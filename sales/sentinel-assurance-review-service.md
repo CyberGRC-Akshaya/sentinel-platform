@@ -1,55 +1,76 @@
-# Sentinel Assurance Review Service
+# Sentinel Evidence & Metrics Assurance Review
 
-## Offer Name
+## Service positioning
 
-Sentinel Evidence & Metrics Assurance Review
+A consulting-assisted assurance review for regulated organizations that need to know whether their evidence packages, metrics, vendor reviews, privacy artifacts, SDLC records, or AI governance evidence will withstand serious audit, 2LOD, or examiner scrutiny.
 
-## Who it is for
+## Core promise
 
-- IT GRC leaders
-- CISOs
-- Internal Audit teams
-- TPRM teams
-- Privacy officers
-- AI governance leads
-- Regulated technology organizations
+We do not just check whether evidence exists.
 
-## Problem
+We challenge whether the evidence proves the claim.
 
-Teams often prepare metrics, evidence packages, audit responses, vendor reviews, and governance artifacts without knowing whether the package will withstand 2LOD, internal audit, or examiner scrutiny.
+## Ideal buyers
 
-## Service outcome
+- Head of IT GRC
+- CISO / Deputy CISO
+- Internal Audit leader
+- TPRM leader
+- Privacy Officer
+- AI Governance lead
+- Risk and compliance leadership
 
-A structured assurance review that identifies:
-- weak evidence lineage
-- denominator/numerator issues
-- unsupported management conclusions
-- vendor evidence reliance gaps
-- privacy/data handling gaps
-- SDLC/change governance gaps
-- AI governance evidence gaps
+## Starter package
+
+### Sentinel Evidence Health Check
+
+Scope:
+- 1 evidence package
+- up to 10 artifacts
+- 1 executive summary
+- finding register
+- remediation evidence request list
+
+Indicative pilot pricing:
+- INR 25,000 to INR 75,000
+
+## Professional package
+
+### Sentinel Assurance Review
+
+Scope:
+- 3 to 5 evidence packages
+- metrics / vendor / privacy / SDLC / AI governance coverage
+- executive report
+- finding register
+- challenge question library
+- management response support
+
+Indicative pricing:
+- INR 1,00,000 to INR 3,00,000
+
+## Enterprise advisory
+
+Monthly assurance intelligence support for:
+- recurring metric validation
+- audit readiness
+- vendor evidence challenge
+- AI governance readiness
+- control evidence quality uplift
+
+Pricing:
+- Custom
 
 ## Deliverables
 
-1. Evidence intake checklist
-2. Sentinel examiner report
-3. Finding register
-4. Executive summary
-5. Remediation evidence request list
+1. Sentinel examiner report
+2. Evidence gap register
+3. Examiner challenge questions
+4. Remediation evidence request list
+5. Executive summary
 6. Framework relevance map
-7. Management-ready response notes
+7. Management response notes
 
-## Starter pricing logic
+## Why this is sellable
 
-Pilot / first client:
-- INR 25,000 to INR 75,000 for a focused evidence review
-
-Professional package:
-- INR 1,00,000 to INR 3,00,000 for multi-domain review
-
-Enterprise advisory:
-- Custom pricing for ongoing monthly assurance support
-
-## Why this can sell
-
-It solves a real problem before audit, regulatory exams, committee reporting, vendor reviews, and executive governance meetings.
+Regulated organizations frequently prepare for audits, risk committees, vendor reviews, regulatory exams, internal control testing, and executive reporting. The pain is not the absence of documents. The pain is the uncertainty of whether the evidence is defensible.
