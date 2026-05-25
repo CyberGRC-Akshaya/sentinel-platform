@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 const cases: Record<string, any> = {
   "IT Metrics Examiner": {
@@ -72,17 +72,127 @@ const cases: Record<string, any> = {
   }
 };
 
+function defaultIntakePayload() {
+  return {
+    organization: "Imported Evidence Package",
+    industry: "Regulated Enterprise",
+    evidence_type: "Uploaded Evidence Intake Review",
+    review_objective: "Challenge uploaded evidence for assurance readiness, evidence lineage, governance defensibility, and examiner-style gaps.",
+    items: []
+  };
+}
+
 export default function Home() {
   const [selectedCase, setSelectedCase] = useState("IT Metrics Examiner");
   const [input, setInput] = useState(JSON.stringify(cases["IT Metrics Examiner"], null, 2));
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
+  const [history, setHistory] = useState<any[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("sentinel-review-history");
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch {
+        setHistory([]);
+      }
+    }
+  }, []);
+
+  function saveHistory(entry: any) {
+    const next = [entry, ...history].slice(0, 10);
+    setHistory(next);
+    localStorage.setItem("sentinel-review-history", JSON.stringify(next));
+  }
 
   function loadCase(name: string) {
     setSelectedCase(name);
     setInput(JSON.stringify(cases[name], null, 2));
     setResult(null);
     setError("");
+  }
+
+  function buildTextPayload(fileName: string, text: string) {
+    const payload = defaultIntakePayload();
+    payload.items = [
+      {
+        title: fileName,
+        content: text.slice(0, 25000),
+        source_system: "Uploaded File",
+        owner: "Evidence Submitter",
+        reporting_period: "Uploaded Review"
+      }
+    ];
+    return payload;
+  }
+
+  function parseCsvToPayload(fileName: string, text: string) {
+    const lines = text.split(/\r?\n/).filter(Boolean);
+    const payload = defaultIntakePayload();
+    payload.evidence_type = "Uploaded CSV Evidence Intake Review";
+
+    if (lines.length === 0) return payload;
+
+    const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
+    const rows = lines.slice(1).slice(0, 25);
+
+    payload.items = rows.map((line, index) => {
+      const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+      const obj: Record<string, string> = {};
+      headers.forEach((h, i) => {
+        obj[h || `Column_${i + 1}`] = cols[i] || "";
+      });
+
+      return {
+        title: obj.title || obj.Title || obj.name || obj.Name || `CSV Evidence Row ${index + 1}`,
+        content: JSON.stringify(obj),
+        source_system: obj.source_system || obj.Source_System || obj.Source || "Uploaded CSV",
+        owner: obj.owner || obj.Owner || "Evidence Submitter",
+        reporting_period: obj.reporting_period || obj.Reporting_Period || "Uploaded Review"
+      };
+    });
+
+    return payload;
+  }
+
+  async function handleFileUpload(event: any) {
+    setError("");
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const text = await file.text();
+
+    try {
+      if (file.name.toLowerCase().endsWith(".json")) {
+        const parsed = JSON.parse(text);
+
+        if (parsed.organization && parsed.items) {
+          setInput(JSON.stringify(parsed, null, 2));
+        } else if (Array.isArray(parsed)) {
+          const payload = defaultIntakePayload();
+          payload.items = parsed.map((item: any, index: number) => ({
+            title: item.title || item.name || `JSON Evidence Item ${index + 1}`,
+            content: typeof item === "string" ? item : JSON.stringify(item),
+            source_system: item.source_system || item.source || "Uploaded JSON",
+            owner: item.owner || "Evidence Submitter",
+            reporting_period: item.reporting_period || "Uploaded Review"
+          }));
+          setInput(JSON.stringify(payload, null, 2));
+        } else {
+          setInput(JSON.stringify(buildTextPayload(file.name, JSON.stringify(parsed)), null, 2));
+        }
+      } else if (file.name.toLowerCase().endsWith(".csv")) {
+        setInput(JSON.stringify(parseCsvToPayload(file.name, text), null, 2));
+      } else {
+        setInput(JSON.stringify(buildTextPayload(file.name, text), null, 2));
+      }
+
+      setSelectedCase("Uploaded Evidence");
+      setResult(null);
+    } catch (err: any) {
+      setError("Could not parse uploaded file: " + err.message);
+    }
   }
 
   async function analyze() {
@@ -96,7 +206,16 @@ export default function Home() {
         body: JSON.stringify(payload)
       });
       if (!response.ok) throw new Error("Backend returned error: " + response.status);
-      setResult(await response.json());
+      const data = await response.json();
+      setResult(data);
+      saveHistory({
+        timestamp: new Date().toISOString(),
+        organization: data.organization,
+        evidence_type: data.evidence_type,
+        rating: data.overall_rating,
+        score: data.assurance_score,
+        findings: data.total_findings
+      });
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
     }
@@ -194,18 +313,34 @@ export default function Home() {
     alert("Executive summary copied.");
   }
 
+  function clearHistory() {
+    setHistory([]);
+    localStorage.removeItem("sentinel-review-history");
+  }
+
   return (
     <main className="page">
       <section className="hero">
         <div>
           <p className="eyebrow">Eye On Bits Pvt Ltd</p>
           <h1>Sentinel Assurance Platform</h1>
-          <p className="subtitle">AI-native examiner intelligence with framework mapping rationale for metrics validation, evidence challenge, vendor risk, privacy, SDLC, IAM, and AI governance review.</p>
+          <p className="subtitle">AI-native examiner intelligence with evidence intake, framework mapping rationale, finding register export, and local review history.</p>
         </div>
         <div className="heroCard">
-          <span>Sentinel v0.8</span>
-          <strong>Framework Mapping Console</strong>
-          <p>Designed for BFSI, audit, GRC, privacy, TPRM, AI governance, IAM, and SDLC assurance workflows.</p>
+          <span>Sentinel v0.9</span>
+          <strong>Evidence Intake Console</strong>
+          <p>Upload JSON, CSV, or text evidence packages and convert them into examiner-ready review input.</p>
+        </div>
+      </section>
+
+      <section className="caseLibrary">
+        <div>
+          <h2>Evidence Intake</h2>
+          <p>Upload JSON, CSV, or text evidence. Sentinel converts it into a structured review package.</p>
+        </div>
+        <div className="uploadBox">
+          <input type="file" accept=".json,.csv,.txt,.md" onChange={handleFileUpload} />
+          <span>Supported: JSON packages, CSV rows, TXT/MD evidence notes</span>
         </div>
       </section>
 
@@ -232,10 +367,26 @@ export default function Home() {
       <section className="grid">
         <div className="panel">
           <h2>Evidence Input</h2>
-          <p className="muted">Paste or load evidence package JSON. Sentinel will challenge evidence quality, metric logic, and governance defensibility.</p>
+          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will challenge evidence quality, metric logic, and governance defensibility.</p>
           <textarea value={input} onChange={(e) => setInput(e.target.value)} />
           <button className="primaryBtn" onClick={analyze}>Run Examiner Review</button>
           {error && <div className="error">{error}</div>}
+
+          {history.length > 0 && (
+            <div className="historyBox">
+              <div className="historyHead">
+                <h3>Local Review History</h3>
+                <button onClick={clearHistory}>Clear</button>
+              </div>
+              {history.map((h, idx) => (
+                <div key={idx} className="historyRow">
+                  <strong>{h.evidence_type}</strong>
+                  <span>{h.rating} · {h.score}/100 · {h.findings} findings</span>
+                  <em>{new Date(h.timestamp).toLocaleString()}</em>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="panel">

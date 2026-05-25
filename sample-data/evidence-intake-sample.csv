@@ -1,0 +1,4 @@
+title,content,source_system,owner,reporting_period
+Q4 Phishing Metric Evidence,"ITSC deck reported 150 delivered emails. Source export shows denominator changed to 152. Screenshot-only evidence retained.","KnowBe4 / ITSC Deck",IT GRC,Q4
+Vendor SOC 2 Evidence,"Vendor provided SOC 2 Type II report. Vendor processes customer data and NPI. No data flow, retention description, or CUEC analysis included.","Vendor Portal",TPRM,Annual Review
+AI Release Evidence,"Release notes mention AI assistant rollout. No AI inventory entry, risk tier, approval record, or monitoring plan attached.","DevOps Tracker",Application Owner,Release 2026.05
