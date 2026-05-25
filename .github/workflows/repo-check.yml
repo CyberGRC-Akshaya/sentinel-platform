@@ -1,0 +1,21 @@
+name: Sentinel Repo Check
+
+on:
+  push:
+    branches: [ "master", "main" ]
+  pull_request:
+    branches: [ "master", "main" ]
+
+jobs:
+  repo-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: List repository files
+        run: ls -la
+      - name: Confirm required files
+        run: |
+          test -f README.md
+          test -f docker-compose.yml
+          test -f backend/app/main.py
+          test -f frontend/app/page.tsx

@@ -4,13 +4,13 @@
 
 Sentinel is an examiner-style assurance intelligence console for regulated organizations. It is designed to challenge evidence, metrics, vendor packages, privacy representations, SDLC artifacts, and AI governance claims.
 
-Most GRC tools store evidence. Sentinel challenges whether the evidence is defensible.
+> Most GRC tools store evidence. Sentinel challenges whether the evidence is defensible.
 
 ---
 
 ## Current Release
 
-**v0.4 — Report-Ready Examiner Console**
+**v0.6 — Launch-Ready Demo Package**
 
 ---
 
@@ -52,16 +52,17 @@ Sentinel is built around that practical assurance problem.
 
 ---
 
-## Target users
+## Product screenshots
 
-- IT GRC teams
-- CISOs / security governance leaders
-- Internal Audit teams
-- 2LOD / credible challenge teams
-- TPRM teams
-- Privacy teams
-- AI governance teams
-- SDLC / DevSecOps governance teams
+Add screenshots under `github-assets/` and update these image references after capture:
+
+| Screen | Screenshot file |
+|---|---|
+| Home / Case Library | `github-assets/01-home-case-library.png` |
+| IT Metrics Examiner Output | `github-assets/02-it-metrics-output.png` |
+| Vendor & Privacy Examiner Output | `github-assets/03-vendor-privacy-output.png` |
+| SDLC & AI Governance Output | `github-assets/04-sdlc-ai-output.png` |
+| HTML Examiner Report | `github-assets/05-html-report.png` |
 
 ---
 
@@ -96,21 +97,16 @@ Challenges:
 
 ---
 
-## Screenshots to add
+## Target users
 
-Add screenshots under:
-
-```text
-github-assets/
-```
-
-Recommended screenshots:
-
-1. Sentinel homepage
-2. Sample Case Library
-3. Examiner Output
-4. Severity Distribution
-5. HTML Report Output
+- IT GRC teams
+- CISOs / security governance leaders
+- Internal Audit teams
+- 2LOD / credible challenge teams
+- TPRM teams
+- Privacy teams
+- AI governance teams
+- SDLC / DevSecOps governance teams
 
 ---
 
@@ -139,22 +135,12 @@ POST /api/report-html
 
 ---
 
-## Example use cases
-
-- Pre-audit evidence readiness review
-- IT metrics validation before committee reporting
-- Vendor/SOC 2 reliance challenge
-- Privacy evidence challenge
-- AI governance readiness review
-- SDLC release governance challenge
-
----
-
-## Commercial service built around Sentinel
+## Example commercial service
 
 **Sentinel Evidence & Metrics Assurance Review**
 
 A consulting-assisted review service where Sentinel accelerates:
+
 - evidence analysis
 - examiner-style questions
 - finding generation
@@ -166,6 +152,20 @@ See:
 ```text
 sales/sentinel-assurance-review-service.md
 ```
+
+---
+
+## Roadmap
+
+| Version | Focus |
+|---|---|
+| v0.4 | Report-ready examiner console |
+| v0.5 | Market and demo package |
+| v0.6 | GitHub/LinkedIn launch polish |
+| v0.7 | PDF export and finding register |
+| v0.8 | Framework mapping library |
+| v0.9 | Uploaded evidence parser |
+| v1.0 | Multi-domain assurance review workflow |
 
 ---
 
