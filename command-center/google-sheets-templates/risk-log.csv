@@ -1,0 +1,5 @@
+﻿Risk_ID,Risk,Impact,Likelihood,Mitigation,Owner,Status
+R001,Docker/Windows environment instability,Build delay,Medium,Keep Docker verified and maintain local fallback path,Founder,Open
+R002,Overbuilding before monetization,Loss of time,High,Prioritize demo, report export, and service offer over complex SaaS features,Founder,Open
+R003,Framework citation overclaiming,Credibility risk,Medium,Use practical interpretation and avoid fake citations until validated,Regulatory Agent,Open
+R004,Generic GRC positioning,Market weakness,High,Position Sentinel as examiner intelligence not evidence storage,Commercialization Agent,Open

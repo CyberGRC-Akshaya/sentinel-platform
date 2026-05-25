@@ -1,37 +1,60 @@
-﻿# Sentinel Agent Factory — n8n Blueprint
+﻿# Sentinel Agent Factory â€” n8n Build Blueprint
 
-Workflow objective:
-Read agent tasks from Google Sheets, route each task to the correct AI Agent prompt, generate output, create a Google Doc, save it in Google Drive, and update the PMO log.
+## Goal
+Read tasks from Google Sheets, route tasks to the correct AI agent, create an output document, save it to Google Drive, and update the PMO log.
+
+## Google Sheet
+Name: Sentinel PMO
+
+Tabs:
+1. Agent_Input_Queue
+2. Agent_Output_Log
+3. Product_Backlog
+4. Decision_Log
+5. Risk_Log
+
+## Google Drive
+Folder:
+Sentinel Command Center
+
+Subfolders:
+01_PMO
+02_Agent_Outputs
+03_Product_Requirements
+04_Framework_Intelligence
+05_Demo_Evidence
+06_Client_Reports
+07_Sales_Assets
+08_GitHub_Assets
+09_n8n_Workflows
+
+## n8n workflow
+Name: Sentinel Agent Factory v0.3
 
 Nodes:
 1. Manual Trigger
-2. Google Sheets - Read Agent_Input_Queue
-3. IF node - Status equals New
-4. Switch node - Agent_Name
-5. OpenAI Chat / AI Agent node
-6. Google Docs - Create Document
-7. Google Drive - Move/Store Document
-8. Google Sheets - Append Agent_Output_Log
-9. Google Sheets - Update Task Status to Completed
+2. Google Sheets - Read rows from Agent_Input_Queue
+3. Filter - Status equals New
+4. Split In Batches - one task at a time
+5. Switch - Agent_Name contains Agent 00/01/02/03/04/05/06
+6. OpenAI Chat node for the selected agent
+7. Google Docs - Create document
+8. Google Drive - Move document to 02_Agent_Outputs
+9. Google Sheets - Append Agent_Output_Log
+10. Google Sheets - Update Agent_Input_Queue row Status to Completed
 
-Google Sheet tabs required:
-- Agent_Input_Queue
-- Agent_Output_Log
-- Product_Backlog
-- Sprint_Board
-- Framework_Mapping
-- Launch_Assets
+## Minimum viable automation
+For the first run, do not overcomplicate routing.
+Use one OpenAI node with a master router prompt that reads Agent_Name and applies the correct persona.
 
-Folder structure in Google Drive:
-- Sentinel Command Center
-  - 01_PMO
-  - 02_Agent_Outputs
-  - 03_Product_Requirements
-  - 04_Framework_Intelligence
-  - 05_Demo_Evidence
-  - 06_Client_Reports
-  - 07_Sales_Assets
-  - 08_GitHub_Assets
+## Recommended model settings
+Temperature: 0.2 to 0.4
+Max output: high enough for detailed docs
+System message: Sentinel Master Agent Router
+User message: combine row fields from Google Sheet
 
-First automation goal:
-Run T001 through T007 and generate one Google Doc per agent output.
+## Output document title
+{{$json["Task_ID"]}} - {{$json["Agent_Name"]}} - Sentinel Output
+
+## Output log summary
+Use first 2-3 lines of model output, or ask the model to provide a "PMO Summary" field.

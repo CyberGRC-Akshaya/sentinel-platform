@@ -1,7 +1,8 @@
 ﻿Backlog_ID,Module,Feature,User_Type,Problem,Solution,Priority,Status
-B001,Examiner Engine,Exportable PDF/HTML report,CISO/Auditor,"Findings need client-ready packaging","Generate professional examiner report",High,Planned
-B002,Framework Mapping,Control citation library,GRC Lead,"Framework tags are currently broad","Add richer framework mapping layer",High,Planned
-B003,TPRM Examiner,SOC2 and vendor package review,TPRM Team,"Vendor evidence review is manual","Challenge SOC2, CUECs, data flow, breach terms",High,Planned
-B004,Metrics Examiner,Metric calculation validator,ITGRC,"Metrics can be misleading or inconsistent","Validate denominator, numerator, reporting period, source lineage",High,Planned
-B005,SDLC Examiner,Release governance review,AppSec/DevOps,"Release evidence may miss approvals/security gates","Validate change, testing, approval, exception evidence",Medium,Planned
-B006,AI Governance Examiner,AI use case risk review,CISO/AI Governance,"AI use cases lack defensible oversight","Validate tiering, approvals, data handling, incident triggers",High,Planned
+B001,Examiner Engine,Exportable HTML/PDF report,CISO/Auditor,"Findings need client-ready packaging","Generate professional examiner report with summary, findings, evidence gaps, and next actions",High,Planned
+B002,Framework Mapping,Control citation library,GRC Lead,"Framework tags are broad","Add richer framework mapping layer and practical interpretation",High,Planned
+B003,TPRM Examiner,SOC2 and vendor package review,TPRM Team,"Vendor evidence review is manual","Challenge SOC2, CUECs, data flow, breach terms, privacy controls, and residual risk",High,Planned
+B004,Metrics Examiner,Metric calculation validator,ITGRC,"Metrics can be misleading or inconsistent","Validate denominator, numerator, reporting period, source lineage, and approval trail",High,Planned
+B005,SDLC Examiner,Release governance review,AppSec/DevOps,"Release evidence may miss approvals/security gates","Validate change record, security test evidence, approval, exception, and production-readiness",Medium,Planned
+B006,AI Governance Examiner,AI use case risk review,CISO/AI Governance,"AI use cases lack defensible oversight","Validate tiering, approvals, data handling, usage restrictions, monitoring, and incident triggers",High,Planned
+B007,PMO Command Center,Agent workflow automation,Founder/PMO,"Manual agent execution is slow","Use n8n + Google Sheets + Google Drive to orchestrate agent outputs",High,Planned

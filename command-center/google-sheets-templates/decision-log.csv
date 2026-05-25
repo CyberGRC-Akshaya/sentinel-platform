@@ -1,0 +1,4 @@
+﻿Decision_ID,Date,Decision,Reason,Owner,Status
+D001,,Use Eye On Bits Pvt Ltd as company brand and Sentinel as product/platform name,"Reduces naming delay and leverages existing registered company identity.",Founder,Approved
+D002,,Build Metrics & Evidence Examiner first,"Strongest differentiation and immediate GRC/audit monetization path.",Founder,Approved
+D003,,Use n8n + Google Workspace for agent orchestration,"Fastest beginner-operable automation stack for one-week sprint.",Founder,Approved
