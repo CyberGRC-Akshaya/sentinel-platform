@@ -1,17 +1,21 @@
-﻿# Sentinel Assurance Platform
+# Sentinel Assurance Platform
 
 AI-native assurance intelligence platform by Eye On Bits Pvt Ltd.
 
-## What Sentinel v0.1 does
+## Sentinel v0.2
 
-Sentinel v0.1 is a Metrics & Evidence Examiner for regulated enterprises. It reviews evidence packages and produces:
+Sentinel v0.2 is an Examiner Intelligence Console for regulated enterprises. It reviews evidence packages and produces:
 
 - assurance score
+- executive posture
 - examiner-style findings
 - evidence gaps
 - challenge questions
 - remediation guidance
+- severity distribution
+- risk-domain summary
 - framework relevance
+- downloadable examiner report
 
 ## Initial focus
 
@@ -20,6 +24,8 @@ Sentinel v0.1 is a Metrics & Evidence Examiner for regulated enterprises. It rev
 - vendor SOC 2 reliance gaps
 - privacy evidence gaps
 - SDLC governance gaps
+- AI governance approval gaps
+- IAM evidence completeness gaps
 
 ## Run locally
 
@@ -29,9 +35,10 @@ docker compose up --build
 
 Open:
 
+```text
 Frontend: http://localhost:3000
-
 Backend health: http://localhost:8000/api/health
+```
 
 ## Built by
 
