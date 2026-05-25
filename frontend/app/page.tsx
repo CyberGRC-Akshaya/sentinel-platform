@@ -54,6 +54,21 @@ const cases: Record<string, any> = {
         reporting_period: "Release 2026.05"
       }
     ]
+  },
+  "IAM Evidence Examiner": {
+    organization: "Sample Bank IAM Program",
+    industry: "BFSI / Identity and Access",
+    evidence_type: "IAM and Authentication Evidence Review",
+    review_objective: "Validate access governance, authentication coverage, approval, review, and exception handling evidence.",
+    items: [
+      {
+        title: "Customer Access and MFA Evidence",
+        content: "IAM evidence references customer access, authentication, MFA, and access review activity. Evidence does not show full approval trail, risk-based exception handling, or remediation tracking.",
+        source_system: "IAM Review Tracker",
+        owner: "IAM Governance",
+        reporting_period: "Quarterly Review"
+      }
+    ]
   }
 };
 
@@ -87,6 +102,11 @@ export default function Home() {
     }
   }
 
+  function csvEscape(value: any) {
+    const text = String(value ?? "");
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
   function downloadJson() {
     if (!result) return;
     const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
@@ -96,11 +116,6 @@ export default function Home() {
     a.download = "sentinel-examiner-report.json";
     a.click();
     URL.revokeObjectURL(url);
-  }
-
-  function csvEscape(value: any) {
-    const text = String(value ?? "");
-    return `"${text.replace(/"/g, '""')}"`;
   }
 
   function downloadFindingRegisterCsv() {
@@ -116,6 +131,8 @@ export default function Home() {
       "Examiner_Question",
       "Remediation",
       "Framework_Relevance",
+      "Framework_Rationale",
+      "Expected_Evidence",
       "Owner",
       "Target_Date",
       "Status",
@@ -132,16 +149,15 @@ export default function Home() {
       finding.examiner_question,
       finding.remediation,
       (finding.framework_relevance || []).join("; "),
+      (finding.framework_mappings || []).map((m: any) => `${m.framework}: ${m.rationale}`).join(" | "),
+      (finding.framework_mappings || []).map((m: any) => `${m.framework}: ${m.evidence_expected}`).join(" | "),
       "",
       "",
       "Open",
       ""
     ]);
 
-    const csv = [headers, ...rows]
-      .map((row) => row.map(csvEscape).join(","))
-      .join("\n");
-
+    const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -184,12 +200,12 @@ export default function Home() {
         <div>
           <p className="eyebrow">Eye On Bits Pvt Ltd</p>
           <h1>Sentinel Assurance Platform</h1>
-          <p className="subtitle">AI-native examiner intelligence for metrics validation, evidence challenge, control assurance, vendor risk, privacy, SDLC, and AI governance review.</p>
+          <p className="subtitle">AI-native examiner intelligence with framework mapping rationale for metrics validation, evidence challenge, vendor risk, privacy, SDLC, IAM, and AI governance review.</p>
         </div>
         <div className="heroCard">
-          <span>Sentinel v0.7</span>
-          <strong>Finding Register Console</strong>
-          <p>Built for BFSI, audit, GRC, privacy, TPRM, AI governance, and SDLC assurance workflows.</p>
+          <span>Sentinel v0.8</span>
+          <strong>Framework Mapping Console</strong>
+          <p>Designed for BFSI, audit, GRC, privacy, TPRM, AI governance, IAM, and SDLC assurance workflows.</p>
         </div>
       </section>
 
@@ -206,6 +222,7 @@ export default function Home() {
                 {name === "IT Metrics Examiner" && "Denominator, evidence lineage, and reporting validation."}
                 {name === "Vendor & Privacy Examiner" && "SOC 2 reliance, CUEC, NPI/PII, data-flow, and retention challenge."}
                 {name === "SDLC & AI Governance Examiner" && "Release governance, AI approval, security gates, and production-readiness challenge."}
+                {name === "IAM Evidence Examiner" && "Access governance, authentication, MFA, exception, and review evidence challenge."}
               </span>
             </button>
           ))}
@@ -223,9 +240,9 @@ export default function Home() {
 
         <div className="panel">
           <h2>Examiner Output</h2>
-          <p className="muted">Executive-ready findings, evidence gaps, challenge questions, and remediation guidance.</p>
+          <p className="muted">Executive-ready findings, evidence gaps, challenge questions, remediation guidance, and framework mapping rationale.</p>
 
-          {!result && <div className="empty">Run the examiner review to generate assurance score, severity distribution, top risk domains, and exportable report.</div>}
+          {!result && <div className="empty">Run the examiner review to generate assurance score, severity distribution, framework coverage, and exportable report.</div>}
 
           {result && (
             <div>
@@ -237,10 +254,10 @@ export default function Home() {
 
               <div className="actions">
                 <button onClick={downloadJson}>Download JSON</button>
-                <button onClick={downloadFindingRegisterCsv}>Download Finding Register</button>
-                <button onClick={downloadHtmlReport}>Download HTML Report</button>
+                <button onClick={downloadFindingRegisterCsv}>Finding Register</button>
+                <button onClick={downloadHtmlReport}>HTML Report</button>
                 <button onClick={copySummary}>Copy Summary</button>
-                <button onClick={() => window.print()}>Print Screen</button>
+                <button onClick={() => window.print()}>Print</button>
               </div>
 
               <div className="summary">{result.executive_summary}</div>
@@ -261,6 +278,13 @@ export default function Home() {
               </div>
 
               <div className="nextSteps">
+                <h3>Framework Coverage</h3>
+                {(result.framework_coverage || []).map((x: any) => (
+                  <div key={x.framework} className="miniRow"><span>{x.framework}</span><strong>{x.count}</strong></div>
+                ))}
+              </div>
+
+              <div className="nextSteps">
                 <h3>Recommended Next Steps</h3>
                 <ol>{(result.recommended_next_steps || []).map((step: string) => <li key={step}>{step}</li>)}</ol>
               </div>
@@ -278,8 +302,17 @@ export default function Home() {
                     <p><b>Evidence gap:</b> {finding.evidence_gap}</p>
                     <p><b>Examiner question:</b> {finding.examiner_question}</p>
                     <p><b>Remediation:</b> {finding.remediation}</p>
-                    <div className="frameworks">
-                      {finding.framework_relevance.map((fw: string) => <span key={fw}>{fw}</span>)}
+
+                    <div className="mappingBox">
+                      <h4>Framework Mapping Rationale</h4>
+                      {(finding.framework_mappings || []).map((m: any) => (
+                        <div key={m.framework} className="mappingRow">
+                          <strong>{m.framework}</strong>
+                          <span>{m.mapping_type}</span>
+                          <p>{m.rationale}</p>
+                          <em>Expected evidence: {m.evidence_expected}</em>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 ))}
