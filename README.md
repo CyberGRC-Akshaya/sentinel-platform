@@ -203,3 +203,28 @@ Sentinel supports assurance review and professional judgment. It does not replac
 
 ![HTML Examiner Report](github-assets/05-html-report.png)
 
+
+---
+
+## Product Screenshots
+
+### Sentinel Home and Case Library
+
+![Sentinel Home and Case Library](github-assets/01-home-case-library.png)
+
+### IT Metrics Examiner Output
+
+![IT Metrics Examiner Output](github-assets/02-it-metrics-output.png)
+
+### Vendor and Privacy Examiner Output
+
+![Vendor and Privacy Examiner Output](github-assets/03-vendor-privacy-output.png)
+
+### SDLC and AI Governance Examiner Output
+
+![SDLC and AI Governance Examiner Output](github-assets/04-sdlc-ai-output.png)
+
+### HTML Examiner Report
+
+![HTML Examiner Report](github-assets/05-html-report.png)
+
