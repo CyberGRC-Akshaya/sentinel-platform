@@ -98,6 +98,59 @@ export default function Home() {
     URL.revokeObjectURL(url);
   }
 
+  function csvEscape(value: any) {
+    const text = String(value ?? "");
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  function downloadFindingRegisterCsv() {
+    if (!result) return;
+
+    const headers = [
+      "Finding_ID",
+      "Severity",
+      "Risk_Domain",
+      "Affected_Item",
+      "Issue",
+      "Evidence_Gap",
+      "Examiner_Question",
+      "Remediation",
+      "Framework_Relevance",
+      "Owner",
+      "Target_Date",
+      "Status",
+      "Management_Response"
+    ];
+
+    const rows = result.findings.map((finding: any, index: number) => [
+      `SEN-${String(index + 1).padStart(3, "0")}`,
+      finding.severity,
+      finding.risk_domain,
+      finding.affected_item,
+      finding.issue,
+      finding.evidence_gap,
+      finding.examiner_question,
+      finding.remediation,
+      (finding.framework_relevance || []).join("; "),
+      "",
+      "",
+      "Open",
+      ""
+    ]);
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map(csvEscape).join(","))
+      .join("\n");
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-finding-register.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   async function downloadHtmlReport() {
     try {
       const payload = JSON.parse(input);
@@ -134,8 +187,8 @@ export default function Home() {
           <p className="subtitle">AI-native examiner intelligence for metrics validation, evidence challenge, control assurance, vendor risk, privacy, SDLC, and AI governance review.</p>
         </div>
         <div className="heroCard">
-          <span>Sentinel v0.4</span>
-          <strong>Report-Ready Examiner Console</strong>
+          <span>Sentinel v0.7</span>
+          <strong>Finding Register Console</strong>
           <p>Built for BFSI, audit, GRC, privacy, TPRM, AI governance, and SDLC assurance workflows.</p>
         </div>
       </section>
@@ -184,6 +237,7 @@ export default function Home() {
 
               <div className="actions">
                 <button onClick={downloadJson}>Download JSON</button>
+                <button onClick={downloadFindingRegisterCsv}>Download Finding Register</button>
                 <button onClick={downloadHtmlReport}>Download HTML Report</button>
                 <button onClick={copySummary}>Copy Summary</button>
                 <button onClick={() => window.print()}>Print Screen</button>
