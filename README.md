@@ -1,31 +1,37 @@
 # Sentinel Assurance Platform
 
-AI-native assurance intelligence platform by Eye On Bits Pvt Ltd.
+AI-native assurance intelligence platform by **Eye On Bits Pvt Ltd**.
 
-## Sentinel v0.2
+Sentinel is not a generic GRC repository. Sentinel is an examiner-style assurance intelligence console designed to challenge evidence, metrics, vendor packages, privacy representations, SDLC artifacts, and AI governance claims.
 
-Sentinel v0.2 is an Examiner Intelligence Console for regulated enterprises. It reviews evidence packages and produces:
+## Current Release
+
+**v0.4 — Report-Ready Examiner Console**
+
+## What Sentinel does
+
+Sentinel v0.4 reviews evidence packages and produces:
 
 - assurance score
-- executive posture
+- overall rating
+- severity distribution
+- top risk domains
 - examiner-style findings
 - evidence gaps
 - challenge questions
 - remediation guidance
-- severity distribution
-- risk-domain summary
-- framework relevance
-- downloadable examiner report
+- framework relevance tags
+- downloadable JSON report
+- downloadable HTML examiner report
 
-## Initial focus
+## Target use cases
 
-- IT metrics validation
-- evidence lineage challenge
-- vendor SOC 2 reliance gaps
-- privacy evidence gaps
-- SDLC governance gaps
-- AI governance approval gaps
-- IAM evidence completeness gaps
+- IT metrics evidence validation
+- TPRM / vendor SOC 2 package challenge
+- privacy and customer data evidence review
+- SDLC / DevOps release governance review
+- AI governance evidence readiness
+- audit and 2LOD credible challenge support
 
 ## Run locally
 
