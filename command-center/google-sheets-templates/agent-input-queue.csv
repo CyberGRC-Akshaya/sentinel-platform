@@ -1,0 +1,8 @@
+﻿Task_ID,Agent_Name,Priority,Input,Expected_Output,Status,Due_Date,Output_Link,Notes
+T001,Agent 00 - Chief Architect,High,"Define Sentinel product architecture for v0.3","Architecture decision brief",New,,,
+T002,Agent 01 - PMO Officer,High,"Create 7-day execution tracker","PMO sprint board and milestone report",New,,,
+T003,Agent 02 - Regulatory Intelligence,High,"Map Sentinel v0.2 findings to FFIEC GLBA SOC2 ISO NIST","Framework mapping table",New,,,
+T004,Agent 03 - Audit Challenge,High,"Create examiner challenge question bank for metrics evidence","Audit challenge library",New,,,
+T005,Agent 04 - Product Engineering,High,"Define next backend/frontend backlog","Technical backlog",New,,,
+T006,Agent 05 - UX Intelligence,Medium,"Improve executive dashboard and report design","UX improvement brief",New,,,
+T007,Agent 06 - Commercialization,High,"Create first monetizable consulting offer","Service offer and outreach package",New,,,
