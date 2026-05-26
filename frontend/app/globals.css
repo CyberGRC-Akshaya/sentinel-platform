@@ -351,7 +351,7 @@ select:focus {
 
 .scoreRow {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(11, 1fr);
   gap: 13px;
   margin-bottom: 15px;
 }
@@ -378,7 +378,7 @@ select:focus {
 
 .tabBar {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(10, 1fr);
   gap: 8px;
   margin-bottom: 14px;
 }
@@ -674,7 +674,7 @@ select:focus {
 }
 
 .heroCard::after {
-  content: "MVP DEMO EDITION";
+  content: "Final Edition DEMO EDITION";
   position: absolute;
   right: -28px;
   bottom: 22px;
@@ -709,5 +709,48 @@ select:focus {
 @media (max-width: 1500px) {
   .tabBar {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+
+/* Sentinel v9 launch-freeze polish */
+.heroCard::after {
+  content: "FINAL EDITION";
+}
+
+.tabBar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  padding: 8px 0;
+  background: rgba(5, 11, 24, 0.72);
+  backdrop-filter: blur(14px);
+}
+
+
+/* Sentinel v10 final edition polish */
+.heroCard::after {
+  content: "FINAL EDITION";
+}
+
+.eyebrow {
+  background: linear-gradient(90deg, #7db6ff, #c4b5fd, #67e8f9);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.primaryBtn,
+.actions button {
+  box-shadow: 0 14px 34px rgba(59, 130, 246, 0.18);
+}
+
+.scoreBox strong {
+  letter-spacing: -0.03em;
+}
+
+@media (max-width: 1700px) {
+  .tabBar {
+    grid-template-columns: repeat(4, 1fr);
   }
 }

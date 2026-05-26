@@ -24,3 +24,10 @@ wsl --shutdown
 Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
 docker context use desktop-linux
 docker compose up --build
+
+Final commit:
+git add .
+git commit -m "Release Sentinel v10.0 final launch edition"
+git push
+git tag -a v10.0-final-launch -m "Sentinel v10.0 - Final Launch Edition"
+git push origin v10.0-final-launch

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-v8.1 freezes Sentinel as a demo-grade MVP and adds the delivery layer needed to show the product like a serious founder, consultant, or GRC product leader.
+v8.1 freezes Sentinel as a demo-grade Final Edition and adds the delivery layer needed to show the product like a serious founder, consultant, or GRC product leader.
 
 ## What v8.1 adds
 
@@ -13,7 +13,7 @@ v8.1 freezes Sentinel as a demo-grade MVP and adds the delivery layer needed to 
 | Client Delivery Checklist | Tracks what must be exported or prepared |
 | Client Follow-up Note | Generates a ready-to-send post-review follow-up |
 | Demo Asset Manifest | Exports a JSON manifest of demo artifacts |
-| UI polish | Adds darker, more premium MVP demo styling |
+| UI polish | Adds darker, more premium Final Edition demo styling |
 
 ## Recommended demo flow
 

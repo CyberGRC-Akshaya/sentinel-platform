@@ -105,10 +105,14 @@ export default function Home() {
   const [boardPack, setBoardPack] = useState<any>(null);
   const [requestPack, setRequestPack] = useState<any>(null);
   const [demoPack, setDemoPack] = useState<any>(null);
+  const [launchReadiness, setLaunchReadiness] = useState<any>(null);
+  const [finalRelease, setFinalRelease] = useState<any>(null);
 
   useEffect(() => {
     loadVault();
     loadPortfolio();
+    loadLaunchReadiness();
+    loadFinalRelease();
   }, []);
 
   async function loadVault() {
@@ -277,7 +281,7 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v8.1-executive-demo-room.html";
+    a.download = "sentinel-v10-executive-demo-room.html";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -288,7 +292,7 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v8.1-executive-demo-room.json";
+    a.download = "sentinel-v10-executive-demo-room.json";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -300,7 +304,7 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v8.1-portfolio-demo-room.html";
+    a.download = "sentinel-v10-portfolio-demo-room.html";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -342,7 +346,7 @@ export default function Home() {
 
   function downloadDeliveryChecklistCsv() {
     const headers = ["Step", "Delivery_Item", "Status", "Action"];
-    downloadCsv("sentinel-v8.1-client-delivery-checklist.csv", headers, deliveryChecklistRows());
+    downloadCsv("sentinel-v10-client-delivery-checklist.csv", headers, deliveryChecklistRows());
   }
 
   function clientFollowUpText() {
@@ -384,7 +388,7 @@ Sentinel Evidence Defensibility Workbench`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v8.1-client-follow-up-note.txt";
+    a.download = "sentinel-v10-client-follow-up-note.txt";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -423,9 +427,124 @@ Sentinel Evidence Defensibility Workbench`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v8.1-demo-asset-manifest.json";
+    a.download = "sentinel-v10-demo-asset-manifest.json";
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+
+  async function loadLaunchReadiness() {
+    try {
+      const response = await fetch(`${API_BASE}/api/launch/readiness`);
+      if (response.ok) setLaunchReadiness(await response.json());
+    } catch {
+      setLaunchReadiness(null);
+    }
+  }
+
+  async function downloadLaunchReadinessHtml() {
+    const response = await fetch(`${API_BASE}/api/launch/readiness-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v10-final-launch-report.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function downloadVaultBackupJson() {
+    const response = await fetch(`${API_BASE}/api/vault/export`);
+    const payload = await response.json();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v10-review-vault-backup.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadMvpFinalJson() {
+    if (!launchReadiness) return;
+    const blob = new Blob([JSON.stringify(launchReadiness.final, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v10-final-scope.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function copyMvpPositioning() {
+    if (!launchReadiness) return;
+    const final = launchReadiness.final;
+    const text = `${final.product_name}
+
+${final.positioning}
+
+One-liner:
+${final.one_liner}
+
+Pilot Offer:
+${final.pilot_offer.name} — ${final.pilot_offer.duration}
+
+Buyer:
+${final.pilot_offer.buyer}`;
+    navigator.clipboard.writeText(text);
+    alert("Final Edition positioning copied.");
+  }
+
+
+  async function loadFinalRelease() {
+    try {
+      const response = await fetch(`${API_BASE}/api/product/final-release`);
+      if (response.ok) setFinalRelease(await response.json());
+    } catch {
+      setFinalRelease(null);
+    }
+  }
+
+  async function downloadFinalReleaseHtml() {
+    const response = await fetch(`${API_BASE}/api/product/final-release-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v10-final-launch-edition.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadFinalReleaseJson() {
+    if (!finalRelease) return;
+    const blob = new Blob([JSON.stringify(finalRelease, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v10-final-release-manifest.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function copyFinalPositioning() {
+    if (!finalRelease) return;
+    const text = `${finalRelease.product_name} ${finalRelease.version}
+
+${finalRelease.positioning}
+
+One-liner:
+${finalRelease.one_liner}
+
+Commercial Offer:
+${finalRelease.commercial_offer.name} — ${finalRelease.commercial_offer.duration}
+
+Outcome:
+${finalRelease.commercial_offer.outcome}`;
+    navigator.clipboard.writeText(text);
+    alert("Final positioning copied.");
   }
 
   function loadCase(name: string) {
@@ -715,7 +834,7 @@ Sentinel Evidence Defensibility Workbench`;
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v8.1</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v10.0</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
             Professional assurance workbench with review vault, evidence request workflow, closure readiness, control atlas mapping, demo-room storytelling, board-pack generation, remediation register, and executive reporting.
@@ -723,8 +842,8 @@ Sentinel Evidence Defensibility Workbench`;
         </div>
         <div className="heroCard">
           <span>Major Upgrade</span>
-          <strong>Executive Demo Room + Client Delivery Kit.</strong>
-          <p>Sentinel now packages the working product into a buyer-ready demo, delivery checklist, follow-up script, exports, and pilot handoff workflow.</p>
+          <strong>Final Launch Edition.</strong>
+          <p>Sentinel is now packaged as the final local launch edition with readiness scoring, vault backup, scope boundaries, pilot offer, and founder-ready delivery assets.</p>
         </div>
       </section>
 
@@ -802,7 +921,7 @@ Sentinel Evidence Defensibility Workbench`;
               </div>
 
               <div className="tabBar">
-                {["Demo Room", "Delivery Kit", "Portfolio", "Board Pack", "Evidence Requests", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
+                {["Final Room", "Launch Room", "Demo Room", "Delivery Kit", "Portfolio", "Board Pack", "Evidence Requests", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
                   <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
                 ))}
               </div>
@@ -820,10 +939,144 @@ Sentinel Evidence Defensibility Workbench`;
               </div>
 
 
+
+
+              {activeTab === "Final Room" && (
+                <div>
+                  <div className="summary">
+                    Final Room is the product baseline summary for Sentinel v10. It captures what the product is, what it does, the commercial offer, and the next-stage gates.
+                  </div>
+
+                  <div className="actions">
+                    <button onClick={loadFinalRelease}>Refresh Final</button>
+                    <button onClick={downloadFinalReleaseHtml}>Final HTML</button>
+                    <button onClick={downloadFinalReleaseJson}>Final JSON</button>
+                    <button onClick={copyFinalPositioning}>Copy Positioning</button>
+                    <button onClick={downloadVaultBackupJson}>Vault Backup</button>
+                  </div>
+
+                  {!finalRelease && <div className="empty">Final release manifest not loaded yet.</div>}
+
+                  {finalRelease && (
+                    <div>
+                      <div className="scoreRow">
+                        <div className="scoreBox"><span>Edition</span><strong>{finalRelease.edition}</strong></div>
+                        <div className="scoreBox"><span>Status</span><strong>{finalRelease.release_status}</strong></div>
+                        <div className="scoreBox"><span>Version</span><strong>{finalRelease.version}</strong></div>
+                      </div>
+
+                      <div className="summary"><b>Positioning:</b> {finalRelease.positioning}</div>
+                      <div className="summary"><b>One-liner:</b> {finalRelease.one_liner}</div>
+
+                      <div className="miniGrid">
+                        <div>
+                          <h3>Capability Stack</h3>
+                          <ol>{(finalRelease.capability_stack || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
+                        </div>
+                        <div>
+                          <h3>Commercial Offer</h3>
+                          <div className="miniRow"><span>Name</span><strong>{finalRelease.commercial_offer.name}</strong></div>
+                          <div className="miniRow"><span>Duration</span><strong>{finalRelease.commercial_offer.duration}</strong></div>
+                          <p>{finalRelease.commercial_offer.outcome}</p>
+                          <ol>{(finalRelease.commercial_offer.deliverables || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
+                        </div>
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Next Stage Gates</h3>
+                        {(finalRelease.next_stage_gates || []).map((x: any) => (
+                          <div key={x.stage} className="miniRow">
+                            <span>{x.stage}</span>
+                            <strong>{x.condition}</strong>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mappingBox">
+                        <h4>Important Boundary</h4>
+                        <p>{finalRelease.important_boundary}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+
+              {activeTab === "Launch Room" && (
+                <div>
+                  <div className="summary">
+                    Launch Room is the Final Edition final control panel. This is where Sentinel stops feature iteration and becomes demo, portfolio, and pilot-ready.
+                  </div>
+
+                  <div className="actions">
+                    <button onClick={loadLaunchReadiness}>Refresh Launch</button>
+                    <button onClick={downloadLaunchReadinessHtml}>Launch HTML</button>
+                    <button onClick={downloadVaultBackupJson}>Vault Backup</button>
+                    <button onClick={downloadMvpFinalJson}>Final JSON</button>
+                    <button onClick={copyMvpPositioning}>Copy Positioning</button>
+                  </div>
+
+                  {!launchReadiness && <div className="empty">Launch readiness not loaded yet.</div>}
+
+                  {launchReadiness && (
+                    <div>
+                      <div className="scoreRow">
+                        <div className="scoreBox"><span>Launch Readiness</span><strong>{launchReadiness.launch_readiness_score}/100</strong></div>
+                        <div className="scoreBox"><span>Status</span><strong>{launchReadiness.status}</strong></div>
+                        <div className="scoreBox"><span>Saved Reviews</span><strong>{launchReadiness.portfolio_snapshot?.total_reviews || 0}</strong></div>
+                      </div>
+
+                      <div className="summary"><b>Positioning:</b> {launchReadiness.final.positioning}</div>
+                      <div className="summary"><b>One-liner:</b> {launchReadiness.final.one_liner}</div>
+
+                      <div className="miniGrid">
+                        <div>
+                          <h3>Launch Readiness Checklist</h3>
+                          {(launchReadiness.readiness_items || []).map((item: any) => (
+                            <div key={item.item} className="miniRow">
+                              <span>{item.item}</span>
+                              <strong>{item.status}</strong>
+                            </div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3>Pilot Offer</h3>
+                          <div className="miniRow"><span>Name</span><strong>{launchReadiness.final.pilot_offer.name}</strong></div>
+                          <div className="miniRow"><span>Duration</span><strong>{launchReadiness.final.pilot_offer.duration}</strong></div>
+                          <div className="miniRow"><span>Status</span><strong>Ready</strong></div>
+                        </div>
+                      </div>
+
+                      <div className="miniGrid">
+                        <div>
+                          <h3>Final Edition In Scope</h3>
+                          <ol>{(launchReadiness.final.final_in_scope || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
+                        </div>
+                        <div>
+                          <h3>Explicitly Out of Scope</h3>
+                          <ol>{(launchReadiness.final.explicitly_out_of_scope_for_final || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
+                        </div>
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Future Versions — Only If Justified</h3>
+                        {(launchReadiness.final.next_versions_only_if_justified || []).map((x: any) => (
+                          <div key={x.version} className="miniRow">
+                            <span>{x.version}</span>
+                            <strong>{x.gate}</strong>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+
               {activeTab === "Demo Room" && (
                 <div>
                   <div className="summary">
-                    Executive Demo Room is the final MVP packaging layer: buyer narrative, guided walkthrough, objections, pilot offer, and demo-readiness score.
+                    Executive Demo Room is the final Final Edition packaging layer: buyer narrative, guided walkthrough, objections, pilot offer, and demo-readiness score.
                   </div>
 
                   <div className="actions">

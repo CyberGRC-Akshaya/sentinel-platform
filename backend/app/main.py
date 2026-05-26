@@ -17,7 +17,7 @@ DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 app = FastAPI(
     title="Sentinel Evidence Defensibility Workbench",
     description="Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, evidence request workflow, demo-room storytelling, board-pack generation, remediation register, and executive reporting exports.",
-    version="8.1.0"
+    version="10.0.0"
 )
 
 app.add_middleware(
@@ -608,7 +608,7 @@ def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
     return {
         "product": "Sentinel Evidence Defensibility Workbench",
         "company": "Eye On Bits Pvt Ltd",
-        "version": "8.1.0",
+        "version": "10.0.0",
         "review_timestamp": datetime.utcnow().isoformat(),
         "organization": payload.organization,
         "industry": payload.industry,
@@ -665,7 +665,7 @@ def save_review(payload: AnalyzeRequest, result: Dict[str, Any]) -> Dict[str, An
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "Sentinel Evidence Defensibility Workbench", "version": "8.1.0", "database": str(DB_PATH), "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "ok", "service": "Sentinel Evidence Defensibility Workbench", "version": "10.0.0", "database": str(DB_PATH), "timestamp": datetime.utcnow().isoformat()}
 
 @app.get("/api/control-atlas")
 def control_atlas():
@@ -887,7 +887,7 @@ th,td {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertica
 </head>
 <body>
 <div class='report'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.0</div>
 <h1>Evidence Defensibility and Control Atlas Report</h1>
 <div class='cards'>
 <div class='card'><span>Organization</span><strong>{html.escape(result['organization'])}</strong></div>
@@ -1036,7 +1036,7 @@ def build_board_pack_from_result(result: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "product": "Sentinel Board Pack Studio",
-        "version": "8.1.0",
+        "version": "10.0.0",
         "generated_at": datetime.utcnow().isoformat(),
         "review_id": result.get("review_id"),
         "organization": result.get("organization"),
@@ -1159,7 +1159,7 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.0</div>
 <h1>Board Pack Studio</h1>
 <p class='sub'>Board-ready evidence defensibility narrative, risk themes, missing evidence, challenge questions, and 30-day action plan.</p>
 
@@ -1240,7 +1240,7 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.0</div>
 <h1>Portfolio Board Pack</h1>
 <div class='cards'>
 <div class='card'><span>Total Reviews</span><strong>{snapshot.get('total_reviews')}</strong></div>
@@ -1372,7 +1372,7 @@ def build_evidence_request_studio_pack(result: Dict[str, Any]) -> Dict[str, Any]
 
     return {
         "product": "Sentinel Evidence Request Studio",
-        "version": "8.1.0",
+        "version": "10.0.0",
         "generated_at": datetime.utcnow().isoformat(),
         "review_id": result.get("review_id"),
         "organization": result.get("organization"),
@@ -1481,7 +1481,7 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.0</div>
 <h1>Evidence Request Studio</h1>
 <p class='sub'>Request-ready evidence pack with owners, priority, preferred artifacts, closure criteria, and validation tests.</p>
 
@@ -1633,7 +1633,7 @@ def build_demo_room_pack(result: Dict[str, Any]) -> Dict[str, Any]:
         },
         {
             "objection": "Is this production SaaS today?",
-            "response": "The current build is a local MVP/demo. Production needs authentication, PostgreSQL, tenant isolation, audit logs, and deployment hardening."
+            "response": "The current build is a local Final Edition/demo. Production needs authentication, PostgreSQL, tenant isolation, audit logs, and deployment hardening."
         },
         {
             "objection": "Why not just use spreadsheets?",
@@ -1641,7 +1641,7 @@ def build_demo_room_pack(result: Dict[str, Any]) -> Dict[str, Any]:
         },
         {
             "objection": "Is the current engine real AI?",
-            "response": "The current MVP uses deterministic scoring and structured logic. The next production-grade step is adding AI-assisted narrative and evidence interpretation under controlled prompts."
+            "response": "The current Final Edition uses deterministic scoring and structured logic. The next production-grade step is adding AI-assisted narrative and evidence interpretation under controlled prompts."
         }
     ]
 
@@ -1668,7 +1668,7 @@ def build_demo_room_pack(result: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "product": "Sentinel Executive Demo Room",
-        "version": "8.1.0",
+        "version": "10.0.0",
         "generated_at": datetime.utcnow().isoformat(),
         "review_id": result.get("review_id"),
         "organization": result.get("organization"),
@@ -1761,9 +1761,9 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.0</div>
 <h1>Executive Demo Room</h1>
-<p class='sub'>Final MVP demo script, buyer narrative, pilot offer, objection handling, and build boundary.</p>
+<p class='sub'>Final Final Edition demo script, buyer narrative, pilot offer, objection handling, and build boundary.</p>
 
 <div class='cards'>
 <div class='card'><span>Organization</span><strong>{html.escape(str(pack.get('organization','')))}</strong></div>
@@ -1801,7 +1801,7 @@ li {{ margin:7px 0; }}
 
 <div class='panel'><h2>Next Build Recommendation</h2><ol>{next_build}</ol></div>
 
-<div class='footer'>Generated by Sentinel Evidence Defensibility Workbench v8.1. This is an executive-demo package, not a production SaaS certification.</div>
+<div class='footer'>Generated by Sentinel Evidence Defensibility Workbench v10.0. This is an executive-demo package, not a production SaaS certification.</div>
 </div>
 </body>
 </html>"""
@@ -1836,6 +1836,281 @@ h1{{font-size:40px;margin:8px 0}}.summary{{border-left:5px solid #1d4ed8;backgro
 .grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px}}.panel{{border:1px solid #e5e7eb;border-radius:16px;padding:18px}}
 table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}td,th{{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left}}
 </style></head>
-<body><div class='pack'><div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.1</div><h1>Portfolio Demo Room</h1><div class='summary'>{html.escape(narrative)}</div>
+<body><div class='pack'><div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.0</div><h1>Portfolio Demo Room</h1><div class='summary'>{html.escape(narrative)}</div>
 <div class='grid'><div class='panel'><h2>Risk Domains</h2><table><tr><th>Domain</th><th>Count</th></tr>{domain_rows}</table></div><div class='panel'><h2>Control Concentration</h2><table><tr><th>Control</th><th>Count</th></tr>{control_rows}</table></div></div>
 </div></body></html>"""
+
+
+FINAL_RELEASE = {
+    "product_name": "Sentinel Evidence Defensibility Workbench",
+    "company": "Eye On Bits Pvt Ltd",
+    "version": "10.0.0",
+    "status": "Final launch baseline",
+    "positioning": "Sentinel is not a GRC repository. It is an evidence defensibility challenge layer for audit, risk, compliance, TPRM, privacy, SDLC, IAM, and AI governance reviews.",
+    "one_liner": "Sentinel turns weak evidence packages into findings, evidence requests, control mappings, board-ready narratives, and closure-ready remediation workflows.",
+    "final_in_scope": [
+        "Evidence package intake using JSON, CSV, TXT, and MD",
+        "Evidence defensibility scoring",
+        "Persistent local review vault",
+        "Control Atlas mapping",
+        "Evidence Request Studio",
+        "Closure Readiness Engine",
+        "Board Pack Studio",
+        "Executive Demo Room",
+        "Delivery Kit",
+        "Portfolio dashboard",
+        "HTML, JSON, and CSV exports",
+        "Local Docker-based execution"
+    ],
+    "explicitly_out_of_scope_for_final": [
+        "Production authentication and RBAC",
+        "Multi-tenant SaaS deployment",
+        "Enterprise encryption and key management",
+        "Formal AI model reasoning with LLM API calls",
+        "PostgreSQL production database",
+        "Workflow approvals and email automation",
+        "SOC 2-ready infrastructure controls",
+        "Legal/regulatory advice"
+    ],
+    "next_versions_only_if_justified": [
+        {"version": "v10.0", "gate": "Real OpenAI reasoning layer with evidence narrative generation and explainable prompt logging"},
+        {"version": "v11.0", "gate": "PostgreSQL, authentication, users, and hosted deployment"},
+        {"version": "v12.0", "gate": "n8n / Google Workspace automation for evidence request follow-ups"}
+    ],
+    "pilot_offer": {
+        "name": "Evidence Defensibility Sprint",
+        "duration": "2 weeks",
+        "buyer": "IT GRC, Internal Audit, TPRM, Privacy, SDLC Governance, IAM, AI Governance teams",
+        "deliverables": [
+            "Evidence defensibility review",
+            "Finding register",
+            "Evidence request list",
+            "Control Atlas mapping",
+            "Board-ready summary",
+            "Closure readiness tracker",
+            "Remediation action plan"
+        ]
+    }
+}
+
+@app.get("/api/product/freeze")
+def product_freeze():
+    return FINAL_RELEASE
+
+@app.get("/api/vault/export")
+def export_vault():
+    ensure_db()
+    with db() as conn:
+        rows = conn.execute("SELECT * FROM reviews ORDER BY created_at DESC").fetchall()
+
+    exported = []
+    for row in rows:
+        exported.append({
+            "id": row["id"],
+            "created_at": row["created_at"],
+            "updated_at": row["updated_at"],
+            "organization": row["organization"],
+            "industry": row["industry"],
+            "evidence_type": row["evidence_type"],
+            "review_objective": row["review_objective"],
+            "overall_rating": row["overall_rating"],
+            "evidence_defensibility_score": row["evidence_defensibility_score"],
+            "intake_coverage_score": row["intake_coverage_score"],
+            "metadata_completeness_score": row["metadata_completeness_score"],
+            "total_findings": row["total_findings"],
+            "payload": json.loads(row["payload_json"]),
+            "result": json.loads(row["result_json"]),
+            "register": json.loads(row["register_json"])
+        })
+
+    return {
+        "product": "Sentinel Evidence Defensibility Workbench",
+        "version": "10.0.0",
+        "exported_at": datetime.utcnow().isoformat(),
+        "review_count": len(exported),
+        "reviews": exported
+    }
+
+@app.get("/api/launch/readiness")
+def launch_readiness():
+    portfolio = portfolio_dashboard()
+    freeze = FINAL_RELEASE
+
+    readiness_items = [
+        {"item": "Product positioning defined", "status": "Ready", "evidence": freeze["positioning"]},
+        {"item": "Final product scope frozen", "status": "Ready", "evidence": f"{len(freeze['final_in_scope'])} in-scope capabilities"},
+        {"item": "Out-of-scope boundaries defined", "status": "Ready", "evidence": f"{len(freeze['explicitly_out_of_scope_for_final'])} exclusions"},
+        {"item": "Saved review vault available", "status": "Ready" if portfolio.get("total_reviews", 0) > 0 else "Pending", "evidence": f"{portfolio.get('total_reviews', 0)} saved review(s)"},
+        {"item": "Portfolio dashboard available", "status": "Ready", "evidence": "Portfolio API active"},
+        {"item": "Board pack available", "status": "Ready", "evidence": "Board Pack Studio endpoint active"},
+        {"item": "Evidence request workflow available", "status": "Ready", "evidence": "Evidence Request Studio endpoint active"},
+        {"item": "Export capability available", "status": "Ready", "evidence": "HTML, JSON, CSV exports available"},
+        {"item": "Pilot offer defined", "status": "Ready", "evidence": freeze["pilot_offer"]["name"]},
+        {"item": "Production security boundary documented", "status": "Ready", "evidence": "Final Edition is local demo-grade software, not production SaaS"}
+    ]
+
+    ready_count = len([x for x in readiness_items if x["status"] == "Ready"])
+    score = round((ready_count / len(readiness_items)) * 100)
+
+    return {
+        "product": freeze["product_name"],
+        "version": "10.0.0",
+        "status": "Final launch baseline",
+        "launch_readiness_score": score,
+        "generated_at": datetime.utcnow().isoformat(),
+        "readiness_items": readiness_items,
+        "portfolio_snapshot": portfolio,
+        "freeze": freeze
+    }
+
+@app.get("/api/launch/readiness-html", response_class=HTMLResponse)
+def launch_readiness_html():
+    readiness = launch_readiness()
+    freeze = readiness["freeze"]
+    portfolio = readiness["portfolio_snapshot"]
+
+    readiness_rows = "".join(
+        f"<tr><td>{html.escape(x['item'])}</td><td>{html.escape(x['status'])}</td><td>{html.escape(str(x['evidence']))}</td></tr>"
+        for x in readiness["readiness_items"]
+    )
+
+    scope_rows = "".join(f"<li>{html.escape(x)}</li>" for x in freeze["final_in_scope"])
+    exclusion_rows = "".join(f"<li>{html.escape(x)}</li>" for x in freeze["explicitly_out_of_scope_for_final"])
+    deliverable_rows = "".join(f"<li>{html.escape(x)}</li>" for x in freeze["pilot_offer"]["deliverables"])
+
+    roadmap_rows = "".join(
+        f"<tr><td>{html.escape(x['version'])}</td><td>{html.escape(x['gate'])}</td></tr>"
+        for x in freeze["next_versions_only_if_justified"]
+    )
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Sentinel v10.0 Final Launch Edition Report</title>
+<style>
+body{{font-family:Arial,sans-serif;background:#f5f7fb;color:#111827;margin:0;padding:32px}}
+.report{{max-width:1280px;margin:auto;background:white;border-radius:22px;padding:38px;box-shadow:0 20px 70px rgba(15,23,42,.13)}}
+.eyebrow{{color:#1d4ed8;text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:800}}
+h1{{margin:8px 0;font-size:42px;letter-spacing:-.04em}}.sub{{color:#4b5563;line-height:1.5}}
+.cards{{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:24px 0}}
+.card{{background:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;padding:16px}}
+.card span{{display:block;color:#6b7280;font-size:12px;text-transform:uppercase}}.card strong{{display:block;font-size:23px;margin-top:6px}}
+.summary{{border-left:5px solid #1d4ed8;background:#eff6ff;padding:16px;border-radius:12px;margin:18px 0;line-height:1.5}}
+.grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px}}.panel{{border:1px solid #e5e7eb;border-radius:16px;padding:18px;margin:16px 0;background:#fff}}
+table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td{{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left;vertical-align:top}}li{{margin:7px 0}}
+@media print{{body{{background:white;padding:0}}.report{{box-shadow:none}}}}
+</style>
+</head>
+<body>
+<div class='report'>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.0</div>
+<h1>Final Launch Edition Report</h1>
+<p class='sub'>{html.escape(freeze['positioning'])}</p>
+<div class='cards'>
+<div class='card'><span>Launch Readiness</span><strong>{readiness['launch_readiness_score']}/100</strong></div>
+<div class='card'><span>Status</span><strong>Final Edition Frozen</strong></div>
+<div class='card'><span>Saved Reviews</span><strong>{portfolio.get('total_reviews',0)}</strong></div>
+<div class='card'><span>Total Findings</span><strong>{portfolio.get('total_findings',0)}</strong></div>
+<div class='card'><span>Open Items</span><strong>{portfolio.get('open_register_items',0)}</strong></div>
+</div>
+<div class='summary'><b>One-liner:</b> {html.escape(freeze['one_liner'])}</div>
+<h2>Readiness Checklist</h2>
+<table><tr><th>Item</th><th>Status</th><th>Evidence</th></tr>{readiness_rows}</table>
+<div class='grid'>
+<div class='panel'><h2>Final Edition Scope</h2><ul>{scope_rows}</ul></div>
+<div class='panel'><h2>Out of Scope for Final Edition</h2><ul>{exclusion_rows}</ul></div>
+</div>
+<div class='panel'><h2>Pilot Offer: {html.escape(freeze['pilot_offer']['name'])}</h2><p><b>Duration:</b> {html.escape(freeze['pilot_offer']['duration'])}</p><p><b>Buyer:</b> {html.escape(freeze['pilot_offer']['buyer'])}</p><ul>{deliverable_rows}</ul></div>
+<h2>Future Versions: Only If Justified</h2>
+<table><tr><th>Version</th><th>Gate</th></tr>{roadmap_rows}</table>
+</div>
+</body>
+</html>"""
+
+
+FINAL_RELEASE_MANIFEST = {
+    "product_name": "Sentinel Evidence Defensibility Workbench",
+    "company": "Eye On Bits Pvt Ltd",
+    "version": "10.0.0",
+    "edition": "Final Launch Edition",
+    "release_status": "Feature baseline complete",
+    "positioning": "Sentinel is an evidence defensibility challenge layer for audit, risk, compliance, TPRM, privacy, SDLC, IAM, and AI governance reviews.",
+    "one_liner": "Sentinel turns weak evidence packages into findings, evidence requests, control mappings, board-ready narratives, and closure-ready remediation workflows.",
+    "capability_stack": [
+        "Evidence intake",
+        "Evidence defensibility scoring",
+        "Persistent local review vault",
+        "Control Atlas mapping",
+        "Evidence Request Studio",
+        "Closure Readiness Engine",
+        "Board Pack Studio",
+        "Executive Demo Room",
+        "Delivery Kit",
+        "Launch Room",
+        "Portfolio dashboard",
+        "HTML, JSON, and CSV exports",
+        "Docker-based local execution"
+    ],
+    "commercial_offer": {
+        "name": "Evidence Defensibility Sprint",
+        "duration": "2 weeks",
+        "outcome": "Find weak evidence before audit, examiners, management committees, or 2LOD credible challenge expose it.",
+        "deliverables": [
+            "Evidence defensibility review",
+            "Finding register",
+            "Evidence request list",
+            "Control Atlas mapping",
+            "Board-ready summary",
+            "Closure readiness tracker",
+            "Remediation action plan",
+            "Client delivery kit"
+        ]
+    },
+    "important_boundary": "This edition is a local demo-grade product baseline. Production use requires authentication, authorization, hardened deployment, data protection controls, secure secrets management, monitoring, and formal legal/security review.",
+    "next_stage_gates": [
+        {"stage": "AI Reasoning Layer", "condition": "Add real OpenAI-assisted reasoning with prompt logging and evidence-grounded outputs."},
+        {"stage": "Hosted Product Layer", "condition": "Add PostgreSQL, authentication, user accounts, tenant boundaries, and deployment hardening."},
+        {"stage": "Automation Layer", "condition": "Add n8n / Google Workspace workflows for evidence owner follow-up and tracker updates."}
+    ]
+}
+
+@app.get("/api/product/final-release")
+def final_release_manifest():
+    return FINAL_RELEASE_MANIFEST
+
+@app.get("/api/product/final-release-html", response_class=HTMLResponse)
+def final_release_manifest_html():
+    cap_rows = "".join(f"<li>{html.escape(x)}</li>" for x in FINAL_RELEASE_MANIFEST["capability_stack"])
+    deliv_rows = "".join(f"<li>{html.escape(x)}</li>" for x in FINAL_RELEASE_MANIFEST["commercial_offer"]["deliverables"])
+    gates = "".join(
+        f"<tr><td>{html.escape(x['stage'])}</td><td>{html.escape(x['condition'])}</td></tr>"
+        for x in FINAL_RELEASE_MANIFEST["next_stage_gates"]
+    )
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Sentinel v10 Final Launch Edition</title>
+<style>
+body{{font-family:Arial,sans-serif;background:#f5f7fb;color:#111827;margin:0;padding:32px}}
+.report{{max-width:1180px;margin:auto;background:white;border-radius:22px;padding:38px;box-shadow:0 20px 70px rgba(15,23,42,.13)}}
+.eyebrow{{color:#1d4ed8;text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:800}}
+h1{{margin:8px 0;font-size:42px;letter-spacing:-.04em}}
+.summary{{border-left:5px solid #1d4ed8;background:#eff6ff;padding:16px;border-radius:12px;margin:18px 0;line-height:1.5}}
+.grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px}}.panel{{border:1px solid #e5e7eb;border-radius:16px;padding:18px;margin:16px 0;background:#fff}}
+table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td{{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left;vertical-align:top}}li{{margin:7px 0}}
+</style>
+</head>
+<body>
+<div class='report'>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.0</div>
+<h1>Final Launch Edition</h1>
+<div class='summary'><b>Positioning:</b> {html.escape(FINAL_RELEASE_MANIFEST['positioning'])}</div>
+<div class='summary'><b>One-liner:</b> {html.escape(FINAL_RELEASE_MANIFEST['one_liner'])}</div>
+<div class='grid'><div class='panel'><h2>Capability Stack</h2><ul>{cap_rows}</ul></div><div class='panel'><h2>Commercial Offer</h2><p><b>{html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['name'])}</b> · {html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['duration'])}</p><p>{html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['outcome'])}</p><ul>{deliv_rows}</ul></div></div>
+<div class='panel'><h2>Important Boundary</h2><p>{html.escape(FINAL_RELEASE_MANIFEST['important_boundary'])}</p></div>
+<h2>Next Stage Gates</h2><table><tr><th>Stage</th><th>Condition</th></tr>{gates}</table>
+</div>
+</body>
+</html>"""

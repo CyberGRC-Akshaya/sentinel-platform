@@ -16,7 +16,7 @@ v8.0 is the Executive Demo Edition. It stops feature sprawl and packages Sentine
 | Objection Handling | Prepares answers for expected buyer questions |
 | Pilot Offer | Converts the product into a 2-week service/productized pilot |
 | Portfolio Demo Room | Creates portfolio-level demo narrative |
-| Final Build Recommendation | Defines what should happen after MVP freeze |
+| Final Build Recommendation | Defines what should happen after Final Launch |
 
 ## New API endpoints
 
@@ -32,4 +32,4 @@ This version is not just another feature.
 
 It turns Sentinel into something you can explain, demo, sell, and improve with discipline.
 
-v8.0 should be treated as the Final MVP Demo Edition unless a major production capability is being added.
+v8.0 should be treated as the Final Final Edition Demo Edition unless a major production capability is being added.

@@ -1,91 +1,21 @@
-# Sentinel Demo Script
+# Sentinel v10.0 Demo Script
 
-## Demo objective
+## Opening
 
-Show that Sentinel is not a generic GRC dashboard. It acts as an examiner-style assurance intelligence console that challenges whether evidence is actually defensible.
+Sentinel is an evidence defensibility workbench. It does not replace GRC tools. It challenges whether the evidence behind metrics, controls, vendors, AI use cases, IAM reviews, and SDLC releases is strong enough for audit, management, or examiner reliance.
 
-## Opening narration
+## Flow
 
-Today I am demonstrating Sentinel by Eye On Bits Pvt Ltd.
+1. Start in Launch Room.
+2. Explain Final Launch and boundaries.
+3. Run a sample evidence review.
+4. Show evidence defensibility score.
+5. Open Control Atlas and show mapped control gaps.
+6. Open Evidence Requests and show owner-ready follow-up asks.
+7. Open Board Pack and show executive narrative.
+8. Open Delivery Kit and show exportable handoff assets.
+9. Close with the Evidence Defensibility Sprint offer.
 
-Sentinel is an AI-native assurance intelligence console built for regulated environments where evidence quality matters as much as control design.
+## Close
 
-The first working module focuses on evidence and metrics review. It helps identify weak evidence lineage, inconsistent metric logic, unsupported management conclusions, vendor reliance gaps, privacy/data handling gaps, SDLC governance gaps, and AI governance evidence gaps.
-
-## Demo flow
-
-### Step 1 — Open Sentinel
-
-Open:
-
-```text
-http://localhost:3000
-```
-
-Say:
-
-This is the Sentinel Assurance Platform. The interface is designed around examiner-style review rather than evidence storage.
-
-### Step 2 — Show sample case library
-
-Click each case card briefly:
-
-1. IT Metrics Examiner
-2. Vendor & Privacy Examiner
-3. SDLC & AI Governance Examiner
-
-Say:
-
-Each sample case represents a common regulated-industry assurance problem.
-
-### Step 3 — Run IT Metrics Examiner
-
-Select IT Metrics Examiner and click:
-
-```text
-Run Examiner Review
-```
-
-Say:
-
-Sentinel now reviews the evidence package and generates an assurance score, rating, findings, challenge questions, remediation guidance, and framework relevance.
-
-### Step 4 — Explain output
-
-Point out:
-
-- Assurance score
-- Rating
-- Findings count
-- Severity distribution
-- Top risk domains
-- Recommended next steps
-- Examiner findings
-
-Say:
-
-The value is not just the score. The value is the challenge logic: what evidence is missing, what question an auditor or regulator may ask, and what remediation evidence is needed.
-
-### Step 5 — Export report
-
-Click:
-
-```text
-Download HTML Report
-```
-
-Say:
-
-The HTML report converts the review into a client-ready or management-ready artifact.
-
-### Step 6 — Show commercial value
-
-Say:
-
-This can support pre-audit readiness, IT metrics validation, vendor evidence challenge, AI governance review, privacy evidence review, and SDLC governance assurance.
-
-## Closing narration
-
-Sentinel is currently at MVP stage, but the direction is clear: most organizations do not need another evidence repository. They need an intelligence layer that challenges whether the evidence proves what management claims.
-
-That is the problem Sentinel is built to solve.
+The value is not storing evidence. The value is challenging weak evidence before audit, regulators, or senior stakeholders challenge it.
