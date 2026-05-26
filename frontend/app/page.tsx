@@ -104,6 +104,7 @@ export default function Home() {
   const [saveMessage, setSaveMessage] = useState("");
   const [boardPack, setBoardPack] = useState<any>(null);
   const [requestPack, setRequestPack] = useState<any>(null);
+  const [demoPack, setDemoPack] = useState<any>(null);
 
   useEffect(() => {
     loadVault();
@@ -255,6 +256,67 @@ export default function Home() {
     alert("First evidence request message copied.");
   }
 
+
+  async function loadDemoPack(reviewId: string) {
+    try {
+      const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/demo-room`);
+      if (response.ok) setDemoPack(await response.json());
+    } catch {
+      setDemoPack(null);
+    }
+  }
+
+  async function downloadDemoRoomHtml() {
+    if (!currentReviewId) {
+      setSaveMessage("Load or save a review first.");
+      return;
+    }
+    const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/demo-room-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v8-executive-demo-room.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadDemoRoomJson() {
+    if (!demoPack) return;
+    const blob = new Blob([JSON.stringify(demoPack, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v8-executive-demo-room.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function downloadPortfolioDemoRoom() {
+    const response = await fetch(`${API_BASE}/api/portfolio/demo-room-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v8-portfolio-demo-room.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function copyDemoTalkTrack() {
+    if (!demoPack || !demoPack.demo_flow || demoPack.demo_flow.length === 0) return;
+    const script = [
+      demoPack.one_liner,
+      "",
+      "Demo Flow:",
+      ...demoPack.demo_flow.map((s: any) => `${s.step}. ${s.screen}: ${s.talk_track} Proof point: ${s.proof_point}`)
+    ].join("\n");
+    navigator.clipboard.writeText(script);
+    alert("Demo talk track copied.");
+  }
+
   function loadCase(name: string) {
     setSelectedCase(name);
     setInput(JSON.stringify(cases[name], null, 2));
@@ -375,6 +437,7 @@ export default function Home() {
       if (data.review_id) {
         await loadBoardPack(data.review_id);
         await loadRequestPack(data.review_id);
+        await loadDemoPack(data.review_id);
       }
       await loadVault();
       await loadPortfolio();
@@ -396,6 +459,7 @@ export default function Home() {
       setSaveMessage("Saved review loaded from vault.");
       await loadBoardPack(reviewId);
       await loadRequestPack(reviewId);
+      await loadDemoPack(reviewId);
     } catch (err: any) {
       setError(err.message || "Could not load review.");
     }
@@ -540,16 +604,16 @@ export default function Home() {
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v7.0</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v8.0</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
-            Professional assurance workbench with review vault, evidence request workflow, closure readiness, control atlas mapping, board-pack generation, remediation register, and executive reporting.
+            Professional assurance workbench with review vault, evidence request workflow, closure readiness, control atlas mapping, demo-room storytelling, board-pack generation, remediation register, and executive reporting.
           </p>
         </div>
         <div className="heroCard">
           <span>Major Upgrade</span>
-          <strong>Evidence Request Studio + Closure Readiness Engine.</strong>
-          <p>Sentinel now converts findings into request-ready evidence asks, owner follow-ups, closure criteria, and validation tests.</p>
+          <strong>Executive Demo Room + Final MVP Edition.</strong>
+          <p>Sentinel now converts the working product into a demo-ready buyer narrative, pilot offer, objection handling, and guided sales walkthrough.</p>
         </div>
       </section>
 
@@ -627,7 +691,7 @@ export default function Home() {
               </div>
 
               <div className="tabBar">
-                {["Portfolio", "Board Pack", "Evidence Requests", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
+                {["Demo Room", "Portfolio", "Board Pack", "Evidence Requests", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
                   <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
                 ))}
               </div>
@@ -643,6 +707,104 @@ export default function Home() {
               <div className="actions secondaryActions">
                 <button onClick={copySummary}>Copy Executive Summary</button>
               </div>
+
+
+              {activeTab === "Demo Room" && (
+                <div>
+                  <div className="summary">
+                    Executive Demo Room is the final MVP packaging layer: buyer narrative, guided walkthrough, objections, pilot offer, and demo-readiness score.
+                  </div>
+
+                  <div className="actions">
+                    <button onClick={() => currentReviewId && loadDemoPack(currentReviewId)}>Refresh Demo</button>
+                    <button onClick={downloadDemoRoomJson}>Demo JSON</button>
+                    <button onClick={downloadDemoRoomHtml}>Demo HTML</button>
+                    <button onClick={downloadPortfolioDemoRoom}>Portfolio Demo</button>
+                    <button onClick={copyDemoTalkTrack}>Copy Talk Track</button>
+                  </div>
+
+                  {!demoPack && <div className="empty">Run or load a saved review first to generate the Executive Demo Room.</div>}
+
+                  {demoPack && (
+                    <div>
+                      <div className="scoreRow">
+                        <div className="scoreBox"><span>Demo Readiness</span><strong>{demoPack.demo_readiness_score}/100</strong></div>
+                        <div className="scoreBox"><span>Status</span><strong>{demoPack.demo_status}</strong></div>
+                        <div className="scoreBox"><span>Version</span><strong>{demoPack.version}</strong></div>
+                      </div>
+
+                      <div className="summary"><b>One-liner:</b> {demoPack.one_liner}</div>
+                      <div className="summary"><b>Positioning:</b> {demoPack.positioning}</div>
+                      <div className="summary"><b>Workflow:</b> {demoPack.core_workflow}</div>
+
+                      <div className="nextSteps">
+                        <h3>Buyer Value Matrix</h3>
+                        {(demoPack.buyer_value_matrix || []).map((row: any) => (
+                          <div key={row.buyer} className="mappingBox">
+                            <h4>{row.buyer}</h4>
+                            <p><b>Pain:</b> {row.pain}</p>
+                            <p><b>Value:</b> {row.value}</p>
+                            <p><b>Demo moment:</b> {row.demo_moment}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Seven-Step Demo Flow</h3>
+                        {(demoPack.demo_flow || []).map((step: any) => (
+                          <div key={step.step} className="scorecardItem">
+                            <div className="scorecardTop">
+                              <strong>{step.step}. {step.screen}</strong>
+                              <span>{step.action}</span>
+                            </div>
+                            <p><b>Talk track:</b> {step.talk_track}</p>
+                            <p><b>Proof point:</b> {step.proof_point}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="miniGrid">
+                        <div>
+                          <h3>Board Questions</h3>
+                          {(demoPack.board_pack_snapshot?.board_questions || []).map((q: string) => (
+                            <div key={q} className="miniRow"><span>{q}</span><strong>Ask</strong></div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3>Top Missing Evidence</h3>
+                          {(demoPack.board_pack_snapshot?.top_missing_evidence || []).map((x: any) => (
+                            <div key={x.artifact} className="miniRow"><span>{x.artifact}</span><strong>{x.count}</strong></div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Objection Handling</h3>
+                        {(demoPack.objection_handling || []).map((row: any) => (
+                          <div key={row.objection} className="mappingBox">
+                            <h4>{row.objection}</h4>
+                            <p>{row.response}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>{demoPack.pilot_offer?.name}</h3>
+                        <p><b>Duration:</b> {demoPack.pilot_offer?.duration}</p>
+                        <p><b>Ideal client:</b> {demoPack.pilot_offer?.ideal_client}</p>
+                        <p><b>Success metric:</b> {demoPack.pilot_offer?.success_metric}</p>
+                        <ol>{(demoPack.pilot_offer?.scope || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Next Build Recommendation</h3>
+                        <ol>{(demoPack.next_build_recommendation || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
 
               {activeTab === "Portfolio" && (
                 <div>

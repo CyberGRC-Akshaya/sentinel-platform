@@ -16,8 +16,8 @@ DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
     title="Sentinel Evidence Defensibility Workbench",
-    description="Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, evidence request workflow, board-pack generation, remediation register, and executive reporting exports.",
-    version="7.0.0"
+    description="Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, evidence request workflow, demo-room storytelling, board-pack generation, remediation register, and executive reporting exports.",
+    version="8.0.0"
 )
 
 app.add_middleware(
@@ -608,7 +608,7 @@ def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
     return {
         "product": "Sentinel Evidence Defensibility Workbench",
         "company": "Eye On Bits Pvt Ltd",
-        "version": "7.0.0",
+        "version": "8.0.0",
         "review_timestamp": datetime.utcnow().isoformat(),
         "organization": payload.organization,
         "industry": payload.industry,
@@ -665,7 +665,7 @@ def save_review(payload: AnalyzeRequest, result: Dict[str, Any]) -> Dict[str, An
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "Sentinel Evidence Defensibility Workbench", "version": "7.0.0", "database": str(DB_PATH), "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "ok", "service": "Sentinel Evidence Defensibility Workbench", "version": "8.0.0", "database": str(DB_PATH), "timestamp": datetime.utcnow().isoformat()}
 
 @app.get("/api/control-atlas")
 def control_atlas():
@@ -887,7 +887,7 @@ th,td {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertica
 </head>
 <body>
 <div class='report'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v7.0</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.0</div>
 <h1>Evidence Defensibility and Control Atlas Report</h1>
 <div class='cards'>
 <div class='card'><span>Organization</span><strong>{html.escape(result['organization'])}</strong></div>
@@ -1036,7 +1036,7 @@ def build_board_pack_from_result(result: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "product": "Sentinel Board Pack Studio",
-        "version": "7.0.0",
+        "version": "8.0.0",
         "generated_at": datetime.utcnow().isoformat(),
         "review_id": result.get("review_id"),
         "organization": result.get("organization"),
@@ -1159,7 +1159,7 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v7.0</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.0</div>
 <h1>Board Pack Studio</h1>
 <p class='sub'>Board-ready evidence defensibility narrative, risk themes, missing evidence, challenge questions, and 30-day action plan.</p>
 
@@ -1240,7 +1240,7 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v7.0</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.0</div>
 <h1>Portfolio Board Pack</h1>
 <div class='cards'>
 <div class='card'><span>Total Reviews</span><strong>{snapshot.get('total_reviews')}</strong></div>
@@ -1372,7 +1372,7 @@ def build_evidence_request_studio_pack(result: Dict[str, Any]) -> Dict[str, Any]
 
     return {
         "product": "Sentinel Evidence Request Studio",
-        "version": "7.0.0",
+        "version": "8.0.0",
         "generated_at": datetime.utcnow().isoformat(),
         "review_id": result.get("review_id"),
         "organization": result.get("organization"),
@@ -1481,7 +1481,7 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v7.0</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.0</div>
 <h1>Evidence Request Studio</h1>
 <p class='sub'>Request-ready evidence pack with owners, priority, preferred artifacts, closure criteria, and validation tests.</p>
 
@@ -1523,3 +1523,319 @@ def saved_review_request_studio(review_id: str):
 def saved_review_request_studio_html(review_id: str):
     result = get_review(review_id)
     return render_evidence_request_pack_html(build_evidence_request_studio_pack(result))
+
+
+def build_demo_room_pack(result: Dict[str, Any]) -> Dict[str, Any]:
+    board = build_board_pack_from_result(result)
+    request_pack = build_evidence_request_studio_pack(result)
+
+    defensibility = result.get("evidence_defensibility_score") or 0
+    control_atlas = result.get("control_atlas_coverage_score") or 0
+    closure = request_pack.get("average_closure_readiness_score") or 0
+    metadata = result.get("metadata_completeness_score") or 0
+    readiness = round((defensibility * 0.30) + (control_atlas * 0.30) + (closure * 0.20) + (metadata * 0.20))
+
+    if readiness >= 80:
+        demo_status = "Demo-ready"
+    elif readiness >= 60:
+        demo_status = "Usable with explanation"
+    else:
+        demo_status = "Use as gap-discovery demo"
+
+    one_liner = (
+        "Sentinel is an evidence defensibility workbench for GRC, audit, risk, privacy, TPRM, SDLC, IAM, and AI governance teams "
+        "that challenges whether evidence is reliable enough for audit, regulator, or management reliance."
+    )
+
+    buyer_value_matrix = [
+        {
+            "buyer": "CISO / Security Leadership",
+            "pain": "Evidence exists across teams but is inconsistent, screenshot-heavy, and hard to defend during audits.",
+            "value": "Gives leadership a defensibility score, recurring risk themes, and board-ready remediation narrative.",
+            "demo_moment": "Show Board Pack and Portfolio risk roll-up."
+        },
+        {
+            "buyer": "IT GRC / 2LOD",
+            "pain": "Manual credible challenge takes too long and follow-up requests are inconsistent.",
+            "value": "Converts gaps into control-mapped evidence requests, challenge questions, and closure criteria.",
+            "demo_moment": "Show Control Atlas and Evidence Request Studio."
+        },
+        {
+            "buyer": "Internal Audit",
+            "pain": "Audit evidence quality varies and workpapers need better source lineage and review trails.",
+            "value": "Highlights source lineage, calculation integrity, approval evidence, and closure readiness.",
+            "demo_moment": "Show finding severity rationale and closure readiness scoring."
+        },
+        {
+            "buyer": "TPRM / Privacy",
+            "pain": "SOC 2 reliance, CUEC analysis, data flow, retention, and privacy evidence are often incomplete.",
+            "value": "Creates missing-artifact lists and owner-ready requests for vendor/privacy follow-up.",
+            "demo_moment": "Run the Vendor Privacy sample package."
+        }
+    ]
+
+    demo_flow = [
+        {
+            "step": "1",
+            "screen": "Evidence Intake",
+            "action": "Load a sample package or upload JSON/CSV evidence.",
+            "talk_track": "We start where teams actually struggle: scattered evidence packages, not clean system integrations.",
+            "proof_point": "Sentinel accepts lightweight evidence packages and structures them for review."
+        },
+        {
+            "step": "2",
+            "screen": "Run + Save Review",
+            "action": "Click Run + Save Review to Vault.",
+            "talk_track": "The first output is not a policy checklist. It is a defensibility review of whether evidence can withstand challenge.",
+            "proof_point": "Scores are created for defensibility, metadata, intake, and control coverage."
+        },
+        {
+            "step": "3",
+            "screen": "Control Atlas",
+            "action": "Open Control Atlas tab.",
+            "talk_track": "Every gap is tied back to a control objective, expected artifacts, and challenge questions.",
+            "proof_point": "This converts subjective review into a structured assurance conversation."
+        },
+        {
+            "step": "4",
+            "screen": "Evidence Requests",
+            "action": "Open Evidence Requests tab and copy a request.",
+            "talk_track": "Sentinel turns findings into owner-ready follow-up requests, not just dashboards.",
+            "proof_point": "The request includes owner, priority, preferred artifacts, closure criteria, and validation test."
+        },
+        {
+            "step": "5",
+            "screen": "Command Center",
+            "action": "Add owner, target date, management response, closure evidence, and validation notes.",
+            "talk_track": "This is the operating workflow: finding to response to closure readiness.",
+            "proof_point": "Closure readiness improves when management response and evidence fields are completed."
+        },
+        {
+            "step": "6",
+            "screen": "Board Pack",
+            "action": "Open Board Pack tab.",
+            "talk_track": "Leadership does not want raw findings. They need what to ask, what to fix, and what evidence blocks closure.",
+            "proof_point": "Sentinel generates executive narrative, board questions, and 30-day action plan."
+        },
+        {
+            "step": "7",
+            "screen": "Portfolio",
+            "action": "Show portfolio view and export portfolio board pack.",
+            "talk_track": "Across reviews, Sentinel shows recurring risk domains and control concentration.",
+            "proof_point": "This is how the tool moves from one review to evidence assurance portfolio oversight."
+        }
+    ]
+
+    objection_handling = [
+        {
+            "objection": "Is this replacing GRC tools?",
+            "response": "No. Sentinel is a defensibility challenge layer. It can sit before or beside Archer, ServiceNow, Jira, Sheets, or audit workpapers."
+        },
+        {
+            "objection": "Is this production SaaS today?",
+            "response": "The current build is a local MVP/demo. Production needs authentication, PostgreSQL, tenant isolation, audit logs, and deployment hardening."
+        },
+        {
+            "objection": "Why not just use spreadsheets?",
+            "response": "Spreadsheets track rows. Sentinel structures the reasoning: evidence gap, control objective, missing artifact, request message, and closure test."
+        },
+        {
+            "objection": "Is the current engine real AI?",
+            "response": "The current MVP uses deterministic scoring and structured logic. The next production-grade step is adding AI-assisted narrative and evidence interpretation under controlled prompts."
+        }
+    ]
+
+    pilot_offer = {
+        "name": "Evidence Defensibility Sprint",
+        "duration": "2 weeks",
+        "scope": [
+            "Review 10-25 evidence packages across one process area.",
+            "Generate defensibility scores, findings, missing evidence, and request tracker.",
+            "Deliver board-style summary and remediation register.",
+            "Run one readout session with owners and risk/compliance stakeholders."
+        ],
+        "ideal_client": "Banks, fintechs, BFSI GCCs, audit teams, IT GRC teams, TPRM teams, and AI governance teams.",
+        "success_metric": "Evidence packages move from unclear/unreliable to owner-assigned, artifact-specific, and closure-ready."
+    }
+
+    next_build_recommendation = [
+        "Freeze this as Executive Demo Edition.",
+        "Clean code structure before adding more features.",
+        "Add OpenAI-assisted narrative after demo flow is stable.",
+        "Move SQLite to PostgreSQL before external deployment.",
+        "Design final 4-5 screens in Figma before UI expansion."
+    ]
+
+    return {
+        "product": "Sentinel Executive Demo Room",
+        "version": "8.0.0",
+        "generated_at": datetime.utcnow().isoformat(),
+        "review_id": result.get("review_id"),
+        "organization": result.get("organization"),
+        "evidence_type": result.get("evidence_type"),
+        "demo_readiness_score": readiness,
+        "demo_status": demo_status,
+        "one_liner": one_liner,
+        "positioning": "Not a GRC repository. A defensibility challenge layer for evidence, controls, and closure readiness.",
+        "core_workflow": "Evidence → Defensibility Review → Control Atlas → Evidence Request → Management Response → Closure Readiness → Board Pack → Portfolio Oversight",
+        "buyer_value_matrix": buyer_value_matrix,
+        "demo_flow": demo_flow,
+        "objection_handling": objection_handling,
+        "pilot_offer": pilot_offer,
+        "next_build_recommendation": next_build_recommendation,
+        "board_pack_snapshot": {
+            "overall_rating": board.get("overall_rating"),
+            "defensibility_score": board.get("evidence_defensibility_score"),
+            "control_atlas_coverage_score": board.get("control_atlas_coverage_score"),
+            "high_or_critical_findings": board.get("high_or_critical_findings"),
+            "open_register_items": board.get("open_register_items"),
+            "top_missing_evidence": board.get("top_missing_evidence", [])[:8],
+            "board_questions": board.get("board_questions", [])[:5]
+        },
+        "request_pack_snapshot": {
+            "total_requests": request_pack.get("total_requests"),
+            "open_requests": request_pack.get("open_requests"),
+            "average_closure_readiness_score": request_pack.get("average_closure_readiness_score"),
+            "owner_distribution": request_pack.get("owner_distribution"),
+            "priority_distribution": request_pack.get("priority_distribution")
+        }
+    }
+
+def render_demo_room_html(pack: Dict[str, Any]) -> str:
+    demo_rows = ""
+    for step in pack.get("demo_flow", []):
+        demo_rows += f"""
+        <div class='step'>
+          <h3>{html.escape(step.get('step',''))}. {html.escape(step.get('screen',''))}</h3>
+          <p><b>Action:</b> {html.escape(step.get('action',''))}</p>
+          <p><b>Talk track:</b> {html.escape(step.get('talk_track',''))}</p>
+          <p><b>Proof point:</b> {html.escape(step.get('proof_point',''))}</p>
+        </div>
+        """
+
+    buyer_rows = ""
+    for row in pack.get("buyer_value_matrix", []):
+        buyer_rows += f"""
+        <tr>
+          <td>{html.escape(row.get('buyer',''))}</td>
+          <td>{html.escape(row.get('pain',''))}</td>
+          <td>{html.escape(row.get('value',''))}</td>
+          <td>{html.escape(row.get('demo_moment',''))}</td>
+        </tr>
+        """
+
+    objection_rows = ""
+    for row in pack.get("objection_handling", []):
+        objection_rows += f"<tr><td>{html.escape(row.get('objection',''))}</td><td>{html.escape(row.get('response',''))}</td></tr>"
+
+    pilot = pack.get("pilot_offer", {})
+    scope = "".join(f"<li>{html.escape(x)}</li>" for x in pilot.get("scope", []))
+    next_build = "".join(f"<li>{html.escape(x)}</li>" for x in pack.get("next_build_recommendation", []))
+    board_questions = "".join(f"<li>{html.escape(x)}</li>" for x in pack.get("board_pack_snapshot", {}).get("board_questions", []))
+    missing = "".join(f"<li>{html.escape(x.get('artifact',''))} — {x.get('count')}</li>" for x in pack.get("board_pack_snapshot", {}).get("top_missing_evidence", []))
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Sentinel Executive Demo Room</title>
+<style>
+body {{ font-family: Arial, sans-serif; background:#f5f7fb; color:#111827; margin:0; padding:32px; }}
+.pack {{ max-width:1280px; margin:auto; background:white; border-radius:22px; padding:38px; box-shadow:0 20px 70px rgba(15,23,42,.13); }}
+.eyebrow {{ color:#1d4ed8; text-transform:uppercase; letter-spacing:.18em; font-size:12px; font-weight:800; }}
+h1 {{ margin:8px 0 8px; font-size:42px; letter-spacing:-.04em; }}
+.sub {{ color:#4b5563; }}
+.cards {{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:24px 0; }}
+.card {{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:14px; padding:16px; }}
+.card span {{ display:block; color:#6b7280; font-size:12px; text-transform:uppercase; }}
+.card strong {{ display:block; font-size:23px; margin-top:6px; }}
+.summary {{ border-left:5px solid #1d4ed8; background:#eff6ff; padding:16px; border-radius:12px; margin:18px 0; line-height:1.5; }}
+.step, .panel {{ border:1px solid #e5e7eb; border-radius:16px; padding:18px; margin:16px 0; background:#ffffff; }}
+.grid {{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }}
+table {{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }}
+th,td {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertical-align:top; }}
+li {{ margin:7px 0; }}
+.footer {{ color:#6b7280; font-size:12px; margin-top:24px; }}
+@media print {{ body {{ background:white; padding:0; }} .pack {{ box-shadow:none; }} }}
+</style>
+</head>
+<body>
+<div class='pack'>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.0</div>
+<h1>Executive Demo Room</h1>
+<p class='sub'>Final MVP demo script, buyer narrative, pilot offer, objection handling, and build boundary.</p>
+
+<div class='cards'>
+<div class='card'><span>Organization</span><strong>{html.escape(str(pack.get('organization','')))}</strong></div>
+<div class='card'><span>Demo Readiness</span><strong>{pack.get('demo_readiness_score','')}/100</strong></div>
+<div class='card'><span>Status</span><strong>{html.escape(str(pack.get('demo_status','')))}</strong></div>
+<div class='card'><span>Version</span><strong>{html.escape(str(pack.get('version','')))}</strong></div>
+</div>
+
+<div class='summary'><b>One-liner:</b> {html.escape(pack.get('one_liner',''))}</div>
+<div class='summary'><b>Positioning:</b> {html.escape(pack.get('positioning',''))}</div>
+<div class='summary'><b>Workflow:</b> {html.escape(pack.get('core_workflow',''))}</div>
+
+<h2>Buyer Value Matrix</h2>
+<table><tr><th>Buyer</th><th>Pain</th><th>Value</th><th>Demo Moment</th></tr>{buyer_rows}</table>
+
+<h2>Seven-Step Demo Flow</h2>
+{demo_rows}
+
+<div class='grid'>
+<div class='panel'><h2>Board Questions</h2><ol>{board_questions}</ol></div>
+<div class='panel'><h2>Top Missing Evidence</h2><ol>{missing}</ol></div>
+</div>
+
+<h2>Objection Handling</h2>
+<table><tr><th>Objection</th><th>Response</th></tr>{objection_rows}</table>
+
+<div class='panel'>
+<h2>{html.escape(pilot.get('name','Pilot Offer'))}</h2>
+<p><b>Duration:</b> {html.escape(str(pilot.get('duration','')))}</p>
+<p><b>Ideal client:</b> {html.escape(str(pilot.get('ideal_client','')))}</p>
+<p><b>Success metric:</b> {html.escape(str(pilot.get('success_metric','')))}</p>
+<h3>Scope</h3>
+<ul>{scope}</ul>
+</div>
+
+<div class='panel'><h2>Next Build Recommendation</h2><ol>{next_build}</ol></div>
+
+<div class='footer'>Generated by Sentinel Evidence Defensibility Workbench v8.0. This is an executive-demo package, not a production SaaS certification.</div>
+</div>
+</body>
+</html>"""
+
+@app.get("/api/reviews/{review_id}/demo-room")
+def saved_review_demo_room(review_id: str):
+    result = get_review(review_id)
+    return build_demo_room_pack(result)
+
+@app.get("/api/reviews/{review_id}/demo-room-html", response_class=HTMLResponse)
+def saved_review_demo_room_html(review_id: str):
+    result = get_review(review_id)
+    return render_demo_room_html(build_demo_room_pack(result))
+
+@app.get("/api/portfolio/demo-room-html", response_class=HTMLResponse)
+def portfolio_demo_room_html():
+    snapshot = portfolio_dashboard()
+    narrative = (
+        f"Sentinel portfolio currently contains {snapshot.get('total_reviews')} saved review(s), "
+        f"{snapshot.get('total_findings')} finding(s), and {snapshot.get('open_register_items')} open remediation item(s). "
+        f"The average defensibility score is {snapshot.get('average_defensibility_score')}/100."
+    )
+    domain_rows = "".join(f"<tr><td>{html.escape(str(k))}</td><td>{v}</td></tr>" for k, v in sorted(snapshot.get('risk_domain_distribution', {}).items(), key=lambda x: x[1], reverse=True))
+    control_rows = "".join(f"<tr><td>{html.escape(str(k))}</td><td>{v}</td></tr>" for k, v in sorted(snapshot.get('control_atlas_distribution', {}).items(), key=lambda x: x[1], reverse=True))
+    return f"""<!DOCTYPE html>
+<html><head><meta charset='utf-8'><title>Sentinel Portfolio Demo Room</title>
+<style>
+body{{font-family:Arial,sans-serif;background:#f5f7fb;color:#111827;margin:0;padding:32px}}
+.pack{{max-width:1180px;margin:auto;background:white;border-radius:22px;padding:38px;box-shadow:0 20px 70px rgba(15,23,42,.13)}}
+.eyebrow{{color:#1d4ed8;text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:800}}
+h1{{font-size:40px;margin:8px 0}}.summary{{border-left:5px solid #1d4ed8;background:#eff6ff;padding:16px;border-radius:12px;margin:18px 0;line-height:1.5}}
+.grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px}}.panel{{border:1px solid #e5e7eb;border-radius:16px;padding:18px}}
+table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}td,th{{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left}}
+</style></head>
+<body><div class='pack'><div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v8.0</div><h1>Portfolio Demo Room</h1><div class='summary'>{html.escape(narrative)}</div>
+<div class='grid'><div class='panel'><h2>Risk Domains</h2><table><tr><th>Domain</th><th>Count</th></tr>{domain_rows}</table></div><div class='panel'><h2>Control Concentration</h2><table><tr><th>Control</th><th>Count</th></tr>{control_rows}</table></div></div>
+</div></body></html>"""
