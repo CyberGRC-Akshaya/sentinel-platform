@@ -1,0 +1,2 @@
+Finding_ID,Severity,Risk_Domain,Affected_Item,Issue,Evidence_Gap,Examiner_Question,Remediation,Framework_Relevance,Framework_Rationale,Expected_Evidence,Owner,Target_Date,Status,Management_Response
+SEN-001,High,Metrics Assurance,Q4 Metric Evidence,Metric denominator inconsistency,Source reconciliation not provided,How was denominator completeness validated?,Add source extract and reconciliation,FFIEC Management; FFIEC Audit,Metric reporting should be source-traceable,Source export; calculation logic; reviewer approval,,,Open,

@@ -327,8 +327,8 @@ export default function Home() {
           <p className="subtitle">AI-native examiner intelligence with evidence intake, framework mapping rationale, finding register export, and local review history.</p>
         </div>
         <div className="heroCard">
-          <span>Sentinel v0.9</span>
-          <strong>Evidence Intake Console</strong>
+          <span>Sentinel v1.0</span>
+          <strong>Consulting-Ready Assurance Console</strong>
           <p>Upload JSON, CSV, or text evidence packages and convert them into examiner-ready review input.</p>
         </div>
       </section>
@@ -381,7 +381,7 @@ export default function Home() {
               {history.map((h, idx) => (
                 <div key={idx} className="historyRow">
                   <strong>{h.evidence_type}</strong>
-                  <span>{h.rating} · {h.score}/100 · {h.findings} findings</span>
+                  <span>{h.rating} Â· {h.score}/100 Â· {h.findings} findings</span>
                   <em>{new Date(h.timestamp).toLocaleString()}</em>
                 </div>
               ))}
