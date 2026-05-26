@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sentinel Assurance Platform | Eye On Bits Pvt Ltd</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #08111f;
+      color: #eef5ff;
+      line-height: 1.6;
+    }
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 34px 22px; }
+    .hero {
+      min-height: 74vh;
+      display: grid;
+      grid-template-columns: 1.25fr .85fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .eyebrow {
+      color: #8ec5ff;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    h1 {
+      font-size: 62px;
+      line-height: 1;
+      margin: 12px 0 18px;
+    }
+    .sub {
+      font-size: 20px;
+      color: #c5d6f6;
+      max-width: 760px;
+    }
+    .card {
+      background: rgba(255,255,255,.075);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 26px;
+      padding: 26px;
+      box-shadow: 0 30px 100px rgba(0,0,0,.25);
+    }
+    .cta {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+    .btn {
+      display: inline-block;
+      padding: 14px 18px;
+      border-radius: 14px;
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .primary { background: linear-gradient(135deg,#60a5fa,#a78bfa); color:#07111f; }
+    .secondary { color:#c7ddff; border:1px solid rgba(199,221,255,.28); }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(3,1fr);
+      gap: 18px;
+      margin: 28px 0;
+    }
+    h2 { font-size: 34px; margin-top: 60px; }
+    h3 { margin-top: 0; }
+    .muted { color: #b5c4de; }
+    .pill {
+      display: inline-block;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(96,165,250,.14);
+      color: #bfdbfe;
+      margin: 4px;
+      font-size: 13px;
+    }
+    .process {
+      counter-reset: step;
+    }
+    .process .card {
+      position: relative;
+    }
+    .process .card:before {
+      counter-increment: step;
+      content: counter(step);
+      position: absolute;
+      top: 18px;
+      right: 20px;
+      color: #60a5fa;
+      font-size: 42px;
+      font-weight: 900;
+      opacity: .25;
+    }
+    .footer {
+      margin-top: 60px;
+      padding-top: 24px;
+      border-top: 1px solid rgba(255,255,255,.12);
+      color: #9fb0ca;
+      font-size: 14px;
+    }
+    @media(max-width: 900px) {
+      .hero, .grid { grid-template-columns: 1fr; }
+      h1 { font-size: 42px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <div>
+        <div class="eyebrow">Eye On Bits Pvt Ltd</div>
+        <h1>Sentinel Assurance Platform</h1>
+        <p class="sub">
+          AI-native assurance intelligence for regulated enterprises. Sentinel challenges whether evidence, metrics,
+          vendor submissions, privacy artifacts, SDLC records, IAM evidence, and AI governance claims are defensible.
+        </p>
+        <div class="cta">
+          <a class="btn primary" href="#service">Request Evidence Review</a>
+          <a class="btn secondary" href="#demo">View Demo Flow</a>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Most GRC tools store evidence.</h3>
+        <p class="muted">Sentinel challenges whether the evidence actually proves the management claim.</p>
+        <div>
+          <span class="pill">IT Metrics</span>
+          <span class="pill">TPRM</span>
+          <span class="pill">Privacy</span>
+          <span class="pill">SDLC</span>
+          <span class="pill">IAM</span>
+          <span class="pill">AI Governance</span>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>The Problem</h2>
+      <div class="grid">
+        <div class="card"><h3>Evidence exists</h3><p class="muted">But it may not prove completeness, accuracy, source lineage, or management review.</p></div>
+        <div class="card"><h3>Metrics are reported</h3><p class="muted">But denominator logic, reporting period, and source reconciliation may be weak.</p></div>
+        <div class="card"><h3>Controls are declared effective</h3><p class="muted">But positive assurance statements often lack traceable test evidence.</p></div>
+      </div>
+    </section>
+
+    <section id="demo">
+      <h2>What Sentinel Generates</h2>
+      <div class="grid">
+        <div class="card"><h3>Examiner Findings</h3><p class="muted">Issues, evidence gaps, examiner-style challenge questions, and remediation guidance.</p></div>
+        <div class="card"><h3>Finding Register</h3><p class="muted">CSV tracker with owner, target date, status, management response, and expected evidence.</p></div>
+        <div class="card"><h3>HTML Report</h3><p class="muted">Management-ready report with framework mapping rationale and recommended next steps.</p></div>
+      </div>
+    </section>
+
+    <section>
+      <h2>Use Cases</h2>
+      <div class="grid">
+        <div class="card"><h3>IT Metrics Validation</h3><p class="muted">Denominator, numerator, reporting period, source system, and reviewer sign-off challenge.</p></div>
+        <div class="card"><h3>Vendor Evidence Review</h3><p class="muted">SOC 2 reliance, CUEC analysis, data-flow, retention, and residual risk review.</p></div>
+        <div class="card"><h3>AI Governance Readiness</h3><p class="muted">AI inventory, risk tier, approval, data handling, monitoring, and incident escalation evidence.</p></div>
+      </div>
+    </section>
+
+    <section id="service">
+      <h2>Service Offer</h2>
+      <div class="card">
+        <h3>Sentinel Evidence & Metrics Assurance Review</h3>
+        <p class="muted">
+          A consulting-assisted review where Sentinel accelerates evidence analysis, examiner-style challenge,
+          finding register creation, remediation evidence requests, and executive reporting.
+        </p>
+        <p><strong>Starter pilot:</strong> focused evidence health check for one evidence package.</p>
+        <p><strong>Professional review:</strong> multi-domain review across metrics, vendor, privacy, SDLC, IAM, or AI governance evidence.</p>
+        <p><strong>Monthly assurance desk:</strong> recurring evidence challenge and governance reporting support.</p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Review Method</h2>
+      <div class="grid process">
+        <div class="card"><h3>Intake</h3><p class="muted">Collect the evidence package and business objective.</p></div>
+        <div class="card"><h3>Challenge</h3><p class="muted">Run Sentinel examiner review and identify defensibility gaps.</p></div>
+        <div class="card"><h3>Deliver</h3><p class="muted">Export findings, framework rationale, remediation requests, and executive summary.</p></div>
+      </div>
+    </section>
+
+    <div class="footer">
+      Sentinel supports professional judgment. It does not replace qualified audit, legal, regulatory, or compliance advice.
+      <br />Built by Eye On Bits Pvt Ltd.
+    </div>
+  </main>
+</body>
+</html>
