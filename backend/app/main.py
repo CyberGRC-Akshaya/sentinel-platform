@@ -16,8 +16,8 @@ DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
     title="Sentinel Evidence Defensibility Workbench",
-    description="Professional assurance workbench with persistent review vault, portfolio analytics, control atlas mapping, remediation register, and executive reporting exports.",
-    version="5.0.0"
+    description="Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, board-pack generation, remediation register, and executive reporting exports.",
+    version="6.0.0"
 )
 
 app.add_middleware(
@@ -608,7 +608,7 @@ def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
     return {
         "product": "Sentinel Evidence Defensibility Workbench",
         "company": "Eye On Bits Pvt Ltd",
-        "version": "5.0.0",
+        "version": "6.0.0",
         "review_timestamp": datetime.utcnow().isoformat(),
         "organization": payload.organization,
         "industry": payload.industry,
@@ -665,7 +665,7 @@ def save_review(payload: AnalyzeRequest, result: Dict[str, Any]) -> Dict[str, An
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "Sentinel Evidence Defensibility Workbench", "version": "5.0.0", "database": str(DB_PATH), "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "ok", "service": "Sentinel Evidence Defensibility Workbench", "version": "6.0.0", "database": str(DB_PATH), "timestamp": datetime.utcnow().isoformat()}
 
 @app.get("/api/control-atlas")
 def control_atlas():
@@ -887,7 +887,7 @@ th,td {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertica
 </head>
 <body>
 <div class='report'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v5.0</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v6.0</div>
 <h1>Evidence Defensibility and Control Atlas Report</h1>
 <div class='cards'>
 <div class='card'><span>Organization</span><strong>{html.escape(result['organization'])}</strong></div>
@@ -937,3 +937,321 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 <div class='grid'><div class='panel'><h2>Control Atlas</h2><table><tr><th>Control</th><th>Findings</th></tr>{control_rows}</table></div><div class='panel'><h2>Domains</h2><table><tr><th>Domain</th><th>Count</th></tr>{domain_rows}</table></div><div class='panel'><h2>Severity</h2><table><tr><th>Severity</th><th>Count</th></tr>{severity_rows}</table></div></div>
 <h2>Saved Reviews</h2><table><tr><th>Organization</th><th>Evidence Type</th><th>Rating</th><th>Score</th><th>Findings</th></tr>{review_rows}</table>
 </div></body></html>"""
+
+
+def build_board_pack_from_result(result: Dict[str, Any]) -> Dict[str, Any]:
+    findings = result.get("findings", [])
+    register = result.get("remediation_register", [])
+    item_scorecards = result.get("item_scorecards", [])
+
+    high_findings = [f for f in findings if f.get("severity") in ["High", "Critical"]]
+    medium_findings = [f for f in findings if f.get("severity") == "Medium"]
+
+    open_items = [r for r in register if r.get("status", "Open") not in ["Closed"]]
+    closed_items = [r for r in register if r.get("status") == "Closed"]
+
+    domains: Dict[str, int] = {}
+    controls: Dict[str, int] = {}
+    missing_evidence: Dict[str, int] = {}
+    challenge_questions: List[str] = []
+
+    for item in item_scorecards:
+        domain = item.get("domain", "Unknown")
+        domains[domain] = domains.get(domain, 0) + 1
+
+        atlas = item.get("control_atlas_mapping", {})
+        for control in atlas.get("mapped_controls", []):
+            cid = control.get("control_id", "Unknown")
+            controls[cid] = controls.get(cid, 0) + 1
+
+            for evidence in control.get("missing_evidence", []):
+                missing_evidence[evidence] = missing_evidence.get(evidence, 0) + 1
+
+            for question in control.get("challenge_questions", []):
+                if question not in challenge_questions:
+                    challenge_questions.append(question)
+
+    top_domains = sorted(domains.items(), key=lambda x: x[1], reverse=True)
+    top_controls = sorted(controls.items(), key=lambda x: x[1], reverse=True)
+    top_missing = sorted(missing_evidence.items(), key=lambda x: x[1], reverse=True)
+
+    business_narrative = (
+        f"The review of {result.get('organization')} produced an overall evidence defensibility rating of "
+        f"{result.get('overall_rating')} with a defensibility score of {result.get('evidence_defensibility_score')}/100. "
+        f"The review identified {result.get('total_findings')} finding(s), including {len(high_findings)} high or critical item(s). "
+        f"The control atlas coverage score is {result.get('control_atlas_coverage_score', 'N/A')}/100, indicating the extent to which submitted evidence aligns to expected control objectives and supporting artifacts."
+    )
+
+    board_message = (
+        "The primary concern is not merely whether evidence exists, but whether evidence is reliable enough for management, audit, "
+        "or examiner reliance. The immediate management focus should be on source lineage, ownership, review approval, missing control evidence, "
+        "and closure artifacts for open remediation items."
+    )
+
+    action_plan = [
+        {
+            "phase": "0-7 days",
+            "focus": "Stabilize evidence ownership and source lineage",
+            "actions": [
+                "Assign accountable owner for each open finding.",
+                "Confirm source system and reporting period for each evidence item.",
+                "Collect missing source exports, approval evidence, and reconciliation support for high-priority gaps."
+            ]
+        },
+        {
+            "phase": "8-21 days",
+            "focus": "Remediate control evidence gaps",
+            "actions": [
+                "Use the Control Atlas missing evidence list to collect expected artifacts.",
+                "Document management response and remediation commitment for each finding.",
+                "Validate whether risk acceptance is required for evidence that cannot be produced."
+            ]
+        },
+        {
+            "phase": "22-30 days",
+            "focus": "Prepare closure and governance reporting",
+            "actions": [
+                "Attach closure evidence and reviewer validation notes.",
+                "Export remediation register for management review.",
+                "Re-run Sentinel to confirm improved defensibility and control coverage scores."
+            ]
+        }
+    ]
+
+    board_questions = [
+        "Which evidence gaps create the highest audit or examiner reliance risk?",
+        "Which findings lack a named owner, target date, or closure path?",
+        "Which missing artifacts prevent management from validating the control claim?",
+        "Are any open issues suitable for formal risk acceptance rather than remediation?",
+        "What improvement should be expected in the defensibility score after remediation evidence is provided?"
+    ]
+
+    management_prompts = [
+        "Provide a source-of-record artifact for the reported value or control claim.",
+        "Explain whether the missing evidence is unavailable, not applicable, retained elsewhere, or pending collection.",
+        "Identify the accountable owner, target date, and expected closure evidence.",
+        "Document whether a temporary risk acceptance is needed until evidence is produced.",
+        "Confirm how management will prevent recurrence in the next reporting cycle."
+    ]
+
+    return {
+        "product": "Sentinel Board Pack Studio",
+        "version": "6.0.0",
+        "generated_at": datetime.utcnow().isoformat(),
+        "review_id": result.get("review_id"),
+        "organization": result.get("organization"),
+        "evidence_type": result.get("evidence_type"),
+        "overall_rating": result.get("overall_rating"),
+        "evidence_defensibility_score": result.get("evidence_defensibility_score"),
+        "control_atlas_coverage_score": result.get("control_atlas_coverage_score"),
+        "intake_coverage_score": result.get("intake_coverage_score"),
+        "metadata_completeness_score": result.get("metadata_completeness_score"),
+        "total_findings": result.get("total_findings"),
+        "high_or_critical_findings": len(high_findings),
+        "open_register_items": len(open_items),
+        "closed_register_items": len(closed_items),
+        "business_narrative": business_narrative,
+        "board_message": board_message,
+        "top_domains": [{"domain": k, "count": v} for k, v in top_domains],
+        "top_control_atlas_ids": [{"control_id": k, "count": v} for k, v in top_controls],
+        "top_missing_evidence": [{"artifact": k, "count": v} for k, v in top_missing],
+        "board_questions": board_questions,
+        "control_challenge_questions": challenge_questions[:12],
+        "management_prompts": management_prompts,
+        "thirty_day_action_plan": action_plan,
+        "high_priority_findings": [
+            {
+                "finding_id": f.get("finding_id"),
+                "severity": f.get("severity"),
+                "risk_domain": f.get("risk_domain"),
+                "control_atlas_ids": f.get("control_atlas_ids", []),
+                "issue": f.get("issue"),
+                "evidence_gap": f.get("evidence_gap"),
+                "examiner_question": f.get("examiner_question"),
+                "remediation": f.get("remediation")
+            }
+            for f in high_findings[:10]
+        ],
+        "open_remediation_items": open_items[:25]
+    }
+
+def render_board_pack_html(pack: Dict[str, Any]) -> str:
+    domain_rows = "".join(
+        f"<tr><td>{html.escape(str(x.get('domain','')))}</td><td>{x.get('count','')}</td></tr>"
+        for x in pack.get("top_domains", [])
+    )
+
+    control_rows = "".join(
+        f"<tr><td>{html.escape(str(x.get('control_id','')))}</td><td>{x.get('count','')}</td></tr>"
+        for x in pack.get("top_control_atlas_ids", [])
+    )
+
+    missing_rows = "".join(
+        f"<tr><td>{html.escape(str(x.get('artifact','')))}</td><td>{x.get('count','')}</td></tr>"
+        for x in pack.get("top_missing_evidence", [])
+    )
+
+    question_items = "".join(f"<li>{html.escape(q)}</li>" for q in pack.get("board_questions", []))
+    challenge_items = "".join(f"<li>{html.escape(q)}</li>" for q in pack.get("control_challenge_questions", []))
+    prompt_items = "".join(f"<li>{html.escape(q)}</li>" for q in pack.get("management_prompts", []))
+
+    plan_blocks = ""
+    for phase in pack.get("thirty_day_action_plan", []):
+        actions = "".join(f"<li>{html.escape(a)}</li>" for a in phase.get("actions", []))
+        plan_blocks += f"""
+        <div class='phase'>
+          <h3>{html.escape(phase.get('phase',''))} — {html.escape(phase.get('focus',''))}</h3>
+          <ul>{actions}</ul>
+        </div>
+        """
+
+    finding_blocks = ""
+    for finding in pack.get("high_priority_findings", []):
+        finding_blocks += f"""
+        <div class='finding'>
+          <h3>{html.escape(str(finding.get('finding_id','')))} — {html.escape(str(finding.get('severity','')))}</h3>
+          <p><b>Risk Domain:</b> {html.escape(str(finding.get('risk_domain','')))}</p>
+          <p><b>Control Atlas:</b> {html.escape(', '.join(finding.get('control_atlas_ids', [])))}</p>
+          <p><b>Issue:</b> {html.escape(str(finding.get('issue','')))}</p>
+          <p><b>Evidence Gap:</b> {html.escape(str(finding.get('evidence_gap','')))}</p>
+          <p><b>Examiner Question:</b> {html.escape(str(finding.get('examiner_question','')))}</p>
+          <p><b>Remediation:</b> {html.escape(str(finding.get('remediation','')))}</p>
+        </div>
+        """
+
+    open_rows = ""
+    for item in pack.get("open_remediation_items", []):
+        open_rows += f"""
+        <tr>
+          <td>{html.escape(str(item.get('finding_id','')))}</td>
+          <td>{html.escape(str(item.get('severity','')))}</td>
+          <td>{html.escape(str(item.get('owner','')))}</td>
+          <td>{html.escape(str(item.get('target_date','')))}</td>
+          <td>{html.escape(str(item.get('status','')))}</td>
+          <td>{html.escape(str(item.get('evidence_needed','')))}</td>
+        </tr>
+        """
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Sentinel Board Pack Studio</title>
+<style>
+body {{ font-family: Arial, sans-serif; background:#f5f7fb; color:#111827; margin:0; padding:32px; }}
+.pack {{ max-width:1280px; margin:auto; background:white; border-radius:22px; padding:38px; box-shadow:0 20px 70px rgba(15,23,42,.13); }}
+.eyebrow {{ color:#1d4ed8; text-transform:uppercase; letter-spacing:.18em; font-size:12px; font-weight:800; }}
+h1 {{ margin:8px 0 8px; font-size:40px; letter-spacing:-.04em; }}
+.sub {{ color:#4b5563; }}
+.cards {{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:24px 0; }}
+.card {{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:14px; padding:16px; }}
+.card span {{ display:block; color:#6b7280; font-size:12px; text-transform:uppercase; }}
+.card strong {{ display:block; font-size:23px; margin-top:6px; }}
+.summary {{ border-left:5px solid #1d4ed8; background:#eff6ff; padding:16px; border-radius:12px; margin:18px 0; line-height:1.5; }}
+.grid {{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:18px 0; }}
+.panel, .phase, .finding {{ border:1px solid #e5e7eb; border-radius:16px; padding:18px; margin:16px 0; background:#ffffff; }}
+table {{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }}
+th,td {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertical-align:top; }}
+li {{ margin:7px 0; }}
+.footer {{ color:#6b7280; font-size:12px; margin-top:24px; }}
+@media print {{ body {{ background:white; padding:0; }} .pack {{ box-shadow:none; }} }}
+</style>
+</head>
+<body>
+<div class='pack'>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v6.0</div>
+<h1>Board Pack Studio</h1>
+<p class='sub'>Board-ready evidence defensibility narrative, risk themes, missing evidence, challenge questions, and 30-day action plan.</p>
+
+<div class='cards'>
+<div class='card'><span>Organization</span><strong>{html.escape(str(pack.get('organization','')))}</strong></div>
+<div class='card'><span>Rating</span><strong>{html.escape(str(pack.get('overall_rating','')))}</strong></div>
+<div class='card'><span>Defensibility</span><strong>{pack.get('evidence_defensibility_score','')}/100</strong></div>
+<div class='card'><span>Control Atlas</span><strong>{pack.get('control_atlas_coverage_score','')}/100</strong></div>
+<div class='card'><span>Open Items</span><strong>{pack.get('open_register_items','')}</strong></div>
+</div>
+
+<div class='summary'><b>Executive Narrative:</b> {html.escape(pack.get('business_narrative',''))}</div>
+<div class='summary'><b>Board Message:</b> {html.escape(pack.get('board_message',''))}</div>
+
+<div class='grid'>
+<div class='panel'><h2>Top Risk Domains</h2><table><tr><th>Domain</th><th>Count</th></tr>{domain_rows}</table></div>
+<div class='panel'><h2>Control Atlas Concentration</h2><table><tr><th>Control ID</th><th>Count</th></tr>{control_rows}</table></div>
+<div class='panel'><h2>Missing Evidence</h2><table><tr><th>Artifact</th><th>Count</th></tr>{missing_rows}</table></div>
+</div>
+
+<div class='panel'><h2>Board Questions</h2><ol>{question_items}</ol></div>
+<div class='panel'><h2>Control Challenge Questions</h2><ol>{challenge_items}</ol></div>
+<div class='panel'><h2>Management Response Prompts</h2><ol>{prompt_items}</ol></div>
+
+<h2>30-Day Action Plan</h2>
+{plan_blocks}
+
+<h2>High-Priority Findings</h2>
+{finding_blocks}
+
+<h2>Open Remediation Items</h2>
+<table><tr><th>Finding</th><th>Severity</th><th>Owner</th><th>Target Date</th><th>Status</th><th>Evidence Needed</th></tr>{open_rows}</table>
+
+<div class='footer'>Generated by Sentinel Evidence Defensibility Workbench v6.0. This output supports management and board-style evidence assurance discussion.</div>
+</div>
+</body>
+</html>"""
+
+@app.get("/api/reviews/{review_id}/board-pack")
+def saved_review_board_pack(review_id: str):
+    result = get_review(review_id)
+    return build_board_pack_from_result(result)
+
+@app.get("/api/reviews/{review_id}/board-pack-html", response_class=HTMLResponse)
+def saved_review_board_pack_html(review_id: str):
+    result = get_review(review_id)
+    return render_board_pack_html(build_board_pack_from_result(result))
+
+@app.get("/api/portfolio/board-pack-html", response_class=HTMLResponse)
+def portfolio_board_pack_html():
+    snapshot = portfolio_dashboard()
+    domain_rows = "".join(f"<tr><td>{html.escape(str(k))}</td><td>{v}</td></tr>" for k, v in sorted(snapshot.get('risk_domain_distribution', {}).items(), key=lambda x: x[1], reverse=True))
+    control_rows = "".join(f"<tr><td>{html.escape(str(k))}</td><td>{v}</td></tr>" for k, v in sorted(snapshot.get('control_atlas_distribution', {}).items(), key=lambda x: x[1], reverse=True))
+    review_rows = "".join(f"<tr><td>{html.escape(str(r.get('organization','')))}</td><td>{html.escape(str(r.get('evidence_type','')))}</td><td>{html.escape(str(r.get('overall_rating','')))}</td><td>{r.get('evidence_defensibility_score','')}/100</td><td>{r.get('total_findings','')}</td></tr>" for r in snapshot.get("reviews", []))
+
+    narrative = (
+        f"The portfolio contains {snapshot.get('total_reviews')} saved review(s), with an average defensibility score of "
+        f"{snapshot.get('average_defensibility_score')}/100 and {snapshot.get('total_findings')} total finding(s). "
+        f"There are {snapshot.get('open_register_items')} open remediation item(s), including "
+        f"{snapshot.get('high_or_critical_findings')} high or critical finding(s)."
+    )
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Sentinel Portfolio Board Pack</title>
+<style>
+body{{font-family:Arial,sans-serif;background:#f5f7fb;color:#111827;margin:0;padding:32px}}
+.pack{{max-width:1280px;margin:auto;background:white;border-radius:22px;padding:38px;box-shadow:0 20px 70px rgba(15,23,42,.13)}}
+.eyebrow{{color:#1d4ed8;text-transform:uppercase;letter-spacing:.18em;font-size:12px;font-weight:800}}
+h1{{margin:8px 0;font-size:40px}}.summary{{border-left:5px solid #1d4ed8;background:#eff6ff;padding:16px;border-radius:12px;margin:18px 0;line-height:1.5}}
+.cards{{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin:24px 0}}.card{{background:#f9fafb;border:1px solid #e5e7eb;border-radius:14px;padding:16px}}
+.card span{{display:block;color:#6b7280;font-size:12px;text-transform:uppercase}}.card strong{{display:block;font-size:23px;margin-top:6px}}
+.grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px}}.panel{{border:1px solid #e5e7eb;border-radius:16px;padding:18px;margin:16px 0}}
+table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td{{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left;vertical-align:top}}
+</style>
+</head>
+<body>
+<div class='pack'>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v6.0</div>
+<h1>Portfolio Board Pack</h1>
+<div class='cards'>
+<div class='card'><span>Total Reviews</span><strong>{snapshot.get('total_reviews')}</strong></div>
+<div class='card'><span>Avg Defensibility</span><strong>{snapshot.get('average_defensibility_score')}/100</strong></div>
+<div class='card'><span>Total Findings</span><strong>{snapshot.get('total_findings')}</strong></div>
+<div class='card'><span>High/Critical</span><strong>{snapshot.get('high_or_critical_findings')}</strong></div>
+<div class='card'><span>Open Items</span><strong>{snapshot.get('open_register_items')}</strong></div>
+</div>
+<div class='summary'>{html.escape(narrative)}</div>
+<div class='grid'><div class='panel'><h2>Risk Domains</h2><table><tr><th>Domain</th><th>Count</th></tr>{domain_rows}</table></div><div class='panel'><h2>Control Atlas Concentration</h2><table><tr><th>Control</th><th>Count</th></tr>{control_rows}</table></div></div>
+<h2>Saved Reviews</h2><table><tr><th>Organization</th><th>Evidence Type</th><th>Rating</th><th>Score</th><th>Findings</th></tr>{review_rows}</table>
+</div>
+</body>
+</html>"""

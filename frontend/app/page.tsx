@@ -102,6 +102,7 @@ export default function Home() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("Workbench");
   const [saveMessage, setSaveMessage] = useState("");
+  const [boardPack, setBoardPack] = useState<any>(null);
 
   useEffect(() => {
     loadVault();
@@ -139,6 +140,55 @@ export default function Home() {
     } catch (err: any) {
       setError(err.message || "Could not seed demo reviews.");
     }
+  }
+
+
+  async function loadBoardPack(reviewId: string) {
+    try {
+      const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/board-pack`);
+      if (response.ok) setBoardPack(await response.json());
+    } catch {
+      setBoardPack(null);
+    }
+  }
+
+  async function downloadBoardPackHtml() {
+    if (!currentReviewId) {
+      setSaveMessage("Load or save a review first.");
+      return;
+    }
+    const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/board-pack-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v6-board-pack.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadBoardPackJson() {
+    if (!boardPack) return;
+    const blob = new Blob([JSON.stringify(boardPack, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v6-board-pack.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function downloadPortfolioBoardPack() {
+    const response = await fetch(`${API_BASE}/api/portfolio/board-pack-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v6-portfolio-board-pack.html";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function loadCase(name: string) {
@@ -258,6 +308,7 @@ export default function Home() {
       setRegisterRows(data.remediation_register || []);
       setActiveTab("Command Center");
       setSaveMessage("Review saved to vault.");
+      if (data.review_id) await loadBoardPack(data.review_id);
       await loadVault();
       await loadPortfolio();
     } catch (err: any) {
@@ -276,6 +327,7 @@ export default function Home() {
       setRegisterRows(data.remediation_register || []);
       setActiveTab("Command Center");
       setSaveMessage("Saved review loaded from vault.");
+      await loadBoardPack(reviewId);
     } catch (err: any) {
       setError(err.message || "Could not load review.");
     }
@@ -420,16 +472,16 @@ export default function Home() {
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v5.0</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v6.0</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
-            Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, challenge question bank, remediation register, and executive reporting.
+            Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, board-pack generation, remediation register, and executive reporting.
           </p>
         </div>
         <div className="heroCard">
           <span>Major Upgrade</span>
-          <strong>Control Atlas Mapper + Assurance Question Bank.</strong>
-          <p>Sentinel now maps evidence to control themes, expected artifacts, missing control evidence, and examiner-style challenge questions.</p>
+          <strong>Board Pack Studio + Control Atlas Mapper.</strong>
+          <p>Sentinel now converts review results into board-ready narratives, management prompts, 30-day action plans, and control evidence challenge questions.</p>
         </div>
       </section>
 
@@ -507,7 +559,7 @@ export default function Home() {
               </div>
 
               <div className="tabBar">
-                {["Portfolio", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
+                {["Portfolio", "Board Pack", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
                   <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
                 ))}
               </div>
@@ -560,6 +612,90 @@ export default function Home() {
                   )}
                 </div>
               )}
+
+
+              {activeTab === "Board Pack" && (
+                <div>
+                  <div className="summary">
+                    Board Pack Studio converts technical evidence findings into management-ready narrative, questions, missing evidence priorities, and 30-day action plan.
+                  </div>
+
+                  <div className="actions">
+                    <button onClick={() => currentReviewId && loadBoardPack(currentReviewId)}>Refresh Board Pack</button>
+                    <button onClick={downloadBoardPackJson}>Board JSON</button>
+                    <button onClick={downloadBoardPackHtml}>Board HTML</button>
+                    <button onClick={downloadPortfolioBoardPack}>Portfolio Board</button>
+                    <button onClick={copySummary}>Copy Summary</button>
+                  </div>
+
+                  {!boardPack && <div className="empty">Run or load a saved review first to generate the board pack.</div>}
+
+                  {boardPack && (
+                    <div>
+                      <div className="scoreRow">
+                        <div className="scoreBox"><span>Rating</span><strong>{boardPack.overall_rating}</strong></div>
+                        <div className="scoreBox"><span>High/Critical</span><strong>{boardPack.high_or_critical_findings}</strong></div>
+                        <div className="scoreBox"><span>Open Items</span><strong>{boardPack.open_register_items}</strong></div>
+                      </div>
+
+                      <div className="summary"><b>Executive Narrative:</b> {boardPack.business_narrative}</div>
+                      <div className="summary"><b>Board Message:</b> {boardPack.board_message}</div>
+
+                      <div className="miniGrid">
+                        <div>
+                          <h3>Top Missing Evidence</h3>
+                          {(boardPack.top_missing_evidence || []).map((x: any) => (
+                            <div key={x.artifact} className="miniRow"><span>{x.artifact}</span><strong>{x.count}</strong></div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3>Control Concentration</h3>
+                          {(boardPack.top_control_atlas_ids || []).map((x: any) => (
+                            <div key={x.control_id} className="miniRow"><span>{x.control_id}</span><strong>{x.count}</strong></div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Board Questions</h3>
+                        <ol>{(boardPack.board_questions || []).map((q: string) => <li key={q}>{q}</li>)}</ol>
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Management Response Prompts</h3>
+                        <ol>{(boardPack.management_prompts || []).map((q: string) => <li key={q}>{q}</li>)}</ol>
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>30-Day Action Plan</h3>
+                        {(boardPack.thirty_day_action_plan || []).map((phase: any) => (
+                          <div key={phase.phase} className="mappingBox">
+                            <h4>{phase.phase} · {phase.focus}</h4>
+                            <ol>{(phase.actions || []).map((a: string) => <li key={a}>{a}</li>)}</ol>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="findings">
+                        <h3>High-Priority Findings</h3>
+                        {(boardPack.high_priority_findings || []).map((finding: any) => (
+                          <div key={finding.finding_id} className="finding">
+                            <div className="findingTop">
+                              <h3>{finding.finding_id} · {finding.severity}</h3>
+                              <span className={"badge " + String(finding.severity || "").toLowerCase()}>{finding.risk_domain}</span>
+                            </div>
+                            <p><b>Control Atlas:</b> {(finding.control_atlas_ids || []).join(", ")}</p>
+                            <p><b>Issue:</b> {finding.issue}</p>
+                            <p><b>Evidence Gap:</b> {finding.evidence_gap}</p>
+                            <p><b>Examiner Question:</b> {finding.examiner_question}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
 
               {activeTab === "Command Center" && (
                 <div>
