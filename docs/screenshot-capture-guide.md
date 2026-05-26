@@ -1,97 +1,155 @@
-# Sentinel Screenshot Capture Guide
+# Screenshot Capture Guide
 
-## Goal
+## Browser setup
 
-Capture five clean screenshots for GitHub, LinkedIn, and demo packaging.
+Use Chrome or Edge.
 
-## Before capturing
-
-Run Sentinel:
-
-```powershell
-cd $HOME\Desktop\EyeOnBits-Sentinel
-docker compose up --build
-```
-
-Open:
+Recommended zoom:
 
 ```text
-http://localhost:3000
+80% or 90%
 ```
 
-Set browser zoom to 80% or 90% so the layout fits.
-
-## Screenshots to capture
-
-### 1. Home / Case Library
-
-File name:
+Recommended window:
 
 ```text
-github-assets/01-home-case-library.png
+Full screen desktop
 ```
 
-Capture:
-- Sentinel Assurance Platform header
-- v0.4/v0.6 console card
-- Sample Case Library
-
-### 2. IT Metrics Examiner Output
-
-File name:
+Hard refresh before screenshots:
 
 ```text
-github-assets/02-it-metrics-output.png
+Ctrl + Shift + R
 ```
 
-Steps:
-- Select IT Metrics Examiner
-- Click Run Examiner Review
-- Capture assurance score, rating, severity distribution, and first finding
+## Screenshot sequence
 
-### 3. Vendor & Privacy Examiner Output
+### 1. Final Room
 
-File name:
+Show:
+- Edition
+- Status
+- Version
+- Positioning
+- One-liner
+- Capability Stack
+
+Filename:
 
 ```text
-github-assets/03-vendor-privacy-output.png
+01-final-room.png
 ```
 
-Steps:
-- Select Vendor & Privacy Examiner
-- Click Run Examiner Review
-- Capture evidence gaps and findings
+### 2. Launch Room
 
-### 4. SDLC & AI Governance Examiner Output
+Show:
+- Launch readiness
+- Product positioning
+- scope boundaries
+- pilot offer
 
-File name:
+Filename:
 
 ```text
-github-assets/04-sdlc-ai-output.png
+02-launch-room.png
 ```
 
-Steps:
-- Select SDLC & AI Governance Examiner
-- Click Run Examiner Review
-- Capture AI governance finding
+### 3. Demo Room
 
-### 5. HTML Report
+Show:
+- demo readiness
+- buyer value matrix
+- demo flow
+- objections
+- pilot offer
 
-File name:
+Filename:
 
 ```text
-github-assets/05-html-report.png
+03-demo-room.png
 ```
 
-Steps:
-- Click Download HTML Report
-- Open downloaded HTML file in browser
-- Capture report top section and first finding
+### 4. Control Atlas
 
-## Screenshot quality rules
+Show:
+- control ID
+- control objective
+- coverage score
+- missing evidence
+- challenge questions
 
-- Use full browser width
-- Hide personal bookmarks if possible
-- Avoid showing unrelated desktop content
-- Use consistent zoom
-- Save PNG files only
+Filename:
+
+```text
+04-control-atlas.png
+```
+
+### 5. Evidence Requests
+
+Show:
+- request-ready evidence asks
+- preferred artifacts
+- validation test
+- closure readiness
+
+Filename:
+
+```text
+05-evidence-requests.png
+```
+
+### 6. Board Pack
+
+Show:
+- executive narrative
+- board questions
+- management response prompts
+- 30-day action plan
+
+Filename:
+
+```text
+06-board-pack.png
+```
+
+### 7. Delivery Kit
+
+Show:
+- delivery readiness score
+- checklist
+- follow-up note preview
+
+Filename:
+
+```text
+07-delivery-kit.png
+```
+
+### 8. Portfolio
+
+Show:
+- saved reviews
+- control concentration
+- risk domains
+
+Filename:
+
+```text
+08-portfolio-dashboard.png
+```
+
+### 9. Command Center
+
+Show:
+- remediation register
+- owner
+- target date
+- management response
+- closure evidence
+- validation notes
+
+Filename:
+
+```text
+09-command-center.png
+```
