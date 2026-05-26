@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 const cases: Record<string, any> = {
   "IT Metrics Examiner": {
     organization: "Sample Tier-1 Bank",
@@ -200,7 +202,7 @@ export default function Home() {
     setResult(null);
     try {
       const payload = JSON.parse(input);
-      const response = await fetch("http://localhost:8000/api/analyze", {
+      const response = await fetch(`${API_BASE}/api/analyze`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
@@ -289,7 +291,7 @@ export default function Home() {
   async function downloadHtmlReport() {
     try {
       const payload = JSON.parse(input);
-      const response = await fetch("http://localhost:8000/api/report-html", {
+      const response = await fetch(`${API_BASE}/api/report-html`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
@@ -381,7 +383,7 @@ export default function Home() {
               {history.map((h, idx) => (
                 <div key={idx} className="historyRow">
                   <strong>{h.evidence_type}</strong>
-                  <span>{h.rating} Â· {h.score}/100 Â· {h.findings} findings</span>
+                  <span>{h.rating} Ã‚Â· {h.score}/100 Ã‚Â· {h.findings} findings</span>
                   <em>{new Date(h.timestamp).toLocaleString()}</em>
                 </div>
               ))}

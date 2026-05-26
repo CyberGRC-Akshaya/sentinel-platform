@@ -228,3 +228,19 @@ Sentinel supports assurance review and professional judgment. It does not replac
 
 ![HTML Examiner Report](github-assets/05-html-report.png)
 
+
+
+---
+
+## Public Demo URLs
+
+Update these after deployment:
+
+| Asset | URL |
+|---|---|
+| Landing Page | `TBD` |
+| Frontend Demo | `TBD` |
+| Backend Health | `TBD/api/health` |
+
+---
+
