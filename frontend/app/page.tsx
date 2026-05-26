@@ -16,14 +16,18 @@ const cases: Record<string, any> = {
         content: "The ITSC deck reported 150 delivered emails. KnowBe4 source export shows denominator changed to 152. Screenshot-only evidence was retained. Metric owner stated the number was corrected later. No reviewer approval or reconciliation is attached.",
         source_system: "KnowBe4 / ITSC Deck",
         owner: "IT GRC",
-        reporting_period: "Q4"
+        reporting_period: "Q4",
+        evidence_date: "",
+        control_reference: ""
       },
       {
         title: "RCSA Control Effectiveness Metric",
         content: "The reported value was presented as quarterly, but calculation logic appears cumulative year-to-date. The metric narrative says effective and green but does not show test procedure, sample basis, or reviewer approval.",
         source_system: "RCSA Tracker",
         owner: "Risk Management",
-        reporting_period: "Q3"
+        reporting_period: "Q3",
+        evidence_date: "",
+        control_reference: ""
       }
     ]
   },
@@ -38,7 +42,9 @@ const cases: Record<string, any> = {
         content: "Vendor provided SOC 2 Type II report. Vendor processes customer data and NPI. Evidence does not include data flow, retention description, bridge letter, subservice organization review, DPA, or CUEC analysis.",
         source_system: "Vendor Portal",
         owner: "TPRM",
-        reporting_period: "Annual Review"
+        reporting_period: "Annual Review",
+        evidence_date: "",
+        control_reference: ""
       }
     ]
   },
@@ -53,7 +59,9 @@ const cases: Record<string, any> = {
         content: "Release notes mention AI assistant functionality and production rollout. Evidence includes release summary but no AI inventory entry, risk tier, approval record, security gate, change record, risk acceptance, monitoring plan, or incident escalation logic.",
         source_system: "DevOps Release Tracker",
         owner: "Application Owner",
-        reporting_period: "Release 2026.05"
+        reporting_period: "Release 2026.05",
+        evidence_date: "",
+        control_reference: ""
       }
     ]
   },
@@ -68,7 +76,9 @@ const cases: Record<string, any> = {
         content: "IAM evidence references customer access, authentication, MFA, and access review activity. Evidence does not show full approval trail, risk-based exception handling, periodic review results, issue remediation, or closure evidence.",
         source_system: "IAM Review Tracker",
         owner: "IAM Governance",
-        reporting_period: "Quarterly Review"
+        reporting_period: "Quarterly Review",
+        evidence_date: "",
+        control_reference: ""
       }
     ]
   }
@@ -92,7 +102,7 @@ export default function Home() {
   const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("sentinel-v2-review-history");
+    const saved = localStorage.getItem("sentinel-v21-review-history");
     if (saved) {
       try { setHistory(JSON.parse(saved)); } catch { setHistory([]); }
     }
@@ -101,7 +111,7 @@ export default function Home() {
   function saveHistory(entry: any) {
     const next = [entry, ...history].slice(0, 10);
     setHistory(next);
-    localStorage.setItem("sentinel-v2-review-history", JSON.stringify(next));
+    localStorage.setItem("sentinel-v21-review-history", JSON.stringify(next));
   }
 
   function loadCase(name: string) {
@@ -118,9 +128,32 @@ export default function Home() {
       content: text.slice(0, 25000),
       source_system: "Uploaded File",
       owner: "Evidence Submitter",
-      reporting_period: "Uploaded Review"
+      reporting_period: "Uploaded Review",
+      artifact_type: fileName.toLowerCase().endsWith(".md") ? "Markdown Evidence Note" : "Text Evidence Note",
+      evidence_date: "",
+      control_reference: ""
     }];
     return payload;
+  }
+
+  function smartSplitCsv(line: string) {
+    const result: string[] = [];
+    let current = "";
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === "," && !inQuotes) {
+        result.push(current.trim().replace(/^"|"$/g, ""));
+        current = "";
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim().replace(/^"|"$/g, ""));
+    return result;
   }
 
   function parseCsvToPayload(fileName: string, text: string) {
@@ -130,20 +163,23 @@ export default function Home() {
 
     if (lines.length === 0) return payload;
 
-    const headers = lines[0].split(",").map((h) => h.trim().replace(/^"|"$/g, ""));
-    const rows = lines.slice(1).slice(0, 25);
+    const headers = smartSplitCsv(lines[0]).map((h) => h.trim());
+    const rows = lines.slice(1).slice(0, 50);
 
     payload.items = rows.map((line, index) => {
-      const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
+      const cols = smartSplitCsv(line);
       const obj: Record<string, string> = {};
       headers.forEach((h, i) => { obj[h || `Column_${i + 1}`] = cols[i] || ""; });
 
       return {
         title: obj.title || obj.Title || obj.name || obj.Name || `CSV Evidence Row ${index + 1}`,
-        content: JSON.stringify(obj),
-        source_system: obj.source_system || obj.Source_System || obj.Source || "Uploaded CSV",
+        content: obj.content || obj.Content || obj.description || obj.Description || JSON.stringify(obj),
+        source_system: obj.source_system || obj.Source_System || obj.Source || obj.source || "Uploaded CSV",
         owner: obj.owner || obj.Owner || "Evidence Submitter",
-        reporting_period: obj.reporting_period || obj.Reporting_Period || "Uploaded Review"
+        reporting_period: obj.reporting_period || obj.Reporting_Period || obj.period || "Uploaded Review",
+        artifact_type: obj.artifact_type || obj.Artifact_Type || "CSV Evidence Row",
+        evidence_date: obj.evidence_date || obj.Evidence_Date || obj.date || "",
+        control_reference: obj.control_reference || obj.Control_Reference || obj.control || ""
       };
     });
 
@@ -169,7 +205,10 @@ export default function Home() {
             content: typeof item === "string" ? item : JSON.stringify(item),
             source_system: item.source_system || item.source || "Uploaded JSON",
             owner: item.owner || "Evidence Submitter",
-            reporting_period: item.reporting_period || "Uploaded Review"
+            reporting_period: item.reporting_period || "Uploaded Review",
+            artifact_type: item.artifact_type || "JSON Evidence Item",
+            evidence_date: item.evidence_date || "",
+            control_reference: item.control_reference || ""
           }));
           setInput(JSON.stringify(payload, null, 2));
         } else {
@@ -206,6 +245,8 @@ export default function Home() {
         evidence_type: data.evidence_type,
         rating: data.overall_rating,
         score: data.evidence_defensibility_score,
+        intake: data.intake_coverage_score,
+        metadata: data.metadata_completeness_score,
         findings: data.total_findings
       });
     } catch (err: any) {
@@ -224,14 +265,13 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v2-evidence-report.json";
+    a.download = "sentinel-v2.1-evidence-report.json";
     a.click();
     URL.revokeObjectURL(url);
   }
 
   function downloadFindingRegisterCsv() {
     if (!result) return;
-
     const headers = [
       "Finding_ID","Severity","Severity_Rationale","Risk_Domain","Dimension","Affected_Item","Issue","Evidence_Gap",
       "Examiner_Question","Remediation","Framework_Relevance","Framework_Rationale","Expected_Evidence",
@@ -266,14 +306,13 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v2-finding-register.csv";
+    a.download = "sentinel-v2.1-finding-register.csv";
     a.click();
     URL.revokeObjectURL(url);
   }
 
   function downloadEvidenceRequestCsv() {
     if (!result) return;
-
     const headers = ["Request_ID","Priority","Owner","Evidence_Needed","Preferred_Artifacts","Status"];
     const rows = result.evidence_requests.map((req: any) => [
       req.request_id,
@@ -289,7 +328,43 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v2-evidence-request-list.csv";
+    a.download = "sentinel-v2.1-evidence-request-list.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadIntakeDiagnosticsCsv() {
+    if (!result) return;
+    const headers = [
+      "Item",
+      "Domain",
+      "Artifact_Type",
+      "Metadata_Completeness_Score",
+      "Missing_Metadata",
+      "Intake_Coverage_Score",
+      "Intake_Rating",
+      "Present_Elements",
+      "Missing_Elements"
+    ];
+
+    const rows = result.item_scorecards.map((item: any) => [
+      item.item_title,
+      item.domain,
+      item.artifact_profile?.artifact_type || "",
+      item.artifact_profile?.metadata_completeness_score || "",
+      (item.artifact_profile?.missing_metadata || []).join("; "),
+      item.intake_gap_analysis?.intake_coverage_score || "",
+      item.intake_gap_analysis?.intake_rating || "",
+      (item.intake_gap_analysis?.present_elements || []).join("; "),
+      (item.intake_gap_analysis?.missing_elements || []).join("; ")
+    ]);
+
+    const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v2.1-intake-diagnostics.csv";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -307,7 +382,7 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "sentinel-v2-evidence-defensibility-report.html";
+      a.download = "sentinel-v2.1-evidence-defensibility-report.html";
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {
@@ -323,23 +398,23 @@ export default function Home() {
 
   function clearHistory() {
     setHistory([]);
-    localStorage.removeItem("sentinel-v2-review-history");
+    localStorage.removeItem("sentinel-v21-review-history");
   }
 
   return (
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v2.0</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v2.1</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
-            Professional assurance workbench for challenging evidence quality, source lineage, calculation integrity,
-            governance traceability, data handling, review approval, and framework relevance.
+            Professional assurance workbench for evidence quality, intake coverage, metadata completeness,
+            source lineage, calculation integrity, governance traceability, and framework relevance.
           </p>
         </div>
         <div className="heroCard">
           <span>Positioning</span>
-          <strong>Not a GRC repository. A defensibility challenge layer.</strong>
+          <strong>Evidence intake intelligence + defensibility challenge layer.</strong>
           <p>Built for IT GRC, audit readiness, TPRM, privacy, SDLC, IAM, and AI governance evidence reviews.</p>
         </div>
       </section>
@@ -347,11 +422,11 @@ export default function Home() {
       <section className="caseLibrary">
         <div>
           <h2>Evidence Intake</h2>
-          <p>Upload JSON, CSV, TXT, or MD evidence. Sentinel converts it into a structured review package.</p>
+          <p>Upload JSON, CSV, TXT, or MD evidence. Sentinel converts it into a structured review package and evaluates metadata quality.</p>
         </div>
         <div className="uploadBox">
           <input type="file" accept=".json,.csv,.txt,.md" onChange={handleFileUpload} />
-          <span>Use this for client-like evidence packages, sample files, or demo artifacts.</span>
+          <span>v2.1 supports smarter CSV parsing, artifact typing, intake diagnostics, and metadata completeness scoring.</span>
         </div>
       </section>
 
@@ -378,7 +453,7 @@ export default function Home() {
       <section className="grid">
         <div className="panel">
           <h2>Review Input</h2>
-          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will produce a defensibility scorecard, findings, and evidence requests.</p>
+          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will produce scorecards, intake diagnostics, findings, and evidence requests.</p>
           <textarea value={input} onChange={(e) => setInput(e.target.value)} />
           <button className="primaryBtn" onClick={analyze}>Run Evidence Defensibility Review</button>
           {error && <div className="error">{error}</div>}
@@ -392,7 +467,7 @@ export default function Home() {
               {history.map((h, idx) => (
                 <div key={idx} className="historyRow">
                   <strong>{h.evidence_type}</strong>
-                  <span>{h.rating} · {h.score}/100 · {h.findings} findings</span>
+                  <span>{h.rating} · Defensibility {h.score}/100 · Intake {h.intake}/100 · Metadata {h.metadata}/100</span>
                   <em>{new Date(h.timestamp).toLocaleString()}</em>
                 </div>
               ))}
@@ -402,23 +477,27 @@ export default function Home() {
 
         <div className="panel">
           <h2>Defensibility Output</h2>
-          <p className="muted">Scorecards, findings, evidence requests, severity rationale, and framework mapping rationale.</p>
+          <p className="muted">Scorecards, intake diagnostics, evidence requests, severity rationale, and framework mapping rationale.</p>
 
           {!result && <div className="empty">Run a review to generate professional evidence defensibility output.</div>}
 
           {result && (
             <div>
               <div className="scoreRow">
-                <div className="scoreBox"><span>Defensibility Score</span><strong>{result.evidence_defensibility_score}/100</strong></div>
-                <div className="scoreBox"><span>Rating</span><strong>{result.overall_rating}</strong></div>
-                <div className="scoreBox"><span>Evidence Requests</span><strong>{result.evidence_requests.length}</strong></div>
+                <div className="scoreBox"><span>Defensibility</span><strong>{result.evidence_defensibility_score}/100</strong></div>
+                <div className="scoreBox"><span>Intake Coverage</span><strong>{result.intake_coverage_score}/100</strong></div>
+                <div className="scoreBox"><span>Metadata</span><strong>{result.metadata_completeness_score}/100</strong></div>
               </div>
 
               <div className="actions">
                 <button onClick={downloadJson}>JSON</button>
-                <button onClick={downloadFindingRegisterCsv}>Finding Register</button>
-                <button onClick={downloadEvidenceRequestCsv}>Evidence Requests</button>
-                <button onClick={downloadHtmlReport}>HTML Report</button>
+                <button onClick={downloadFindingRegisterCsv}>Findings</button>
+                <button onClick={downloadEvidenceRequestCsv}>Requests</button>
+                <button onClick={downloadIntakeDiagnosticsCsv}>Intake CSV</button>
+                <button onClick={downloadHtmlReport}>HTML</button>
+              </div>
+
+              <div className="actions secondaryActions">
                 <button onClick={copySummary}>Copy Summary</button>
               </div>
 
@@ -440,14 +519,28 @@ export default function Home() {
               </div>
 
               <div className="nextSteps">
-                <h3>Item Scorecards</h3>
+                <h3>Item Scorecards + Intake Diagnostics</h3>
                 {(result.item_scorecards || []).map((item: any) => (
                   <div key={item.item_title} className="scorecardItem">
                     <div className="scorecardTop">
                       <strong>{item.item_title}</strong>
                       <span>{item.score}/100 · {item.rating}</span>
                     </div>
-                    <p>{item.domain}</p>
+                    <p>{item.domain} · {item.artifact_profile?.artifact_type}</p>
+                    <div className="miniRow">
+                      <span>Metadata completeness</span>
+                      <strong>{item.artifact_profile?.metadata_completeness_score}/100</strong>
+                    </div>
+                    <div className="miniRow">
+                      <span>Intake coverage</span>
+                      <strong>{item.intake_gap_analysis?.intake_coverage_score}/100</strong>
+                    </div>
+                    {(item.artifact_profile?.missing_metadata || []).length > 0 && (
+                      <p><b>Missing metadata:</b> {(item.artifact_profile?.missing_metadata || []).join(", ")}</p>
+                    )}
+                    {(item.intake_gap_analysis?.missing_elements || []).length > 0 && (
+                      <p><b>Missing intake elements:</b> {(item.intake_gap_analysis?.missing_elements || []).join(", ")}</p>
+                    )}
                     {(item.dimensions || []).map((d: any) => (
                       <div key={d.key} className="dimensionRow">
                         <span>{d.label}</span>

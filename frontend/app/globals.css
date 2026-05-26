@@ -206,3 +206,9 @@ textarea {
   .actions { grid-template-columns: 1fr 1fr; }
   h1 { font-size: 40px; }
 }
+
+.secondaryActions {
+  grid-template-columns: 1fr !important;
+  margin-top: -6px;
+}
+
