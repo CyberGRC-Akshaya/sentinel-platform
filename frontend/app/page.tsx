@@ -84,6 +84,23 @@ const cases: Record<string, any> = {
   }
 };
 
+type RegisterRow = {
+  finding_id: string;
+  severity: string;
+  risk_domain: string;
+  affected_item: string;
+  issue: string;
+  remediation: string;
+  evidence_needed: string;
+  preferred_artifacts: string;
+  owner: string;
+  target_date: string;
+  status: string;
+  management_response: string;
+  closure_evidence: string;
+  validation_notes: string;
+};
+
 function defaultIntakePayload() {
   return {
     organization: "Imported Evidence Package",
@@ -98,11 +115,13 @@ export default function Home() {
   const [selectedCase, setSelectedCase] = useState("IT Metrics Evidence Package");
   const [input, setInput] = useState(JSON.stringify(cases["IT Metrics Evidence Package"], null, 2));
   const [result, setResult] = useState<any>(null);
+  const [registerRows, setRegisterRows] = useState<RegisterRow[]>([]);
   const [error, setError] = useState("");
   const [history, setHistory] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState("Output");
 
   useEffect(() => {
-    const saved = localStorage.getItem("sentinel-v21-review-history");
+    const saved = localStorage.getItem("sentinel-v22-review-history");
     if (saved) {
       try { setHistory(JSON.parse(saved)); } catch { setHistory([]); }
     }
@@ -111,14 +130,32 @@ export default function Home() {
   function saveHistory(entry: any) {
     const next = [entry, ...history].slice(0, 10);
     setHistory(next);
-    localStorage.setItem("sentinel-v21-review-history", JSON.stringify(next));
+    localStorage.setItem("sentinel-v22-review-history", JSON.stringify(next));
   }
 
   function loadCase(name: string) {
     setSelectedCase(name);
     setInput(JSON.stringify(cases[name], null, 2));
     setResult(null);
+    setRegisterRows([]);
+    setActiveTab("Output");
     setError("");
+  }
+
+  function smartSplitCsv(line: string) {
+    const result: string[] = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') inQuotes = !inQuotes;
+      else if (char === "," && !inQuotes) {
+        result.push(current.trim().replace(/^"|"$/g, ""));
+        current = "";
+      } else current += char;
+    }
+    result.push(current.trim().replace(/^"|"$/g, ""));
+    return result;
   }
 
   function buildTextPayload(fileName: string, text: string) {
@@ -136,31 +173,10 @@ export default function Home() {
     return payload;
   }
 
-  function smartSplitCsv(line: string) {
-    const result: string[] = [];
-    let current = "";
-    let inQuotes = false;
-
-    for (let i = 0; i < line.length; i++) {
-      const char = line[i];
-      if (char === '"') {
-        inQuotes = !inQuotes;
-      } else if (char === "," && !inQuotes) {
-        result.push(current.trim().replace(/^"|"$/g, ""));
-        current = "";
-      } else {
-        current += char;
-      }
-    }
-    result.push(current.trim().replace(/^"|"$/g, ""));
-    return result;
-  }
-
   function parseCsvToPayload(fileName: string, text: string) {
     const lines = text.split(/\r?\n/).filter(Boolean);
     const payload = defaultIntakePayload();
     payload.evidence_type = "Uploaded CSV Evidence Defensibility Review";
-
     if (lines.length === 0) return payload;
 
     const headers = smartSplitCsv(lines[0]).map((h) => h.trim());
@@ -170,7 +186,6 @@ export default function Home() {
       const cols = smartSplitCsv(line);
       const obj: Record<string, string> = {};
       headers.forEach((h, i) => { obj[h || `Column_${i + 1}`] = cols[i] || ""; });
-
       return {
         title: obj.title || obj.Title || obj.name || obj.Name || `CSV Evidence Row ${index + 1}`,
         content: obj.content || obj.Content || obj.description || obj.Description || JSON.stringify(obj),
@@ -182,7 +197,6 @@ export default function Home() {
         control_reference: obj.control_reference || obj.Control_Reference || obj.control || ""
       };
     });
-
     return payload;
   }
 
@@ -190,7 +204,6 @@ export default function Home() {
     setError("");
     const file = event.target.files?.[0];
     if (!file) return;
-
     const text = await file.text();
 
     try {
@@ -221,14 +234,36 @@ export default function Home() {
       }
       setSelectedCase("Uploaded Evidence");
       setResult(null);
+      setRegisterRows([]);
+      setActiveTab("Output");
     } catch (err: any) {
       setError("Could not parse uploaded file: " + err.message);
     }
   }
 
+  function buildRegisterRows(data: any): RegisterRow[] {
+    return (data.findings || []).map((finding: any) => ({
+      finding_id: finding.finding_id,
+      severity: finding.severity,
+      risk_domain: finding.risk_domain,
+      affected_item: finding.affected_item,
+      issue: finding.issue,
+      remediation: finding.remediation,
+      evidence_needed: finding.evidence_request?.evidence_needed || "",
+      preferred_artifacts: (finding.evidence_request?.preferred_artifacts || []).join("; "),
+      owner: finding.evidence_request?.owner || "",
+      target_date: "",
+      status: "Open",
+      management_response: "",
+      closure_evidence: "",
+      validation_notes: ""
+    }));
+  }
+
   async function analyze() {
     setError("");
     setResult(null);
+    setRegisterRows([]);
     try {
       const payload = JSON.parse(input);
       const response = await fetch(`${API_BASE}/api/analyze`, {
@@ -239,6 +274,8 @@ export default function Home() {
       if (!response.ok) throw new Error("Backend returned error: " + response.status);
       const data = await response.json();
       setResult(data);
+      setRegisterRows(buildRegisterRows(data));
+      setActiveTab("Command Center");
       saveHistory({
         timestamp: new Date().toISOString(),
         organization: data.organization,
@@ -254,97 +291,83 @@ export default function Home() {
     }
   }
 
+  function updateRegisterRow(index: number, field: keyof RegisterRow, value: string) {
+    const next = [...registerRows];
+    next[index] = { ...next[index], [field]: value };
+    setRegisterRows(next);
+  }
+
   function csvEscape(value: any) {
     const text = String(value ?? "");
     return `"${text.replace(/"/g, '""')}"`;
   }
 
-  function downloadJson() {
-    if (!result) return;
-    const blob = new Blob([JSON.stringify(result, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sentinel-v2.1-evidence-report.json";
-    a.click();
-    URL.revokeObjectURL(url);
-  }
-
-  function downloadFindingRegisterCsv() {
-    if (!result) return;
-    const headers = [
-      "Finding_ID","Severity","Severity_Rationale","Risk_Domain","Dimension","Affected_Item","Issue","Evidence_Gap",
-      "Examiner_Question","Remediation","Framework_Relevance","Framework_Rationale","Expected_Evidence",
-      "Evidence_Request_ID","Evidence_Needed","Preferred_Artifacts","Owner","Target_Date","Status","Management_Response"
-    ];
-
-    const rows = result.findings.map((finding: any) => [
-      finding.finding_id,
-      finding.severity,
-      finding.severity_rationale,
-      finding.risk_domain,
-      finding.dimension,
-      finding.affected_item,
-      finding.issue,
-      finding.evidence_gap,
-      finding.examiner_question,
-      finding.remediation,
-      (finding.framework_relevance || []).join("; "),
-      (finding.framework_mappings || []).map((m: any) => `${m.framework}: ${m.rationale}`).join(" | "),
-      (finding.framework_mappings || []).map((m: any) => `${m.framework}: ${m.evidence_expected}`).join(" | "),
-      finding.evidence_request?.request_id || "",
-      finding.evidence_request?.evidence_needed || "",
-      (finding.evidence_request?.preferred_artifacts || []).join("; "),
-      finding.evidence_request?.owner || "",
-      "",
-      "Open",
-      ""
-    ]);
-
+  function downloadCsv(fileName: string, headers: string[], rows: any[][]) {
     const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v2.1-finding-register.csv";
+    a.download = fileName;
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+  function downloadJson() {
+    if (!result) return;
+    const payload = {
+      ...result,
+      remediation_register: registerRows
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v2.2-remediation-workspace.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadRemediationRegisterCsv() {
+    const headers = [
+      "Finding_ID","Severity","Risk_Domain","Affected_Item","Issue","Remediation","Evidence_Needed",
+      "Preferred_Artifacts","Owner","Target_Date","Status","Management_Response","Closure_Evidence","Validation_Notes"
+    ];
+
+    const rows = registerRows.map((row) => [
+      row.finding_id,
+      row.severity,
+      row.risk_domain,
+      row.affected_item,
+      row.issue,
+      row.remediation,
+      row.evidence_needed,
+      row.preferred_artifacts,
+      row.owner,
+      row.target_date,
+      row.status,
+      row.management_response,
+      row.closure_evidence,
+      row.validation_notes
+    ]);
+
+    downloadCsv("sentinel-v2.2-remediation-register.csv", headers, rows);
   }
 
   function downloadEvidenceRequestCsv() {
     if (!result) return;
     const headers = ["Request_ID","Priority","Owner","Evidence_Needed","Preferred_Artifacts","Status"];
     const rows = result.evidence_requests.map((req: any) => [
-      req.request_id,
-      req.priority,
-      req.owner,
-      req.evidence_needed,
-      (req.preferred_artifacts || []).join("; "),
-      req.status
+      req.request_id, req.priority, req.owner, req.evidence_needed, (req.preferred_artifacts || []).join("; "), req.status
     ]);
-
-    const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sentinel-v2.1-evidence-request-list.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadCsv("sentinel-v2.2-evidence-request-list.csv", headers, rows);
   }
 
   function downloadIntakeDiagnosticsCsv() {
     if (!result) return;
     const headers = [
-      "Item",
-      "Domain",
-      "Artifact_Type",
-      "Metadata_Completeness_Score",
-      "Missing_Metadata",
-      "Intake_Coverage_Score",
-      "Intake_Rating",
-      "Present_Elements",
-      "Missing_Elements"
+      "Item","Domain","Artifact_Type","Metadata_Completeness_Score","Missing_Metadata",
+      "Intake_Coverage_Score","Intake_Rating","Present_Elements","Missing_Elements"
     ];
 
     const rows = result.item_scorecards.map((item: any) => [
@@ -359,14 +382,7 @@ export default function Home() {
       (item.intake_gap_analysis?.missing_elements || []).join("; ")
     ]);
 
-    const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sentinel-v2.1-intake-diagnostics.csv";
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadCsv("sentinel-v2.2-intake-diagnostics.csv", headers, rows);
   }
 
   async function downloadHtmlReport() {
@@ -382,7 +398,7 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "sentinel-v2.1-evidence-defensibility-report.html";
+      a.download = "sentinel-v2.2-evidence-defensibility-report.html";
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {
@@ -396,25 +412,35 @@ export default function Home() {
     alert("Executive summary copied.");
   }
 
+  function registerStats() {
+    const open = registerRows.filter((r) => r.status === "Open").length;
+    const inProgress = registerRows.filter((r) => r.status === "In Progress").length;
+    const riskAccepted = registerRows.filter((r) => r.status === "Risk Accepted").length;
+    const closed = registerRows.filter((r) => r.status === "Closed").length;
+    return { open, inProgress, riskAccepted, closed };
+  }
+
   function clearHistory() {
     setHistory([]);
-    localStorage.removeItem("sentinel-v21-review-history");
+    localStorage.removeItem("sentinel-v22-review-history");
   }
+
+  const stats = registerStats();
 
   return (
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v2.1</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v2.2</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
-            Professional assurance workbench for evidence quality, intake coverage, metadata completeness,
-            source lineage, calculation integrity, governance traceability, and framework relevance.
+            Professional assurance workbench with intake intelligence, defensibility scoring, evidence requests,
+            and editable remediation command center.
           </p>
         </div>
         <div className="heroCard">
           <span>Positioning</span>
-          <strong>Evidence intake intelligence + defensibility challenge layer.</strong>
+          <strong>From finding output to remediation command center.</strong>
           <p>Built for IT GRC, audit readiness, TPRM, privacy, SDLC, IAM, and AI governance evidence reviews.</p>
         </div>
       </section>
@@ -426,7 +452,7 @@ export default function Home() {
         </div>
         <div className="uploadBox">
           <input type="file" accept=".json,.csv,.txt,.md" onChange={handleFileUpload} />
-          <span>v2.1 supports smarter CSV parsing, artifact typing, intake diagnostics, and metadata completeness scoring.</span>
+          <span>v2.2 adds editable owner, target date, status, management response, closure evidence, and validation notes.</span>
         </div>
       </section>
 
@@ -453,7 +479,7 @@ export default function Home() {
       <section className="grid">
         <div className="panel">
           <h2>Review Input</h2>
-          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will produce scorecards, intake diagnostics, findings, and evidence requests.</p>
+          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will produce scorecards, findings, requests, and editable remediation register.</p>
           <textarea value={input} onChange={(e) => setInput(e.target.value)} />
           <button className="primaryBtn" onClick={analyze}>Run Evidence Defensibility Review</button>
           {error && <div className="error">{error}</div>}
@@ -477,7 +503,7 @@ export default function Home() {
 
         <div className="panel">
           <h2>Defensibility Output</h2>
-          <p className="muted">Scorecards, intake diagnostics, evidence requests, severity rationale, and framework mapping rationale.</p>
+          <p className="muted">Scorecards, intake diagnostics, evidence requests, severity rationale, and remediation command center.</p>
 
           {!result && <div className="empty">Run a review to generate professional evidence defensibility output.</div>}
 
@@ -489,115 +515,161 @@ export default function Home() {
                 <div className="scoreBox"><span>Metadata</span><strong>{result.metadata_completeness_score}/100</strong></div>
               </div>
 
+              <div className="tabBar">
+                {["Command Center", "Output", "Scorecards", "Findings"].map((tab) => (
+                  <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
+                ))}
+              </div>
+
               <div className="actions">
-                <button onClick={downloadJson}>JSON</button>
-                <button onClick={downloadFindingRegisterCsv}>Findings</button>
-                <button onClick={downloadEvidenceRequestCsv}>Requests</button>
+                <button onClick={downloadJson}>Workspace JSON</button>
+                <button onClick={downloadRemediationRegisterCsv}>Register CSV</button>
+                <button onClick={downloadEvidenceRequestCsv}>Requests CSV</button>
                 <button onClick={downloadIntakeDiagnosticsCsv}>Intake CSV</button>
-                <button onClick={downloadHtmlReport}>HTML</button>
+                <button onClick={downloadHtmlReport}>HTML Report</button>
               </div>
 
               <div className="actions secondaryActions">
-                <button onClick={copySummary}>Copy Summary</button>
+                <button onClick={copySummary}>Copy Executive Summary</button>
               </div>
 
-              <div className="summary">{result.executive_summary}</div>
-
-              <div className="miniGrid">
+              {activeTab === "Command Center" && (
                 <div>
-                  <h3>Severity Distribution</h3>
-                  {Object.entries(result.severity_distribution || {}).map(([k, v]: any) => (
-                    <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
-                  ))}
-                </div>
-                <div>
-                  <h3>Top Risk Domains</h3>
-                  {(result.top_risk_domains || []).map((x: any) => (
-                    <div key={x.domain} className="miniRow"><span>{x.domain}</span><strong>{x.count}</strong></div>
-                  ))}
-                </div>
-              </div>
+                  <div className="summary">{result.executive_summary}</div>
 
-              <div className="nextSteps">
-                <h3>Item Scorecards + Intake Diagnostics</h3>
-                {(result.item_scorecards || []).map((item: any) => (
-                  <div key={item.item_title} className="scorecardItem">
-                    <div className="scorecardTop">
-                      <strong>{item.item_title}</strong>
-                      <span>{item.score}/100 · {item.rating}</span>
+                  <div className="miniGrid">
+                    <div>
+                      <h3>Remediation Status</h3>
+                      <div className="miniRow"><span>Open</span><strong>{stats.open}</strong></div>
+                      <div className="miniRow"><span>In Progress</span><strong>{stats.inProgress}</strong></div>
+                      <div className="miniRow"><span>Risk Accepted</span><strong>{stats.riskAccepted}</strong></div>
+                      <div className="miniRow"><span>Closed</span><strong>{stats.closed}</strong></div>
                     </div>
-                    <p>{item.domain} · {item.artifact_profile?.artifact_type}</p>
-                    <div className="miniRow">
-                      <span>Metadata completeness</span>
-                      <strong>{item.artifact_profile?.metadata_completeness_score}/100</strong>
-                    </div>
-                    <div className="miniRow">
-                      <span>Intake coverage</span>
-                      <strong>{item.intake_gap_analysis?.intake_coverage_score}/100</strong>
-                    </div>
-                    {(item.artifact_profile?.missing_metadata || []).length > 0 && (
-                      <p><b>Missing metadata:</b> {(item.artifact_profile?.missing_metadata || []).join(", ")}</p>
-                    )}
-                    {(item.intake_gap_analysis?.missing_elements || []).length > 0 && (
-                      <p><b>Missing intake elements:</b> {(item.intake_gap_analysis?.missing_elements || []).join(", ")}</p>
-                    )}
-                    {(item.dimensions || []).map((d: any) => (
-                      <div key={d.key} className="dimensionRow">
-                        <span>{d.label}</span>
-                        <strong>{d.score}/100</strong>
-                        <em>{d.rating}</em>
-                      </div>
-                    ))}
-                  </div>
-                ))}
-              </div>
-
-              <div className="nextSteps">
-                <h3>Evidence Request List</h3>
-                {(result.evidence_requests || []).map((req: any) => (
-                  <div key={req.request_id} className="requestRow">
-                    <strong>{req.request_id} · {req.priority}</strong>
-                    <span>{req.evidence_needed}</span>
-                    <em>Preferred: {(req.preferred_artifacts || []).join(", ")}</em>
-                  </div>
-                ))}
-              </div>
-
-              <div className="findings">
-                {result.findings.map((finding: any) => (
-                  <div key={finding.finding_id} className="finding">
-                    <div className="findingTop">
-                      <h3>{finding.finding_id} — {finding.title}</h3>
-                      <span className={"badge " + finding.severity.toLowerCase()}>{finding.severity}</span>
-                    </div>
-                    <p><b>Risk domain:</b> {finding.risk_domain}</p>
-                    <p><b>Dimension:</b> {finding.dimension}</p>
-                    <p><b>Affected item:</b> {finding.affected_item}</p>
-                    <p><b>Issue:</b> {finding.issue}</p>
-                    <p><b>Severity rationale:</b> {finding.severity_rationale}</p>
-                    <p><b>Evidence gap:</b> {finding.evidence_gap}</p>
-                    <p><b>Examiner question:</b> {finding.examiner_question}</p>
-                    <p><b>Remediation:</b> {finding.remediation}</p>
-
-                    <div className="mappingBox">
-                      <h4>Framework Mapping Rationale</h4>
-                      {(finding.framework_mappings || []).map((m: any) => (
-                        <div key={m.framework} className="mappingRow">
-                          <strong>{m.framework}</strong>
-                          <span>{m.mapping_type}</span>
-                          <p>{m.rationale}</p>
-                          <em>Expected evidence: {m.evidence_expected}</em>
-                        </div>
+                    <div>
+                      <h3>Risk Snapshot</h3>
+                      {Object.entries(result.severity_distribution || {}).map(([k, v]: any) => (
+                        <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
                       ))}
                     </div>
                   </div>
-                ))}
-              </div>
 
-              <div className="nextSteps">
-                <h3>Recommended Next Steps</h3>
-                <ol>{(result.recommended_next_steps || []).map((step: string) => <li key={step}>{step}</li>)}</ol>
-              </div>
+                  <div className="registerPanel">
+                    <h3>Editable Remediation Register</h3>
+                    <p className="muted">Use this as a management-response workspace before exporting the final register.</p>
+                    {registerRows.map((row, index) => (
+                      <div key={row.finding_id} className="registerCard">
+                        <div className="registerHeader">
+                          <strong>{row.finding_id} · {row.severity} · {row.risk_domain}</strong>
+                          <span>{row.affected_item}</span>
+                        </div>
+                        <p><b>Issue:</b> {row.issue}</p>
+                        <p><b>Evidence needed:</b> {row.evidence_needed}</p>
+                        <div className="registerGrid">
+                          <label>Owner<input value={row.owner} onChange={(e) => updateRegisterRow(index, "owner", e.target.value)} /></label>
+                          <label>Target Date<input type="date" value={row.target_date} onChange={(e) => updateRegisterRow(index, "target_date", e.target.value)} /></label>
+                          <label>Status
+                            <select value={row.status} onChange={(e) => updateRegisterRow(index, "status", e.target.value)}>
+                              <option>Open</option>
+                              <option>In Progress</option>
+                              <option>Pending Evidence</option>
+                              <option>Risk Accepted</option>
+                              <option>Closed</option>
+                            </select>
+                          </label>
+                        </div>
+                        <label>Management Response
+                          <textarea className="smallText" value={row.management_response} onChange={(e) => updateRegisterRow(index, "management_response", e.target.value)} />
+                        </label>
+                        <label>Closure Evidence
+                          <textarea className="smallText" value={row.closure_evidence} onChange={(e) => updateRegisterRow(index, "closure_evidence", e.target.value)} />
+                        </label>
+                        <label>Validation Notes
+                          <textarea className="smallText" value={row.validation_notes} onChange={(e) => updateRegisterRow(index, "validation_notes", e.target.value)} />
+                        </label>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "Output" && (
+                <div>
+                  <div className="summary">{result.executive_summary}</div>
+                  <div className="miniGrid">
+                    <div>
+                      <h3>Severity Distribution</h3>
+                      {Object.entries(result.severity_distribution || {}).map(([k, v]: any) => (
+                        <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
+                      ))}
+                    </div>
+                    <div>
+                      <h3>Top Risk Domains</h3>
+                      {(result.top_risk_domains || []).map((x: any) => (
+                        <div key={x.domain} className="miniRow"><span>{x.domain}</span><strong>{x.count}</strong></div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="nextSteps">
+                    <h3>Recommended Next Steps</h3>
+                    <ol>{(result.recommended_next_steps || []).map((step: string) => <li key={step}>{step}</li>)}</ol>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "Scorecards" && (
+                <div className="nextSteps">
+                  <h3>Item Scorecards + Intake Diagnostics</h3>
+                  {(result.item_scorecards || []).map((item: any) => (
+                    <div key={item.item_title} className="scorecardItem">
+                      <div className="scorecardTop">
+                        <strong>{item.item_title}</strong>
+                        <span>{item.score}/100 · {item.rating}</span>
+                      </div>
+                      <p>{item.domain} · {item.artifact_profile?.artifact_type}</p>
+                      <div className="miniRow"><span>Metadata completeness</span><strong>{item.artifact_profile?.metadata_completeness_score}/100</strong></div>
+                      <div className="miniRow"><span>Intake coverage</span><strong>{item.intake_gap_analysis?.intake_coverage_score}/100</strong></div>
+                      {(item.artifact_profile?.missing_metadata || []).length > 0 && <p><b>Missing metadata:</b> {(item.artifact_profile?.missing_metadata || []).join(", ")}</p>}
+                      {(item.intake_gap_analysis?.missing_elements || []).length > 0 && <p><b>Missing intake elements:</b> {(item.intake_gap_analysis?.missing_elements || []).join(", ")}</p>}
+                      {(item.dimensions || []).map((d: any) => (
+                        <div key={d.key} className="dimensionRow"><span>{d.label}</span><strong>{d.score}/100</strong><em>{d.rating}</em></div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {activeTab === "Findings" && (
+                <div className="findings">
+                  {result.findings.map((finding: any) => (
+                    <div key={finding.finding_id} className="finding">
+                      <div className="findingTop">
+                        <h3>{finding.finding_id} — {finding.title}</h3>
+                        <span className={"badge " + finding.severity.toLowerCase()}>{finding.severity}</span>
+                      </div>
+                      <p><b>Risk domain:</b> {finding.risk_domain}</p>
+                      <p><b>Dimension:</b> {finding.dimension}</p>
+                      <p><b>Affected item:</b> {finding.affected_item}</p>
+                      <p><b>Issue:</b> {finding.issue}</p>
+                      <p><b>Severity rationale:</b> {finding.severity_rationale}</p>
+                      <p><b>Evidence gap:</b> {finding.evidence_gap}</p>
+                      <p><b>Examiner question:</b> {finding.examiner_question}</p>
+                      <p><b>Remediation:</b> {finding.remediation}</p>
+
+                      <div className="mappingBox">
+                        <h4>Framework Mapping Rationale</h4>
+                        {(finding.framework_mappings || []).map((m: any) => (
+                          <div key={m.framework} className="mappingRow">
+                            <strong>{m.framework}</strong>
+                            <span>{m.mapping_type}</span>
+                            <p>{m.rationale}</p>
+                            <em>Expected evidence: {m.evidence_expected}</em>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
         </div>

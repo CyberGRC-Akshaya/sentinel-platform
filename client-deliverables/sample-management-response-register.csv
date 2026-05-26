@@ -1,0 +1,3 @@
+Finding_ID,Owner,Target_Date,Status,Management_Response,Closure_Evidence,Validation_Notes
+SEN-001,IT GRC,2026-06-15,In Progress,"Management will provide source export and denominator reconciliation.","Pending KnowBe4 export and ITSC tie-out.","Reviewer to validate denominator consistency after evidence receipt."
+SEN-002,Risk Management,2026-06-20,Pending Evidence,"Metric definition will be clarified to distinguish quarterly vs cumulative reporting.","Pending revised metric definition and RCSA calculation workbook.","Validate against committee reporting deck."
