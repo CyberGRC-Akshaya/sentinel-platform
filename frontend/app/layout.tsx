@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Sentinel Evidence Defensibility Workbench",
-  description: "Evidence defensibility, review vault, remediation register, and portfolio command center by Eye On Bits Pvt Ltd.",
+  description: "Evidence defensibility, control atlas mapping, review vault, remediation register, and portfolio command center by Eye On Bits Pvt Ltd.",
 };
 
 export default function RootLayout({

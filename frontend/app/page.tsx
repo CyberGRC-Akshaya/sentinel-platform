@@ -17,8 +17,7 @@ const cases: Record<string, any> = {
         source_system: "KnowBe4 / ITSC Deck",
         owner: "IT GRC",
         reporting_period: "Q4",
-        evidence_date: "",
-        control_reference: ""
+        artifact_type: "Metric Evidence"
       },
       {
         title: "RCSA Control Effectiveness Metric",
@@ -26,8 +25,7 @@ const cases: Record<string, any> = {
         source_system: "RCSA Tracker",
         owner: "Risk Management",
         reporting_period: "Q3",
-        evidence_date: "",
-        control_reference: ""
+        artifact_type: "Metric Evidence"
       }
     ]
   },
@@ -43,8 +41,7 @@ const cases: Record<string, any> = {
         source_system: "Vendor Portal",
         owner: "TPRM",
         reporting_period: "Annual Review",
-        evidence_date: "",
-        control_reference: ""
+        artifact_type: "SOC 2 / Vendor Evidence"
       }
     ]
   },
@@ -60,8 +57,7 @@ const cases: Record<string, any> = {
         source_system: "DevOps Release Tracker",
         owner: "Application Owner",
         reporting_period: "Release 2026.05",
-        evidence_date: "",
-        control_reference: ""
+        artifact_type: "AI Release Evidence"
       }
     ]
   }
@@ -71,6 +67,7 @@ type RegisterRow = {
   finding_id: string;
   severity: string;
   risk_domain: string;
+  control_atlas_ids?: string;
   affected_item: string;
   issue: string;
   remediation: string;
@@ -100,11 +97,11 @@ export default function Home() {
   const [result, setResult] = useState<any>(null);
   const [registerRows, setRegisterRows] = useState<RegisterRow[]>([]);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [portfolio, setPortfolio] = useState<any>(null);
   const [currentReviewId, setCurrentReviewId] = useState("");
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("Workbench");
   const [saveMessage, setSaveMessage] = useState("");
-  const [portfolio, setPortfolio] = useState<any>(null);
 
   useEffect(() => {
     loadVault();
@@ -114,23 +111,16 @@ export default function Home() {
   async function loadVault() {
     try {
       const response = await fetch(`${API_BASE}/api/reviews`);
-      if (response.ok) {
-        const data = await response.json();
-        setReviews(data);
-      }
+      if (response.ok) setReviews(await response.json());
     } catch {
       setReviews([]);
     }
   }
 
-
   async function loadPortfolio() {
     try {
       const response = await fetch(`${API_BASE}/api/portfolio`);
-      if (response.ok) {
-        const data = await response.json();
-        setPortfolio(data);
-      }
+      if (response.ok) setPortfolio(await response.json());
     } catch {
       setPortfolio(null);
     }
@@ -149,33 +139,6 @@ export default function Home() {
     } catch (err: any) {
       setError(err.message || "Could not seed demo reviews.");
     }
-  }
-
-  async function downloadPortfolioReport() {
-    try {
-      const response = await fetch(`${API_BASE}/api/portfolio/report-html`);
-      const reportHtml = await response.text();
-      const blob = new Blob([reportHtml], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "sentinel-v4-portfolio-command-center-report.html";
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      setError("Could not generate portfolio report.");
-    }
-  }
-
-  function downloadPortfolioJson() {
-    if (!portfolio) return;
-    const blob = new Blob([JSON.stringify(portfolio, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sentinel-v4-portfolio-snapshot.json";
-    a.click();
-    URL.revokeObjectURL(url);
   }
 
   function loadCase(name: string) {
@@ -225,10 +188,8 @@ export default function Home() {
     const payload = defaultIntakePayload();
     payload.evidence_type = "Uploaded CSV Evidence Defensibility Review";
     if (lines.length === 0) return payload;
-
     const headers = smartSplitCsv(lines[0]).map((h) => h.trim());
     const rows = lines.slice(1).slice(0, 50);
-
     payload.items = rows.map((line, index) => {
       const cols = smartSplitCsv(line);
       const obj: Record<string, string> = {};
@@ -252,13 +213,11 @@ export default function Home() {
     const file = event.target.files?.[0];
     if (!file) return;
     const text = await file.text();
-
     try {
       if (file.name.toLowerCase().endsWith(".json")) {
         const parsed = JSON.parse(text);
-        if (parsed.organization && parsed.items) {
-          setInput(JSON.stringify(parsed, null, 2));
-        } else if (Array.isArray(parsed)) {
+        if (parsed.organization && parsed.items) setInput(JSON.stringify(parsed, null, 2));
+        else if (Array.isArray(parsed)) {
           const payload = defaultIntakePayload();
           payload.items = parsed.map((item: any, index: number) => ({
             title: item.title || item.name || `JSON Evidence Item ${index + 1}`,
@@ -271,14 +230,9 @@ export default function Home() {
             control_reference: item.control_reference || ""
           }));
           setInput(JSON.stringify(payload, null, 2));
-        } else {
-          setInput(JSON.stringify(buildTextPayload(file.name, JSON.stringify(parsed)), null, 2));
-        }
-      } else if (file.name.toLowerCase().endsWith(".csv")) {
-        setInput(JSON.stringify(parseCsvToPayload(file.name, text), null, 2));
-      } else {
-        setInput(JSON.stringify(buildTextPayload(file.name, text), null, 2));
-      }
+        } else setInput(JSON.stringify(buildTextPayload(file.name, JSON.stringify(parsed)), null, 2));
+      } else if (file.name.toLowerCase().endsWith(".csv")) setInput(JSON.stringify(parseCsvToPayload(file.name, text), null, 2));
+      else setInput(JSON.stringify(buildTextPayload(file.name, text), null, 2));
       setSelectedCase("Uploaded Evidence");
       setResult(null);
       setRegisterRows([]);
@@ -296,11 +250,7 @@ export default function Home() {
     setSaveMessage("");
     try {
       const payload = JSON.parse(input);
-      const response = await fetch(`${API_BASE}/api/reviews/analyze-save`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(payload)
-      });
+      const response = await fetch(`${API_BASE}/api/reviews/analyze-save`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) });
       if (!response.ok) throw new Error("Backend returned error: " + response.status);
       const data = await response.json();
       setResult(data);
@@ -351,19 +301,12 @@ export default function Home() {
       setSaveMessage("Run a saved review first.");
       return;
     }
-
-    const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/register`, {
-      method: "PUT",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({ rows: registerRows })
-    });
-
+    const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/register`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ rows: registerRows }) });
     if (response.ok) {
       setSaveMessage("Register saved to review vault.");
       await loadVault();
-    } else {
-      setSaveMessage("Register save failed.");
-    }
+      await loadPortfolio();
+    } else setSaveMessage("Register save failed.");
   }
 
   function updateRegisterRow(index: number, field: keyof RegisterRow, value: string) {
@@ -395,66 +338,65 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v3-review-vault-workspace.json";
+    a.download = "sentinel-v5-control-atlas-workspace.json";
     a.click();
     URL.revokeObjectURL(url);
   }
 
   function downloadRegisterCsv() {
-    const headers = [
-      "Finding_ID","Severity","Risk_Domain","Affected_Item","Issue","Remediation","Evidence_Needed",
-      "Preferred_Artifacts","Owner","Target_Date","Status","Management_Response","Closure_Evidence","Validation_Notes"
-    ];
-
-    const rows = registerRows.map((row) => [
-      row.finding_id,row.severity,row.risk_domain,row.affected_item,row.issue,row.remediation,row.evidence_needed,
-      row.preferred_artifacts,row.owner,row.target_date,row.status,row.management_response,row.closure_evidence,row.validation_notes
-    ]);
-
-    downloadCsv("sentinel-v3-remediation-register.csv", headers, rows);
+    const headers = ["Finding_ID","Severity","Risk_Domain","Control_Atlas_IDs","Affected_Item","Issue","Remediation","Evidence_Needed","Preferred_Artifacts","Owner","Target_Date","Status","Management_Response","Closure_Evidence","Validation_Notes"];
+    const rows = registerRows.map((row) => [row.finding_id,row.severity,row.risk_domain,row.control_atlas_ids || "",row.affected_item,row.issue,row.remediation,row.evidence_needed,row.preferred_artifacts,row.owner,row.target_date,row.status,row.management_response,row.closure_evidence,row.validation_notes]);
+    downloadCsv("sentinel-v5-control-atlas-register.csv", headers, rows);
   }
 
-  function downloadIntakeCsv() {
+  function downloadControlAtlasCsv() {
     if (!result) return;
-    const headers = ["Item","Domain","Artifact_Type","Metadata_Score","Missing_Metadata","Intake_Score","Intake_Rating","Missing_Elements"];
-    const rows = result.item_scorecards.map((item: any) => [
-      item.item_title,
-      item.domain,
-      item.artifact_profile?.artifact_type || "",
-      item.artifact_profile?.metadata_completeness_score || "",
-      (item.artifact_profile?.missing_metadata || []).join("; "),
-      item.intake_gap_analysis?.intake_coverage_score || "",
-      item.intake_gap_analysis?.intake_rating || "",
-      (item.intake_gap_analysis?.missing_elements || []).join("; ")
-    ]);
-    downloadCsv("sentinel-v3-intake-diagnostics.csv", headers, rows);
+    const headers = ["Item","Domain","Control_ID","Control_Theme","Coverage","Rating","Missing_Evidence","Challenge_Questions"];
+    const rows: any[][] = [];
+    result.item_scorecards.forEach((item: any) => {
+      (item.control_atlas_mapping?.mapped_controls || []).forEach((control: any) => {
+        rows.push([item.item_title, item.domain, control.control_id, control.control_theme, control.control_coverage_score, control.control_rating, (control.missing_evidence || []).join("; "), (control.challenge_questions || []).join("; ")]);
+      });
+    });
+    downloadCsv("sentinel-v5-control-atlas-mapping.csv", headers, rows);
+  }
+
+  function downloadPortfolioJson() {
+    if (!portfolio) return;
+    const blob = new Blob([JSON.stringify(portfolio, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v5-portfolio-snapshot.json";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function downloadHtmlReport() {
     if (!result) return;
-    try {
-      let response;
-      if (currentReviewId) {
-        response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/report-html`);
-      } else {
-        const payload = JSON.parse(input);
-        response = await fetch(`${API_BASE}/api/report-html`, {
-          method: "POST",
-          headers: {"Content-Type": "application/json"},
-          body: JSON.stringify(payload)
-        });
-      }
-      const reportHtml = await response.text();
-      const blob = new Blob([reportHtml], { type: "text/html" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "sentinel-v3-evidence-defensibility-report.html";
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (err: any) {
-      setError(err.message || "Could not generate HTML report.");
-    }
+    const endpoint = currentReviewId ? `${API_BASE}/api/reviews/${currentReviewId}/report-html` : `${API_BASE}/api/report-html`;
+    const options = currentReviewId ? undefined : { method: "POST", headers: {"Content-Type": "application/json"}, body: input };
+    const response = await fetch(endpoint, options as any);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v5-control-atlas-report.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function downloadPortfolioReport() {
+    const response = await fetch(`${API_BASE}/api/portfolio/report-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v5-portfolio-control-atlas-report.html";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   async function copySummary() {
@@ -478,28 +420,27 @@ export default function Home() {
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v4.0</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v5.0</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
-            Professional assurance workbench with persistent review vault, portfolio analytics, executive dashboard,
-            remediation register, and saved report workspace.
+            Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, challenge question bank, remediation register, and executive reporting.
           </p>
         </div>
         <div className="heroCard">
           <span>Major Upgrade</span>
-          <strong>Portfolio Command Center + Persistent Review Vault.</strong>
-          <p>Run reviews, save them locally, track remediation, view portfolio trends, seed demo reviews, and export executive portfolio reports.</p>
+          <strong>Control Atlas Mapper + Assurance Question Bank.</strong>
+          <p>Sentinel now maps evidence to control themes, expected artifacts, missing control evidence, and examiner-style challenge questions.</p>
         </div>
       </section>
 
       <section className="caseLibrary">
         <div>
           <h2>Evidence Intake</h2>
-          <p>Upload JSON, CSV, TXT, or MD evidence. Sentinel converts it into a structured review package.</p>
+          <p>Upload JSON, CSV, TXT, or MD evidence. Sentinel converts it into a structured review package and maps it to the Control Atlas.</p>
         </div>
         <div className="uploadBox">
           <input type="file" accept=".json,.csv,.txt,.md" onChange={handleFileUpload} />
-          <span>v3.0 stores saved reviews in a local SQLite vault under backend/data.</span>
+          <span>v5.0 adds control objective coverage, missing control evidence, and challenge questions.</span>
         </div>
       </section>
 
@@ -553,20 +494,20 @@ export default function Home() {
 
         <div className="panel">
           <h2>Saved Review Workspace</h2>
-          <p className="muted">Scorecards, intake diagnostics, evidence requests, and persistent remediation register.</p>
+          <p className="muted">Control Atlas mappings, scorecards, evidence requests, and persistent remediation register.</p>
 
-          {!result && <div className="empty">Run a review or load one from the Review Vault.</div>}
+          {!result && <div className="empty">Run a review, load one from the Review Vault, or seed demo reviews from Portfolio.</div>}
 
           {result && (
             <div>
               <div className="scoreRow">
                 <div className="scoreBox"><span>Defensibility</span><strong>{result.evidence_defensibility_score}/100</strong></div>
-                <div className="scoreBox"><span>Intake Coverage</span><strong>{result.intake_coverage_score}/100</strong></div>
+                <div className="scoreBox"><span>Control Atlas</span><strong>{result.control_atlas_coverage_score}/100</strong></div>
                 <div className="scoreBox"><span>Metadata</span><strong>{result.metadata_completeness_score}/100</strong></div>
               </div>
 
               <div className="tabBar">
-                {["Portfolio", "Command Center", "Output", "Scorecards", "Findings"].map((tab) => (
+                {["Portfolio", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
                   <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
                 ))}
               </div>
@@ -575,7 +516,7 @@ export default function Home() {
                 <button onClick={saveRegister}>Save Register</button>
                 <button onClick={downloadWorkspaceJson}>Workspace JSON</button>
                 <button onClick={downloadRegisterCsv}>Register CSV</button>
-                <button onClick={downloadIntakeCsv}>Intake CSV</button>
+                <button onClick={downloadControlAtlasCsv}>Control CSV</button>
                 <button onClick={downloadHtmlReport}>HTML Report</button>
               </div>
 
@@ -583,23 +524,17 @@ export default function Home() {
                 <button onClick={copySummary}>Copy Executive Summary</button>
               </div>
 
-
               {activeTab === "Portfolio" && (
                 <div>
-                  <div className="summary">
-                    Portfolio Command Center summarizes saved evidence reviews, recurring domains, severity mix, and remediation status across the local review vault.
-                  </div>
-
+                  <div className="summary">Portfolio Command Center summarizes saved evidence reviews, recurring domains, severity mix, remediation status, and Control Atlas concentration.</div>
                   <div className="actions">
                     <button onClick={loadPortfolio}>Refresh Portfolio</button>
                     <button onClick={seedDemoReviews}>Seed Demo Reviews</button>
                     <button onClick={downloadPortfolioJson}>Portfolio JSON</button>
-                    <button onClick={downloadPortfolioReport}>Portfolio HTML Report</button>
+                    <button onClick={downloadPortfolioReport}>Portfolio HTML</button>
                     <button onClick={loadVault}>Refresh Vault</button>
                   </div>
-
-                  {!portfolio && <div className="empty">No portfolio snapshot loaded yet. Refresh portfolio or seed demo reviews.</div>}
-
+                  {!portfolio && <div className="empty">No portfolio snapshot loaded yet.</div>}
                   {portfolio && (
                     <div>
                       <div className="scoreRow">
@@ -607,53 +542,24 @@ export default function Home() {
                         <div className="scoreBox"><span>Avg Defensibility</span><strong>{portfolio.average_defensibility_score}/100</strong></div>
                         <div className="scoreBox"><span>Open Items</span><strong>{portfolio.open_register_items}</strong></div>
                       </div>
-
                       <div className="miniGrid">
                         <div>
-                          <h3>Portfolio Quality</h3>
-                          <div className="miniRow"><span>Average Intake</span><strong>{portfolio.average_intake_score}/100</strong></div>
-                          <div className="miniRow"><span>Average Metadata</span><strong>{portfolio.average_metadata_score}/100</strong></div>
-                          <div className="miniRow"><span>Total Findings</span><strong>{portfolio.total_findings}</strong></div>
-                          <div className="miniRow"><span>High/Critical Findings</span><strong>{portfolio.high_or_critical_findings}</strong></div>
+                          <h3>Control Atlas Concentration</h3>
+                          {Object.entries(portfolio.control_atlas_distribution || {}).map(([k, v]: any) => (
+                            <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
+                          ))}
                         </div>
-                        <div>
-                          <h3>Remediation Portfolio</h3>
-                          <div className="miniRow"><span>Open</span><strong>{portfolio.open_register_items}</strong></div>
-                          <div className="miniRow"><span>In Progress</span><strong>{portfolio.in_progress_register_items}</strong></div>
-                          <div className="miniRow"><span>Closed</span><strong>{portfolio.closed_register_items}</strong></div>
-                        </div>
-                      </div>
-
-                      <div className="miniGrid">
                         <div>
                           <h3>Risk Domain Distribution</h3>
                           {Object.entries(portfolio.risk_domain_distribution || {}).map(([k, v]: any) => (
                             <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
                           ))}
                         </div>
-                        <div>
-                          <h3>Severity Distribution</h3>
-                          {Object.entries(portfolio.severity_distribution || {}).map(([k, v]: any) => (
-                            <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="registerPanel">
-                        <h3>Saved Reviews Portfolio</h3>
-                        {(portfolio.reviews || []).map((review: any) => (
-                          <div key={review.id} className="vaultRow">
-                            <strong>{review.evidence_type}</strong>
-                            <span>{review.organization} · {review.overall_rating} · {review.evidence_defensibility_score}/100 · {review.total_findings} findings</span>
-                            <em>{new Date(review.created_at).toLocaleString()}</em>
-                          </div>
-                        ))}
                       </div>
                     </div>
                   )}
                 </div>
               )}
-
 
               {activeTab === "Command Center" && (
                 <div>
@@ -668,7 +574,7 @@ export default function Home() {
                       <div className="miniRow"><span>Closed</span><strong>{stats.closed}</strong></div>
                     </div>
                     <div>
-                      <h3>Vault Metadata</h3>
+                      <h3>Review Snapshot</h3>
                       <div className="miniRow"><span>Review ID</span><strong>{currentReviewId ? currentReviewId.slice(0, 8) : "Unsaved"}</strong></div>
                       <div className="miniRow"><span>Total Findings</span><strong>{result.total_findings}</strong></div>
                       <div className="miniRow"><span>Rating</span><strong>{result.overall_rating}</strong></div>
@@ -682,7 +588,7 @@ export default function Home() {
                       <div key={row.finding_id} className="registerCard">
                         <div className="registerHeader">
                           <strong>{row.finding_id} · {row.severity} · {row.risk_domain}</strong>
-                          <span>{row.affected_item}</span>
+                          <span>Control Atlas: {row.control_atlas_ids || "Not mapped"}</span>
                         </div>
                         <p><b>Issue:</b> {row.issue}</p>
                         <p><b>Evidence needed:</b> {row.evidence_needed}</p>
@@ -691,26 +597,41 @@ export default function Home() {
                           <label>Target Date<input type="date" value={row.target_date} onChange={(e) => updateRegisterRow(index, "target_date", e.target.value)} /></label>
                           <label>Status
                             <select value={row.status} onChange={(e) => updateRegisterRow(index, "status", e.target.value)}>
-                              <option>Open</option>
-                              <option>In Progress</option>
-                              <option>Pending Evidence</option>
-                              <option>Risk Accepted</option>
-                              <option>Closed</option>
+                              <option>Open</option><option>In Progress</option><option>Pending Evidence</option><option>Risk Accepted</option><option>Closed</option>
                             </select>
                           </label>
                         </div>
-                        <label>Management Response
-                          <textarea className="smallText" value={row.management_response} onChange={(e) => updateRegisterRow(index, "management_response", e.target.value)} />
-                        </label>
-                        <label>Closure Evidence
-                          <textarea className="smallText" value={row.closure_evidence} onChange={(e) => updateRegisterRow(index, "closure_evidence", e.target.value)} />
-                        </label>
-                        <label>Validation Notes
-                          <textarea className="smallText" value={row.validation_notes} onChange={(e) => updateRegisterRow(index, "validation_notes", e.target.value)} />
-                        </label>
+                        <label>Management Response<textarea className="smallText" value={row.management_response} onChange={(e) => updateRegisterRow(index, "management_response", e.target.value)} /></label>
+                        <label>Closure Evidence<textarea className="smallText" value={row.closure_evidence} onChange={(e) => updateRegisterRow(index, "closure_evidence", e.target.value)} /></label>
+                        <label>Validation Notes<textarea className="smallText" value={row.validation_notes} onChange={(e) => updateRegisterRow(index, "validation_notes", e.target.value)} /></label>
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+
+              {activeTab === "Control Atlas" && (
+                <div className="nextSteps">
+                  <h3>Control Atlas Mapping</h3>
+                  {(result.item_scorecards || []).map((item: any) => (
+                    <div key={item.item_title} className="scorecardItem">
+                      <div className="scorecardTop">
+                        <strong>{item.item_title}</strong>
+                        <span>{item.control_atlas_mapping?.control_coverage_score}/100</span>
+                      </div>
+                      <p>{item.domain} · {item.artifact_profile?.artifact_type}</p>
+                      {(item.control_atlas_mapping?.mapped_controls || []).map((control: any) => (
+                        <div key={control.control_id} className="mappingBox">
+                          <h4>{control.control_id} · {control.control_theme}</h4>
+                          <p><b>Objective:</b> {control.control_objective}</p>
+                          <p><b>Coverage:</b> {control.control_coverage_score}/100 · {control.control_rating}</p>
+                          <p><b>Missing evidence:</b> {(control.missing_evidence || []).join(", ") || "None"}</p>
+                          <p><b>Challenge questions:</b></p>
+                          <ol>{(control.challenge_questions || []).map((q: string) => <li key={q}>{q}</li>)}</ol>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
                 </div>
               )}
 
@@ -720,39 +641,17 @@ export default function Home() {
                   <div className="miniGrid">
                     <div>
                       <h3>Severity Distribution</h3>
-                      {Object.entries(result.severity_distribution || {}).map(([k, v]: any) => (
-                        <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
-                      ))}
+                      {Object.entries(result.severity_distribution || {}).map(([k, v]: any) => <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>)}
                     </div>
                     <div>
-                      <h3>Top Risk Domains</h3>
-                      {(result.top_risk_domains || []).map((x: any) => (
-                        <div key={x.domain} className="miniRow"><span>{x.domain}</span><strong>{x.count}</strong></div>
-                      ))}
+                      <h3>Control Atlas Coverage</h3>
+                      {(result.control_atlas_coverage || []).map((x: any) => <div key={x.control_id} className="miniRow"><span>{x.control_id}</span><strong>{x.finding_count}</strong></div>)}
                     </div>
                   </div>
-                </div>
-              )}
-
-              {activeTab === "Scorecards" && (
-                <div className="nextSteps">
-                  <h3>Item Scorecards + Intake Diagnostics</h3>
-                  {(result.item_scorecards || []).map((item: any) => (
-                    <div key={item.item_title} className="scorecardItem">
-                      <div className="scorecardTop">
-                        <strong>{item.item_title}</strong>
-                        <span>{item.score}/100 · {item.rating}</span>
-                      </div>
-                      <p>{item.domain} · {item.artifact_profile?.artifact_type}</p>
-                      <div className="miniRow"><span>Metadata completeness</span><strong>{item.artifact_profile?.metadata_completeness_score}/100</strong></div>
-                      <div className="miniRow"><span>Intake coverage</span><strong>{item.intake_gap_analysis?.intake_coverage_score}/100</strong></div>
-                      {(item.artifact_profile?.missing_metadata || []).length > 0 && <p><b>Missing metadata:</b> {(item.artifact_profile?.missing_metadata || []).join(", ")}</p>}
-                      {(item.intake_gap_analysis?.missing_elements || []).length > 0 && <p><b>Missing intake elements:</b> {(item.intake_gap_analysis?.missing_elements || []).join(", ")}</p>}
-                      {(item.dimensions || []).map((d: any) => (
-                        <div key={d.key} className="dimensionRow"><span>{d.label}</span><strong>{d.score}/100</strong><em>{d.rating}</em></div>
-                      ))}
-                    </div>
-                  ))}
+                  <div className="nextSteps">
+                    <h3>Recommended Next Steps</h3>
+                    <ol>{(result.recommended_next_steps || []).map((step: string) => <li key={step}>{step}</li>)}</ol>
+                  </div>
                 </div>
               )}
 
@@ -765,6 +664,7 @@ export default function Home() {
                         <span className={"badge " + finding.severity.toLowerCase()}>{finding.severity}</span>
                       </div>
                       <p><b>Risk domain:</b> {finding.risk_domain}</p>
+                      <p><b>Control Atlas:</b> {(finding.control_atlas_ids || []).join(", ")}</p>
                       <p><b>Dimension:</b> {finding.dimension}</p>
                       <p><b>Affected item:</b> {finding.affected_item}</p>
                       <p><b>Issue:</b> {finding.issue}</p>
