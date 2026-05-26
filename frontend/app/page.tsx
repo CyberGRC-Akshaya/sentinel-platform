@@ -64,23 +64,6 @@ const cases: Record<string, any> = {
         control_reference: ""
       }
     ]
-  },
-  "IAM Authentication Evidence Package": {
-    organization: "Sample Bank IAM Program",
-    industry: "BFSI / Identity and Access",
-    evidence_type: "IAM and Authentication Evidence Defensibility Review",
-    review_objective: "Assess access governance, authentication coverage, MFA evidence, approval, periodic review, exception handling, and remediation tracking.",
-    items: [
-      {
-        title: "Customer Access and MFA Evidence",
-        content: "IAM evidence references customer access, authentication, MFA, and access review activity. Evidence does not show full approval trail, risk-based exception handling, periodic review results, issue remediation, or closure evidence.",
-        source_system: "IAM Review Tracker",
-        owner: "IAM Governance",
-        reporting_period: "Quarterly Review",
-        evidence_date: "",
-        control_reference: ""
-      }
-    ]
   }
 };
 
@@ -116,21 +99,26 @@ export default function Home() {
   const [input, setInput] = useState(JSON.stringify(cases["IT Metrics Evidence Package"], null, 2));
   const [result, setResult] = useState<any>(null);
   const [registerRows, setRegisterRows] = useState<RegisterRow[]>([]);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [currentReviewId, setCurrentReviewId] = useState("");
   const [error, setError] = useState("");
-  const [history, setHistory] = useState<any[]>([]);
-  const [activeTab, setActiveTab] = useState("Output");
+  const [activeTab, setActiveTab] = useState("Workbench");
+  const [saveMessage, setSaveMessage] = useState("");
 
   useEffect(() => {
-    const saved = localStorage.getItem("sentinel-v22-review-history");
-    if (saved) {
-      try { setHistory(JSON.parse(saved)); } catch { setHistory([]); }
-    }
+    loadVault();
   }, []);
 
-  function saveHistory(entry: any) {
-    const next = [entry, ...history].slice(0, 10);
-    setHistory(next);
-    localStorage.setItem("sentinel-v22-review-history", JSON.stringify(next));
+  async function loadVault() {
+    try {
+      const response = await fetch(`${API_BASE}/api/reviews`);
+      if (response.ok) {
+        const data = await response.json();
+        setReviews(data);
+      }
+    } catch {
+      setReviews([]);
+    }
   }
 
   function loadCase(name: string) {
@@ -138,8 +126,10 @@ export default function Home() {
     setInput(JSON.stringify(cases[name], null, 2));
     setResult(null);
     setRegisterRows([]);
-    setActiveTab("Output");
+    setCurrentReviewId("");
+    setActiveTab("Workbench");
     setError("");
+    setSaveMessage("");
   }
 
   function smartSplitCsv(line: string) {
@@ -235,38 +225,21 @@ export default function Home() {
       setSelectedCase("Uploaded Evidence");
       setResult(null);
       setRegisterRows([]);
-      setActiveTab("Output");
+      setCurrentReviewId("");
+      setActiveTab("Workbench");
     } catch (err: any) {
       setError("Could not parse uploaded file: " + err.message);
     }
   }
 
-  function buildRegisterRows(data: any): RegisterRow[] {
-    return (data.findings || []).map((finding: any) => ({
-      finding_id: finding.finding_id,
-      severity: finding.severity,
-      risk_domain: finding.risk_domain,
-      affected_item: finding.affected_item,
-      issue: finding.issue,
-      remediation: finding.remediation,
-      evidence_needed: finding.evidence_request?.evidence_needed || "",
-      preferred_artifacts: (finding.evidence_request?.preferred_artifacts || []).join("; "),
-      owner: finding.evidence_request?.owner || "",
-      target_date: "",
-      status: "Open",
-      management_response: "",
-      closure_evidence: "",
-      validation_notes: ""
-    }));
-  }
-
-  async function analyze() {
+  async function analyzeAndSave() {
     setError("");
     setResult(null);
     setRegisterRows([]);
+    setSaveMessage("");
     try {
       const payload = JSON.parse(input);
-      const response = await fetch(`${API_BASE}/api/analyze`, {
+      const response = await fetch(`${API_BASE}/api/reviews/analyze-save`, {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify(payload)
@@ -274,20 +247,63 @@ export default function Home() {
       if (!response.ok) throw new Error("Backend returned error: " + response.status);
       const data = await response.json();
       setResult(data);
-      setRegisterRows(buildRegisterRows(data));
+      setCurrentReviewId(data.review_id || "");
+      setRegisterRows(data.remediation_register || []);
       setActiveTab("Command Center");
-      saveHistory({
-        timestamp: new Date().toISOString(),
-        organization: data.organization,
-        evidence_type: data.evidence_type,
-        rating: data.overall_rating,
-        score: data.evidence_defensibility_score,
-        intake: data.intake_coverage_score,
-        metadata: data.metadata_completeness_score,
-        findings: data.total_findings
-      });
+      setSaveMessage("Review saved to vault.");
+      await loadVault();
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
+    }
+  }
+
+  async function loadSavedReview(reviewId: string) {
+    setError("");
+    try {
+      const response = await fetch(`${API_BASE}/api/reviews/${reviewId}`);
+      if (!response.ok) throw new Error("Review not found.");
+      const data = await response.json();
+      setResult(data);
+      setCurrentReviewId(reviewId);
+      setRegisterRows(data.remediation_register || []);
+      setActiveTab("Command Center");
+      setSaveMessage("Saved review loaded from vault.");
+    } catch (err: any) {
+      setError(err.message || "Could not load review.");
+    }
+  }
+
+  async function deleteSavedReview(reviewId: string) {
+    try {
+      await fetch(`${API_BASE}/api/reviews/${reviewId}`, { method: "DELETE" });
+      if (currentReviewId === reviewId) {
+        setCurrentReviewId("");
+        setResult(null);
+        setRegisterRows([]);
+      }
+      await loadVault();
+    } catch {
+      setError("Could not delete review.");
+    }
+  }
+
+  async function saveRegister() {
+    if (!currentReviewId) {
+      setSaveMessage("Run a saved review first.");
+      return;
+    }
+
+    const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/register`, {
+      method: "PUT",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({ rows: registerRows })
+    });
+
+    if (response.ok) {
+      setSaveMessage("Register saved to review vault.");
+      await loadVault();
+    } else {
+      setSaveMessage("Register save failed.");
     }
   }
 
@@ -313,63 +329,35 @@ export default function Home() {
     URL.revokeObjectURL(url);
   }
 
-  function downloadJson() {
+  function downloadWorkspaceJson() {
     if (!result) return;
-    const payload = {
-      ...result,
-      remediation_register: registerRows
-    };
+    const payload = { ...result, remediation_register: registerRows };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v2.2-remediation-workspace.json";
+    a.download = "sentinel-v3-review-vault-workspace.json";
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  function downloadRemediationRegisterCsv() {
+  function downloadRegisterCsv() {
     const headers = [
       "Finding_ID","Severity","Risk_Domain","Affected_Item","Issue","Remediation","Evidence_Needed",
       "Preferred_Artifacts","Owner","Target_Date","Status","Management_Response","Closure_Evidence","Validation_Notes"
     ];
 
     const rows = registerRows.map((row) => [
-      row.finding_id,
-      row.severity,
-      row.risk_domain,
-      row.affected_item,
-      row.issue,
-      row.remediation,
-      row.evidence_needed,
-      row.preferred_artifacts,
-      row.owner,
-      row.target_date,
-      row.status,
-      row.management_response,
-      row.closure_evidence,
-      row.validation_notes
+      row.finding_id,row.severity,row.risk_domain,row.affected_item,row.issue,row.remediation,row.evidence_needed,
+      row.preferred_artifacts,row.owner,row.target_date,row.status,row.management_response,row.closure_evidence,row.validation_notes
     ]);
 
-    downloadCsv("sentinel-v2.2-remediation-register.csv", headers, rows);
+    downloadCsv("sentinel-v3-remediation-register.csv", headers, rows);
   }
 
-  function downloadEvidenceRequestCsv() {
+  function downloadIntakeCsv() {
     if (!result) return;
-    const headers = ["Request_ID","Priority","Owner","Evidence_Needed","Preferred_Artifacts","Status"];
-    const rows = result.evidence_requests.map((req: any) => [
-      req.request_id, req.priority, req.owner, req.evidence_needed, (req.preferred_artifacts || []).join("; "), req.status
-    ]);
-    downloadCsv("sentinel-v2.2-evidence-request-list.csv", headers, rows);
-  }
-
-  function downloadIntakeDiagnosticsCsv() {
-    if (!result) return;
-    const headers = [
-      "Item","Domain","Artifact_Type","Metadata_Completeness_Score","Missing_Metadata",
-      "Intake_Coverage_Score","Intake_Rating","Present_Elements","Missing_Elements"
-    ];
-
+    const headers = ["Item","Domain","Artifact_Type","Metadata_Score","Missing_Metadata","Intake_Score","Intake_Rating","Missing_Elements"];
     const rows = result.item_scorecards.map((item: any) => [
       item.item_title,
       item.domain,
@@ -378,27 +366,31 @@ export default function Home() {
       (item.artifact_profile?.missing_metadata || []).join("; "),
       item.intake_gap_analysis?.intake_coverage_score || "",
       item.intake_gap_analysis?.intake_rating || "",
-      (item.intake_gap_analysis?.present_elements || []).join("; "),
       (item.intake_gap_analysis?.missing_elements || []).join("; ")
     ]);
-
-    downloadCsv("sentinel-v2.2-intake-diagnostics.csv", headers, rows);
+    downloadCsv("sentinel-v3-intake-diagnostics.csv", headers, rows);
   }
 
   async function downloadHtmlReport() {
+    if (!result) return;
     try {
-      const payload = JSON.parse(input);
-      const response = await fetch(`${API_BASE}/api/report-html`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify(payload)
-      });
+      let response;
+      if (currentReviewId) {
+        response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/report-html`);
+      } else {
+        const payload = JSON.parse(input);
+        response = await fetch(`${API_BASE}/api/report-html`, {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload)
+        });
+      }
       const reportHtml = await response.text();
       const blob = new Blob([reportHtml], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "sentinel-v2.2-evidence-defensibility-report.html";
+      a.download = "sentinel-v3-evidence-defensibility-report.html";
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {
@@ -415,14 +407,10 @@ export default function Home() {
   function registerStats() {
     const open = registerRows.filter((r) => r.status === "Open").length;
     const inProgress = registerRows.filter((r) => r.status === "In Progress").length;
+    const pending = registerRows.filter((r) => r.status === "Pending Evidence").length;
     const riskAccepted = registerRows.filter((r) => r.status === "Risk Accepted").length;
     const closed = registerRows.filter((r) => r.status === "Closed").length;
-    return { open, inProgress, riskAccepted, closed };
-  }
-
-  function clearHistory() {
-    setHistory([]);
-    localStorage.removeItem("sentinel-v22-review-history");
+    return { open, inProgress, pending, riskAccepted, closed };
   }
 
   const stats = registerStats();
@@ -431,28 +419,28 @@ export default function Home() {
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v2.2</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v3.0</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
-            Professional assurance workbench with intake intelligence, defensibility scoring, evidence requests,
-            and editable remediation command center.
+            Professional assurance workbench with persistent review vault, intake diagnostics, defensibility scoring,
+            remediation register, and saved report workspace.
           </p>
         </div>
         <div className="heroCard">
-          <span>Positioning</span>
-          <strong>From finding output to remediation command center.</strong>
-          <p>Built for IT GRC, audit readiness, TPRM, privacy, SDLC, IAM, and AI governance evidence reviews.</p>
+          <span>Major Upgrade</span>
+          <strong>Persistent Review Vault + Saved Remediation Register.</strong>
+          <p>Run reviews, save them locally, reopen them after restart, update management responses, and export client-ready registers.</p>
         </div>
       </section>
 
       <section className="caseLibrary">
         <div>
           <h2>Evidence Intake</h2>
-          <p>Upload JSON, CSV, TXT, or MD evidence. Sentinel converts it into a structured review package and evaluates metadata quality.</p>
+          <p>Upload JSON, CSV, TXT, or MD evidence. Sentinel converts it into a structured review package.</p>
         </div>
         <div className="uploadBox">
           <input type="file" accept=".json,.csv,.txt,.md" onChange={handleFileUpload} />
-          <span>v2.2 adds editable owner, target date, status, management response, closure evidence, and validation notes.</span>
+          <span>v3.0 stores saved reviews in a local SQLite vault under backend/data.</span>
         </div>
       </section>
 
@@ -469,7 +457,6 @@ export default function Home() {
                 {name === "IT Metrics Evidence Package" && "Metric denominator, lineage, review, and reporting-period challenge."}
                 {name === "Vendor Privacy Evidence Package" && "SOC 2 reliance, CUEC, customer data, retention, and data-flow challenge."}
                 {name === "SDLC AI Release Package" && "Release governance, AI approval, security gate, monitoring, and change evidence challenge."}
-                {name === "IAM Authentication Evidence Package" && "Access governance, MFA, exception, review, and remediation evidence challenge."}
               </span>
             </button>
           ))}
@@ -479,33 +466,37 @@ export default function Home() {
       <section className="grid">
         <div className="panel">
           <h2>Review Input</h2>
-          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will produce scorecards, findings, requests, and editable remediation register.</p>
+          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will save the review into the local vault.</p>
           <textarea value={input} onChange={(e) => setInput(e.target.value)} />
-          <button className="primaryBtn" onClick={analyze}>Run Evidence Defensibility Review</button>
+          <button className="primaryBtn" onClick={analyzeAndSave}>Run + Save Review to Vault</button>
           {error && <div className="error">{error}</div>}
+          {saveMessage && <div className="summary">{saveMessage}</div>}
 
-          {history.length > 0 && (
-            <div className="historyBox">
-              <div className="historyHead">
-                <h3>Local Review History</h3>
-                <button onClick={clearHistory}>Clear</button>
-              </div>
-              {history.map((h, idx) => (
-                <div key={idx} className="historyRow">
-                  <strong>{h.evidence_type}</strong>
-                  <span>{h.rating} · Defensibility {h.score}/100 · Intake {h.intake}/100 · Metadata {h.metadata}/100</span>
-                  <em>{new Date(h.timestamp).toLocaleString()}</em>
-                </div>
-              ))}
+          <div className="historyBox">
+            <div className="historyHead">
+              <h3>Review Vault</h3>
+              <button onClick={loadVault}>Refresh</button>
             </div>
-          )}
+            {reviews.length === 0 && <p className="muted">No saved reviews yet.</p>}
+            {reviews.map((review) => (
+              <div key={review.id} className="vaultRow">
+                <strong>{review.evidence_type}</strong>
+                <span>{review.organization} · {review.overall_rating} · {review.evidence_defensibility_score}/100 · {review.total_findings} findings</span>
+                <em>{new Date(review.created_at).toLocaleString()}</em>
+                <div className="vaultActions">
+                  <button onClick={() => loadSavedReview(review.id)}>Load</button>
+                  <button onClick={() => deleteSavedReview(review.id)}>Delete</button>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         <div className="panel">
-          <h2>Defensibility Output</h2>
-          <p className="muted">Scorecards, intake diagnostics, evidence requests, severity rationale, and remediation command center.</p>
+          <h2>Saved Review Workspace</h2>
+          <p className="muted">Scorecards, intake diagnostics, evidence requests, and persistent remediation register.</p>
 
-          {!result && <div className="empty">Run a review to generate professional evidence defensibility output.</div>}
+          {!result && <div className="empty">Run a review or load one from the Review Vault.</div>}
 
           {result && (
             <div>
@@ -522,10 +513,10 @@ export default function Home() {
               </div>
 
               <div className="actions">
-                <button onClick={downloadJson}>Workspace JSON</button>
-                <button onClick={downloadRemediationRegisterCsv}>Register CSV</button>
-                <button onClick={downloadEvidenceRequestCsv}>Requests CSV</button>
-                <button onClick={downloadIntakeDiagnosticsCsv}>Intake CSV</button>
+                <button onClick={saveRegister}>Save Register</button>
+                <button onClick={downloadWorkspaceJson}>Workspace JSON</button>
+                <button onClick={downloadRegisterCsv}>Register CSV</button>
+                <button onClick={downloadIntakeCsv}>Intake CSV</button>
                 <button onClick={downloadHtmlReport}>HTML Report</button>
               </div>
 
@@ -536,26 +527,26 @@ export default function Home() {
               {activeTab === "Command Center" && (
                 <div>
                   <div className="summary">{result.executive_summary}</div>
-
                   <div className="miniGrid">
                     <div>
                       <h3>Remediation Status</h3>
                       <div className="miniRow"><span>Open</span><strong>{stats.open}</strong></div>
                       <div className="miniRow"><span>In Progress</span><strong>{stats.inProgress}</strong></div>
+                      <div className="miniRow"><span>Pending Evidence</span><strong>{stats.pending}</strong></div>
                       <div className="miniRow"><span>Risk Accepted</span><strong>{stats.riskAccepted}</strong></div>
                       <div className="miniRow"><span>Closed</span><strong>{stats.closed}</strong></div>
                     </div>
                     <div>
-                      <h3>Risk Snapshot</h3>
-                      {Object.entries(result.severity_distribution || {}).map(([k, v]: any) => (
-                        <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
-                      ))}
+                      <h3>Vault Metadata</h3>
+                      <div className="miniRow"><span>Review ID</span><strong>{currentReviewId ? currentReviewId.slice(0, 8) : "Unsaved"}</strong></div>
+                      <div className="miniRow"><span>Total Findings</span><strong>{result.total_findings}</strong></div>
+                      <div className="miniRow"><span>Rating</span><strong>{result.overall_rating}</strong></div>
                     </div>
                   </div>
 
                   <div className="registerPanel">
-                    <h3>Editable Remediation Register</h3>
-                    <p className="muted">Use this as a management-response workspace before exporting the final register.</p>
+                    <h3>Persistent Remediation Register</h3>
+                    <p className="muted">Update fields, click Save Register, then reload from vault to confirm persistence.</p>
                     {registerRows.map((row, index) => (
                       <div key={row.finding_id} className="registerCard">
                         <div className="registerHeader">
@@ -609,10 +600,6 @@ export default function Home() {
                       ))}
                     </div>
                   </div>
-                  <div className="nextSteps">
-                    <h3>Recommended Next Steps</h3>
-                    <ol>{(result.recommended_next_steps || []).map((step: string) => <li key={step}>{step}</li>)}</ol>
-                  </div>
                 </div>
               )}
 
@@ -654,18 +641,6 @@ export default function Home() {
                       <p><b>Evidence gap:</b> {finding.evidence_gap}</p>
                       <p><b>Examiner question:</b> {finding.examiner_question}</p>
                       <p><b>Remediation:</b> {finding.remediation}</p>
-
-                      <div className="mappingBox">
-                        <h4>Framework Mapping Rationale</h4>
-                        {(finding.framework_mappings || []).map((m: any) => (
-                          <div key={m.framework} className="mappingRow">
-                            <strong>{m.framework}</strong>
-                            <span>{m.mapping_type}</span>
-                            <p>{m.rationale}</p>
-                            <em>Expected evidence: {m.evidence_expected}</em>
-                          </div>
-                        ))}
-                      </div>
                     </div>
                   ))}
                 </div>

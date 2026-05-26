@@ -310,3 +310,139 @@ textarea {
   }
 }
 
+
+.tabBar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.tab {
+  border: 1px solid rgba(110,168,255,0.25);
+  border-radius: 12px;
+  background: rgba(10,20,40,0.65);
+  color: #cfe0ff;
+  padding: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.activeTab {
+  background: linear-gradient(90deg, #3b82f6, #7c3aed);
+  color: #ffffff;
+}
+
+.secondaryActions {
+  grid-template-columns: 1fr !important;
+  margin-top: -6px;
+}
+
+.registerPanel {
+  background: linear-gradient(180deg, rgba(8,18,36,0.82), rgba(13,23,45,0.94));
+  border: 1px solid rgba(124, 152, 199, 0.2);
+  border-radius: 16px;
+  padding: 15px;
+  margin-bottom: 16px;
+}
+
+.registerCard {
+  background: linear-gradient(180deg, rgba(10,20,40,0.88), rgba(13,23,45,0.96));
+  border: 1px solid rgba(124,152,199,0.18);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+}
+
+.registerHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.registerHeader strong {
+  color: #ffffff;
+}
+
+.registerHeader span {
+  color: #8fb9ff;
+}
+
+.registerGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.registerCard label {
+  display: block;
+  color: #cfe0ff;
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 8px;
+}
+
+.registerCard input,
+.registerCard select {
+  width: 100%;
+  border: 1px solid rgba(110,168,255,0.28);
+  background: #030914;
+  color: #dbeafe;
+  border-radius: 10px;
+  padding: 9px;
+  margin-top: 6px;
+}
+
+.smallText {
+  min-height: 78px !important;
+  margin-top: 6px;
+  font-size: 12px;
+}
+
+.vaultRow {
+  border-top: 1px solid rgba(148,163,184,0.18);
+  padding: 12px 0;
+}
+
+.vaultRow strong,
+.vaultRow span,
+.vaultRow em {
+  display: block;
+}
+
+.vaultRow span {
+  color: #d6e3f4;
+  margin-top: 4px;
+}
+
+.vaultRow em {
+  color: #8fb9ff;
+  font-style: normal;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.vaultActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.vaultActions button {
+  border: 0;
+  border-radius: 9px;
+  padding: 7px 10px;
+  background: rgba(59,130,246,0.22);
+  color: #dbeafe;
+  cursor: pointer;
+}
+
+@media (max-width: 1180px) {
+  .tabBar,
+  .registerGrid {
+    grid-template-columns: 1fr;
+  }
+}
+

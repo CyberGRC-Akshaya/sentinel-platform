@@ -1,16 +1,23 @@
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 from datetime import datetime
+from pathlib import Path
 import html
+import json
+import sqlite3
+import uuid
+
+DB_PATH = Path("data/sentinel.db")
+DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
     title="Sentinel Evidence Defensibility Workbench",
-    description="Professional assurance workbench for evidence defensibility, intake quality, and evidence request generation.",
-    version="2.2.0"
+    description="Professional assurance workbench with persistent review vault, evidence scoring, remediation register, and reporting exports.",
+    version="3.0.0"
 )
 
 app.add_middleware(
@@ -193,6 +200,43 @@ class AnalyzeRequest(BaseModel):
     review_objective: str
     items: List[EvidenceItem]
 
+class RegisterUpdate(BaseModel):
+    rows: List[Dict[str, Any]]
+
+def db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def ensure_db():
+    with db() as conn:
+        conn.execute(
+            """
+            CREATE TABLE IF NOT EXISTS reviews (
+                id TEXT PRIMARY KEY,
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                organization TEXT,
+                industry TEXT,
+                evidence_type TEXT,
+                review_objective TEXT,
+                overall_rating TEXT,
+                evidence_defensibility_score INTEGER,
+                intake_coverage_score INTEGER,
+                metadata_completeness_score INTEGER,
+                total_findings INTEGER,
+                payload_json TEXT NOT NULL,
+                result_json TEXT NOT NULL,
+                register_json TEXT NOT NULL
+            )
+            """
+        )
+        conn.commit()
+
+@app.on_event("startup")
+def startup():
+    ensure_db()
+
 def normalize_text(item: EvidenceItem) -> str:
     return f" {item.title} {item.content} {item.source_system or ''} {item.owner or ''} {item.reporting_period or ''} {item.artifact_type or ''} {item.control_reference or ''} ".lower()
 
@@ -368,6 +412,28 @@ def build_finding(item: EvidenceItem, item_score: Dict[str, Any], dimension: Dic
         "status": "Open"
     }
 
+def build_register(result: Dict[str, Any]) -> List[Dict[str, Any]]:
+    rows = []
+    for finding in result.get("findings", []):
+        request = finding.get("evidence_request", {})
+        rows.append({
+            "finding_id": finding.get("finding_id"),
+            "severity": finding.get("severity"),
+            "risk_domain": finding.get("risk_domain"),
+            "affected_item": finding.get("affected_item"),
+            "issue": finding.get("issue"),
+            "remediation": finding.get("remediation"),
+            "evidence_needed": request.get("evidence_needed", ""),
+            "preferred_artifacts": "; ".join(request.get("preferred_artifacts", [])),
+            "owner": request.get("owner", ""),
+            "target_date": "",
+            "status": "Open",
+            "management_response": "",
+            "closure_evidence": "",
+            "validation_notes": ""
+        })
+    return rows
+
 def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
     item_scores = [score_item(item) for item in payload.items]
     findings = []
@@ -436,7 +502,6 @@ def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
             framework_counts[fw] = framework_counts.get(fw, 0) + 1
 
     evidence_requests = [f["evidence_request"] for f in findings]
-
     executive_summary = (
         f"Sentinel reviewed {len(payload.items)} evidence item(s). The package is rated '{rating}' "
         f"with an evidence defensibility score of {overall_score}/100, intake coverage score of {intake_score}/100, "
@@ -447,7 +512,7 @@ def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
     return {
         "product": "Sentinel Evidence Defensibility Workbench",
         "company": "Eye On Bits Pvt Ltd",
-        "version": "2.2.0",
+        "version": "3.0.0",
         "review_timestamp": datetime.utcnow().isoformat(),
         "organization": payload.organization,
         "industry": payload.industry,
@@ -469,18 +534,60 @@ def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
             "Address missing metadata first: owner, source system, reporting period, evidence date, and control reference.",
             "Use the intake gap analysis to collect missing required evidence elements by domain.",
             "Review high and critical findings with accountable evidence owners.",
-            "Update the finding register with owner, target date, management response, and closure evidence.",
+            "Update the remediation register with owner, target date, management response, and closure evidence.",
             "Re-run Sentinel after remediation evidence is collected."
         ],
         "executive_summary": executive_summary
     }
+
+def save_review(payload: AnalyzeRequest, result: Dict[str, Any]) -> Dict[str, Any]:
+    ensure_db()
+    review_id = str(uuid.uuid4())
+    now = datetime.utcnow().isoformat()
+    register = build_register(result)
+    result_with_id = dict(result)
+    result_with_id["review_id"] = review_id
+    result_with_id["remediation_register"] = register
+
+    with db() as conn:
+        conn.execute(
+            """
+            INSERT INTO reviews (
+                id, created_at, updated_at, organization, industry, evidence_type, review_objective,
+                overall_rating, evidence_defensibility_score, intake_coverage_score, metadata_completeness_score,
+                total_findings, payload_json, result_json, register_json
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                review_id,
+                now,
+                now,
+                payload.organization,
+                payload.industry,
+                payload.evidence_type,
+                payload.review_objective,
+                result["overall_rating"],
+                result["evidence_defensibility_score"],
+                result["intake_coverage_score"],
+                result["metadata_completeness_score"],
+                result["total_findings"],
+                json.dumps(payload.model_dump()),
+                json.dumps(result_with_id),
+                json.dumps(register),
+            ),
+        )
+        conn.commit()
+
+    return result_with_id
 
 @app.get("/api/health")
 def health():
     return {
         "status": "ok",
         "service": "Sentinel Evidence Defensibility Workbench",
-        "version": "2.2.0",
+        "version": "3.0.0",
+        "database": str(DB_PATH),
         "timestamp": datetime.utcnow().isoformat()
     }
 
@@ -500,10 +607,71 @@ def intake_requirements():
 def analyze(payload: AnalyzeRequest):
     return build_analysis(payload)
 
-@app.post("/api/report-html", response_class=HTMLResponse)
-def report_html(payload: AnalyzeRequest):
+@app.post("/api/reviews/analyze-save")
+def analyze_and_save(payload: AnalyzeRequest):
     result = build_analysis(payload)
+    return save_review(payload, result)
 
+@app.get("/api/reviews")
+def list_reviews():
+    ensure_db()
+    with db() as conn:
+        rows = conn.execute(
+            """
+            SELECT id, created_at, updated_at, organization, industry, evidence_type, overall_rating,
+                   evidence_defensibility_score, intake_coverage_score, metadata_completeness_score, total_findings
+            FROM reviews
+            ORDER BY created_at DESC
+            """
+        ).fetchall()
+
+    return [dict(row) for row in rows]
+
+@app.get("/api/reviews/{review_id}")
+def get_review(review_id: str):
+    ensure_db()
+    with db() as conn:
+        row = conn.execute("SELECT * FROM reviews WHERE id = ?", (review_id,)).fetchone()
+
+    if not row:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    result = json.loads(row["result_json"])
+    result["remediation_register"] = json.loads(row["register_json"])
+    return result
+
+@app.put("/api/reviews/{review_id}/register")
+def replace_register(review_id: str, update: RegisterUpdate):
+    ensure_db()
+    now = datetime.utcnow().isoformat()
+    with db() as conn:
+        row = conn.execute("SELECT result_json FROM reviews WHERE id = ?", (review_id,)).fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Review not found")
+
+        result = json.loads(row["result_json"])
+        result["remediation_register"] = update.rows
+        conn.execute(
+            "UPDATE reviews SET updated_at = ?, result_json = ?, register_json = ? WHERE id = ?",
+            (now, json.dumps(result), json.dumps(update.rows), review_id),
+        )
+        conn.commit()
+
+    return {"status": "saved", "review_id": review_id, "updated_at": now, "register_rows": len(update.rows)}
+
+@app.delete("/api/reviews/{review_id}")
+def delete_review(review_id: str):
+    ensure_db()
+    with db() as conn:
+        cur = conn.execute("DELETE FROM reviews WHERE id = ?", (review_id,))
+        conn.commit()
+
+    if cur.rowcount == 0:
+        raise HTTPException(status_code=404, detail="Review not found")
+
+    return {"status": "deleted", "review_id": review_id}
+
+def render_html_report(result: Dict[str, Any]) -> str:
     score_rows = ""
     for item in result["item_scorecards"]:
         dim_rows = "".join(
@@ -522,40 +690,33 @@ def report_html(payload: AnalyzeRequest):
         </div>
         """
 
+    register = result.get("remediation_register", [])
+    register_rows = ""
+    for row in register:
+        register_rows += f"<tr><td>{html.escape(str(row.get('finding_id','')))}</td><td>{html.escape(str(row.get('severity','')))}</td><td>{html.escape(str(row.get('owner','')))}</td><td>{html.escape(str(row.get('target_date','')))}</td><td>{html.escape(str(row.get('status','')))}</td><td>{html.escape(str(row.get('management_response','')))}</td></tr>"
+
     finding_blocks = ""
     for f in result["findings"]:
         mapping_rows = ""
         for m in f.get("framework_mappings", []):
             mapping_rows += f"<tr><td>{html.escape(m['framework'])}</td><td>{html.escape(m['mapping_type'])}</td><td>{html.escape(m['rationale'])}</td><td>{html.escape(m['evidence_expected'])}</td></tr>"
 
-        req = f["evidence_request"]
-        artifacts = ", ".join(req.get("preferred_artifacts", []))
-
         finding_blocks += f"""
         <div class='finding'>
           <div class='finding-head'>
-            <h3>{html.escape(f["finding_id"])} â€” {html.escape(f["title"])}</h3>
+            <h3>{html.escape(f["finding_id"])} — {html.escape(f["title"])}</h3>
             <span class='badge {html.escape(f["severity"].lower())}'>{html.escape(f["severity"])}</span>
           </div>
           <p><b>Risk domain:</b> {html.escape(f["risk_domain"])}</p>
           <p><b>Affected item:</b> {html.escape(f["affected_item"])}</p>
-          <p><b>Dimension:</b> {html.escape(f["dimension"])}</p>
-          <p><b>Issue:</b> {html.escape(f["issue"])}</p>
           <p><b>Severity rationale:</b> {html.escape(f["severity_rationale"])}</p>
           <p><b>Evidence gap:</b> {html.escape(f["evidence_gap"])}</p>
           <p><b>Examiner question:</b> {html.escape(f["examiner_question"])}</p>
           <p><b>Remediation:</b> {html.escape(f["remediation"])}</p>
-          <h4>Evidence Request</h4>
-          <p><b>{html.escape(req["request_id"])}:</b> {html.escape(req["evidence_needed"])}</p>
-          <p><b>Preferred artifacts:</b> {html.escape(artifacts)}</p>
           <h4>Framework Mapping Rationale</h4>
           <table><tr><th>Framework</th><th>Mapping Type</th><th>Rationale</th><th>Expected Evidence</th></tr>{mapping_rows}</table>
         </div>
         """
-
-    requests = ""
-    for req in result["evidence_requests"]:
-        requests += f"<tr><td>{html.escape(req['request_id'])}</td><td>{html.escape(req['priority'])}</td><td>{html.escape(req['owner'])}</td><td>{html.escape(req['evidence_needed'])}</td><td>{html.escape(', '.join(req.get('preferred_artifacts', [])))}</td><td>{html.escape(req['status'])}</td></tr>"
 
     steps = "".join([f"<li>{html.escape(x)}</li>" for x in result["recommended_next_steps"]])
 
@@ -590,7 +751,7 @@ td, th {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertic
 <div class='report'>
 <div class='eyebrow'>Eye On Bits Pvt Ltd</div>
 <h1>Sentinel Evidence Defensibility Report</h1>
-<div class='sub'>Professional assurance workbench output for evidence quality, intake completeness, metadata quality, findings, evidence requests, and framework mapping rationale.</div>
+<div class='sub'>Persistent review-vault output for evidence quality, intake completeness, metadata quality, findings, remediation register, and framework mapping rationale.</div>
 <div class='cards'>
 <div class='card'><span>Organization</span><strong>{html.escape(result["organization"])}</strong></div>
 <div class='card'><span>Defensibility</span><strong>{result["evidence_defensibility_score"]}/100</strong></div>
@@ -599,15 +760,26 @@ td, th {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertic
 <div class='card'><span>Rating</span><strong>{html.escape(result["overall_rating"])}</strong></div>
 </div>
 <div class='summary'>{html.escape(result["executive_summary"])}</div>
+<h2>Remediation Register</h2>
+<table><tr><th>Finding</th><th>Severity</th><th>Owner</th><th>Target Date</th><th>Status</th><th>Management Response</th></tr>{register_rows}</table>
 <h2>Scorecards and Intake Diagnostics</h2>
 {score_rows}
-<h2>Evidence Request List</h2>
-<table><tr><th>Request ID</th><th>Priority</th><th>Owner</th><th>Evidence Needed</th><th>Preferred Artifacts</th><th>Status</th></tr>{requests}</table>
 <h2>Recommended Next Steps</h2>
 <ol>{steps}</ol>
 <h2>Findings</h2>
 {finding_blocks}
-<div class='footer'>Generated by Sentinel Evidence Defensibility Workbench v2.2. This output supports assurance review and does not replace qualified professional judgment.</div>
+<div class='footer'>Generated by Sentinel Evidence Defensibility Workbench v3.0. This output supports assurance review and does not replace qualified professional judgment.</div>
 </div>
 </body>
 </html>"""
+
+@app.post("/api/report-html", response_class=HTMLResponse)
+def report_html(payload: AnalyzeRequest):
+    result = build_analysis(payload)
+    result["remediation_register"] = build_register(result)
+    return render_html_report(result)
+
+@app.get("/api/reviews/{review_id}/report-html", response_class=HTMLResponse)
+def saved_report_html(review_id: str):
+    result = get_review(review_id)
+    return render_html_report(result)
