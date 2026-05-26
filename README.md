@@ -4,33 +4,62 @@
 **Version:** v10 Final Launch Edition  
 **Status:** Local demo-grade product baseline
 
+---
+
 ## Product positioning
 
-Sentinel is an evidence defensibility challenge layer for audit, risk, compliance, TPRM, privacy, SDLC, IAM, and AI governance reviews.
+Sentinel is an **evidence defensibility challenge layer** for audit, risk, compliance, TPRM, privacy, SDLC, IAM, and AI governance reviews.
 
 It does not replace GRC repositories. It sits above evidence packages and challenges whether evidence is strong enough for audit, management review, 2LOD credible challenge, or examiner-style scrutiny.
 
+---
+
 ## One-line value proposition
 
-Sentinel turns weak evidence packages into findings, evidence requests, control mappings, board-ready narratives, and closure-ready remediation workflows.
+Sentinel turns weak evidence packages into **findings, evidence requests, control mappings, board-ready narratives, and closure-ready remediation workflows**.
 
-## Product screenshots
+---
 
-Add screenshots under `github-assets/screenshots/` using the exact filenames below:
+## Why this exists
 
-| Screenshot | Filename |
-|---|---|
-| Final Room | `01-final-room.png` |
-| Launch Room | `02-launch-room.png` |
-| Demo Room | `03-demo-room.png` |
-| Control Atlas | `04-control-atlas.png` |
-| Evidence Requests | `05-evidence-requests.png` |
-| Board Pack | `06-board-pack.png` |
-| Delivery Kit | `07-delivery-kit.png` |
-| Portfolio Dashboard | `08-portfolio-dashboard.png` |
-| Command Center | `09-command-center.png` |
+Most teams do not fail because they have no evidence.
 
-## Core capabilities
+They fail because evidence is often:
+
+- screenshot-only
+- missing source lineage
+- missing denominator or calculation logic
+- missing reviewer approval
+- unclear on reporting period
+- weakly mapped to control objectives
+- incomplete for SOC 2 / CUEC / privacy / AI / IAM / SDLC review
+- not closure-ready
+
+Sentinel converts these weaknesses into structured findings, evidence asks, control mappings, remediation actions, and leadership-ready outputs.
+
+---
+
+## Core workflow
+
+```text
+Evidence Package
+      ↓
+Defensibility Review
+      ↓
+Findings + Scorecard
+      ↓
+Control Atlas Mapping
+      ↓
+Evidence Request Studio
+      ↓
+Closure Readiness
+      ↓
+Board Pack + Delivery Kit
+```
+
+---
+
+## Capability stack
 
 | Capability | What it does |
 |---|---|
@@ -46,19 +75,37 @@ Add screenshots under `github-assets/screenshots/` using the exact filenames bel
 | Portfolio Dashboard | Aggregates saved reviews, domains, severities, and open remediation items |
 | Exports | HTML, JSON, and CSV outputs |
 
-## Demo workflow
+---
 
-1. Open **Final Room** and explain product positioning.
-2. Open **Launch Room** and show launch readiness.
-3. Click **Run + Save Review to Vault**.
-4. Open **Control Atlas** and show mapped control evidence gaps.
-5. Open **Evidence Requests** and show owner-ready evidence asks.
-6. Open **Board Pack** and show executive narrative.
-7. Open **Command Center** and update remediation fields.
-8. Open **Delivery Kit** and export handoff assets.
-9. Export **Final HTML**, **Board HTML**, **Request CSV**, **Register CSV**, and **Vault Backup**.
+## Sample use cases
+
+| Use Case | Sentinel Review Focus |
+|---|---|
+| IT Metrics Review | Source lineage, denominator consistency, calculation logic, committee reporting tie-out |
+| TPRM / SOC 2 Review | SOC 2 reliance, CUEC mapping, bridge letter, subservice orgs, residual risk |
+| Privacy / Data Handling | Data flow, retention, deletion, DPA, customer information boundaries |
+| SDLC / Change Governance | Change record, release approval, testing evidence, rollback planning |
+| AI Governance | AI inventory, risk tier, approval evidence, monitoring, incident escalation |
+| IAM / Access Governance | Access approvals, MFA evidence, access review, exceptions, revocation |
+
+---
+
+## Tech stack
+
+| Layer | Tool |
+|---|---|
+| Frontend | Next.js |
+| Backend | FastAPI |
+| Local Data Store | SQLite |
+| Containerization | Docker Compose |
+| Languages | TypeScript, Python |
+| Repository | GitHub |
+
+---
 
 ## Run locally
+
+Open Docker Desktop first.
 
 ```powershell
 cd $HOME\Desktop\EyeOnBits-Sentinel
@@ -84,6 +131,21 @@ Expected backend after hotfix:
 "version": "10.1.1"
 ```
 
+---
+
+## Recommended walkthrough
+
+1. Open **Final Room** and explain product positioning.
+2. Open **Launch Room** and show readiness.
+3. Click **Run + Save Review to Vault**.
+4. Open **Control Atlas** and show mapped evidence gaps.
+5. Open **Evidence Requests** and show owner-ready evidence asks.
+6. Open **Board Pack** and show executive narrative.
+7. Open **Command Center** and update remediation fields.
+8. Open **Delivery Kit** and export handoff assets.
+
+---
+
 ## Commercial pilot offer
 
 ### Evidence Defensibility Sprint
@@ -103,6 +165,18 @@ Expected backend after hotfix:
 - remediation action plan
 - client delivery kit
 
+---
+
 ## Important boundary
 
 This is a local demo-grade product baseline. Production use requires authentication, authorization, hardened deployment, data protection controls, secure secrets management, monitoring, and formal legal/security review.
+
+---
+
+## Next-stage gates
+
+| Stage | Gate |
+|---|---|
+| AI Reasoning Layer | Real OpenAI-assisted reasoning with prompt logging and evidence-grounded outputs |
+| Hosted Product Layer | PostgreSQL, authentication, user accounts, tenant boundaries, deployment hardening |
+| Automation Layer | n8n / Google Workspace workflows for evidence owner follow-up and tracker updates |

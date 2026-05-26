@@ -1,0 +1,23 @@
+Subject: Quick feedback on evidence defensibility idea
+
+Hi [Name],
+
+I have been building a focused evidence defensibility workbench called Sentinel under Eye On Bits Pvt Ltd.
+
+The idea is not to replace GRC tools. It is to challenge whether evidence packages are strong enough for audit, management review, 2LOD credible challenge, or examiner-style scrutiny.
+
+It reviews evidence and produces:
+- findings register
+- evidence request list
+- Control Atlas mapping
+- closure readiness tracker
+- board-ready summary
+- remediation action plan
+
+I am shaping this into a two-week Evidence Defensibility Sprint for teams dealing with IT metrics, vendor evidence, SOC 2 reliance, privacy/data handling, IAM, SDLC, or AI governance evidence.
+
+Would you be open to a short conversation where I show the workflow and get your feedback?
+
+Regards,
+[Your Name]
+Eye On Bits Pvt Ltd
