@@ -103,6 +103,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("Workbench");
   const [saveMessage, setSaveMessage] = useState("");
   const [boardPack, setBoardPack] = useState<any>(null);
+  const [requestPack, setRequestPack] = useState<any>(null);
 
   useEffect(() => {
     loadVault();
@@ -189,6 +190,69 @@ export default function Home() {
     a.download = "sentinel-v6-portfolio-board-pack.html";
     a.click();
     URL.revokeObjectURL(url);
+  }
+
+
+  async function loadRequestPack(reviewId: string) {
+    try {
+      const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/request-studio`);
+      if (response.ok) setRequestPack(await response.json());
+    } catch {
+      setRequestPack(null);
+    }
+  }
+
+  async function downloadRequestPackHtml() {
+    if (!currentReviewId) {
+      setSaveMessage("Load or save a review first.");
+      return;
+    }
+    const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/request-studio-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v7-evidence-request-studio.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadRequestPackJson() {
+    if (!requestPack) return;
+    const blob = new Blob([JSON.stringify(requestPack, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v7-evidence-request-studio.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadEvidenceRequestCsv() {
+    if (!requestPack) return;
+    const headers = ["Request_ID","Finding_ID","Priority","Owner","Status","Target_Date","Risk_Domain","Control_Atlas_IDs","Evidence_Needed","Preferred_Artifacts","Request_Message","Validation_Test"];
+    const rows = (requestPack.evidence_requests || []).map((r: any) => [
+      r.request_id,
+      r.finding_id,
+      r.priority,
+      r.owner,
+      r.status,
+      r.target_date,
+      r.risk_domain,
+      (r.control_atlas_ids || []).join("; "),
+      r.evidence_needed,
+      (r.preferred_artifacts || []).join("; "),
+      r.request_message,
+      r.validation_test
+    ]);
+    downloadCsv("sentinel-v7-evidence-request-list.csv", headers, rows);
+  }
+
+  function copyFirstEvidenceRequest() {
+    if (!requestPack || !requestPack.evidence_requests || requestPack.evidence_requests.length === 0) return;
+    navigator.clipboard.writeText(requestPack.evidence_requests[0].request_message);
+    alert("First evidence request message copied.");
   }
 
   function loadCase(name: string) {
@@ -308,7 +372,10 @@ export default function Home() {
       setRegisterRows(data.remediation_register || []);
       setActiveTab("Command Center");
       setSaveMessage("Review saved to vault.");
-      if (data.review_id) await loadBoardPack(data.review_id);
+      if (data.review_id) {
+        await loadBoardPack(data.review_id);
+        await loadRequestPack(data.review_id);
+      }
       await loadVault();
       await loadPortfolio();
     } catch (err: any) {
@@ -328,6 +395,7 @@ export default function Home() {
       setActiveTab("Command Center");
       setSaveMessage("Saved review loaded from vault.");
       await loadBoardPack(reviewId);
+      await loadRequestPack(reviewId);
     } catch (err: any) {
       setError(err.message || "Could not load review.");
     }
@@ -472,16 +540,16 @@ export default function Home() {
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v6.0</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v7.0</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
-            Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, board-pack generation, remediation register, and executive reporting.
+            Professional assurance workbench with review vault, evidence request workflow, closure readiness, control atlas mapping, board-pack generation, remediation register, and executive reporting.
           </p>
         </div>
         <div className="heroCard">
           <span>Major Upgrade</span>
-          <strong>Board Pack Studio + Control Atlas Mapper.</strong>
-          <p>Sentinel now converts review results into board-ready narratives, management prompts, 30-day action plans, and control evidence challenge questions.</p>
+          <strong>Evidence Request Studio + Closure Readiness Engine.</strong>
+          <p>Sentinel now converts findings into request-ready evidence asks, owner follow-ups, closure criteria, and validation tests.</p>
         </div>
       </section>
 
@@ -559,7 +627,7 @@ export default function Home() {
               </div>
 
               <div className="tabBar">
-                {["Portfolio", "Board Pack", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
+                {["Portfolio", "Board Pack", "Evidence Requests", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
                   <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
                 ))}
               </div>
@@ -688,6 +756,93 @@ export default function Home() {
                             <p><b>Issue:</b> {finding.issue}</p>
                             <p><b>Evidence Gap:</b> {finding.evidence_gap}</p>
                             <p><b>Examiner Question:</b> {finding.examiner_question}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+
+
+              {activeTab === "Evidence Requests" && (
+                <div>
+                  <div className="summary">
+                    Evidence Request Studio converts findings into request-ready owner follow-ups, preferred artifacts, closure criteria, and validation tests.
+                  </div>
+
+                  <div className="actions">
+                    <button onClick={() => currentReviewId && loadRequestPack(currentReviewId)}>Refresh Requests</button>
+                    <button onClick={downloadRequestPackJson}>Request JSON</button>
+                    <button onClick={downloadRequestPackHtml}>Request HTML</button>
+                    <button onClick={downloadEvidenceRequestCsv}>Request CSV</button>
+                    <button onClick={copyFirstEvidenceRequest}>Copy First Ask</button>
+                  </div>
+
+                  {!requestPack && <div className="empty">Run or load a saved review first to generate evidence requests.</div>}
+
+                  {requestPack && (
+                    <div>
+                      <div className="scoreRow">
+                        <div className="scoreBox"><span>Total Requests</span><strong>{requestPack.total_requests}</strong></div>
+                        <div className="scoreBox"><span>Open Requests</span><strong>{requestPack.open_requests}</strong></div>
+                        <div className="scoreBox"><span>Closure Readiness</span><strong>{requestPack.average_closure_readiness_score}/100</strong></div>
+                      </div>
+
+                      <div className="summary">{requestPack.request_governance_note}</div>
+
+                      <div className="miniGrid">
+                        <div>
+                          <h3>Owner Distribution</h3>
+                          {Object.entries(requestPack.owner_distribution || {}).map(([k, v]: any) => (
+                            <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3>Priority Distribution</h3>
+                          {Object.entries(requestPack.priority_distribution || {}).map(([k, v]: any) => (
+                            <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Evidence Request Operating Model</h3>
+                        <ol>{(requestPack.request_operating_model || []).map((step: string) => <li key={step}>{step}</li>)}</ol>
+                      </div>
+
+                      <div className="findings">
+                        <h3>Request-Ready Evidence Asks</h3>
+                        {(requestPack.evidence_requests || []).map((req: any) => (
+                          <div key={req.request_id} className="finding">
+                            <div className="findingTop">
+                              <h3>{req.request_id} · {req.finding_id}</h3>
+                              <span className={"badge " + String(req.priority || "").toLowerCase()}>{req.priority}</span>
+                            </div>
+                            <p><b>Owner:</b> {req.owner} · <b>Status:</b> {req.status} · <b>Target:</b> {req.target_date || "Not set"}</p>
+                            <p><b>Risk Domain:</b> {req.risk_domain}</p>
+                            <p><b>Control Atlas:</b> {(req.control_atlas_ids || []).join(", ")}</p>
+                            <p><b>Evidence Needed:</b> {req.evidence_needed}</p>
+                            <p><b>Preferred Artifacts:</b> {(req.preferred_artifacts || []).join(", ")}</p>
+                            <div className="mappingBox">
+                              <h4>Request Message</h4>
+                              <p>{req.request_message}</p>
+                            </div>
+                            <p><b>Validation Test:</b> {req.validation_test}</p>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="nextSteps">
+                        <h3>Closure Readiness</h3>
+                        {(requestPack.closure_readiness || []).map((row: any) => (
+                          <div key={row.finding_id} className="scorecardItem">
+                            <div className="scorecardTop">
+                              <strong>{row.finding_id} · {row.severity}</strong>
+                              <span>{row.closure_readiness_score}/100 · {row.closure_readiness_rating}</span>
+                            </div>
+                            <p><b>Missing steps:</b> {(row.closure_missing_steps || []).join(", ") || "None"}</p>
                           </div>
                         ))}
                       </div>

@@ -16,8 +16,8 @@ DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
     title="Sentinel Evidence Defensibility Workbench",
-    description="Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, board-pack generation, remediation register, and executive reporting exports.",
-    version="6.0.0"
+    description="Professional assurance workbench with review vault, portfolio analytics, control atlas mapping, evidence request workflow, board-pack generation, remediation register, and executive reporting exports.",
+    version="7.0.0"
 )
 
 app.add_middleware(
@@ -608,7 +608,7 @@ def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
     return {
         "product": "Sentinel Evidence Defensibility Workbench",
         "company": "Eye On Bits Pvt Ltd",
-        "version": "6.0.0",
+        "version": "7.0.0",
         "review_timestamp": datetime.utcnow().isoformat(),
         "organization": payload.organization,
         "industry": payload.industry,
@@ -665,7 +665,7 @@ def save_review(payload: AnalyzeRequest, result: Dict[str, Any]) -> Dict[str, An
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "Sentinel Evidence Defensibility Workbench", "version": "6.0.0", "database": str(DB_PATH), "timestamp": datetime.utcnow().isoformat()}
+    return {"status": "ok", "service": "Sentinel Evidence Defensibility Workbench", "version": "7.0.0", "database": str(DB_PATH), "timestamp": datetime.utcnow().isoformat()}
 
 @app.get("/api/control-atlas")
 def control_atlas():
@@ -887,7 +887,7 @@ th,td {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertica
 </head>
 <body>
 <div class='report'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v6.0</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v7.0</div>
 <h1>Evidence Defensibility and Control Atlas Report</h1>
 <div class='cards'>
 <div class='card'><span>Organization</span><strong>{html.escape(result['organization'])}</strong></div>
@@ -1036,7 +1036,7 @@ def build_board_pack_from_result(result: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "product": "Sentinel Board Pack Studio",
-        "version": "6.0.0",
+        "version": "7.0.0",
         "generated_at": datetime.utcnow().isoformat(),
         "review_id": result.get("review_id"),
         "organization": result.get("organization"),
@@ -1159,7 +1159,7 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v6.0</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v7.0</div>
 <h1>Board Pack Studio</h1>
 <p class='sub'>Board-ready evidence defensibility narrative, risk themes, missing evidence, challenge questions, and 30-day action plan.</p>
 
@@ -1240,7 +1240,7 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v6.0</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v7.0</div>
 <h1>Portfolio Board Pack</h1>
 <div class='cards'>
 <div class='card'><span>Total Reviews</span><strong>{snapshot.get('total_reviews')}</strong></div>
@@ -1255,3 +1255,271 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 </div>
 </body>
 </html>"""
+
+
+def _closure_readiness_score(row: Dict[str, Any]) -> Dict[str, Any]:
+    checks = [
+        ("owner", "Owner assigned"),
+        ("target_date", "Target date assigned"),
+        ("management_response", "Management response captured"),
+        ("closure_evidence", "Closure evidence referenced"),
+        ("validation_notes", "Reviewer validation notes captured")
+    ]
+
+    completed = []
+    missing = []
+
+    for field, label in checks:
+        if str(row.get(field, "")).strip():
+            completed.append(label)
+        else:
+            missing.append(label)
+
+    if row.get("status") == "Closed":
+        completed.append("Status marked closed")
+    else:
+        missing.append("Status not closed")
+
+    score = round((len(completed) / (len(completed) + len(missing))) * 100) if (completed or missing) else 0
+    rating = "Ready for Closure Review" if score >= 85 else "Partially Ready" if score >= 55 else "Not Ready"
+
+    return {
+        "score": score,
+        "rating": rating,
+        "completed": completed,
+        "missing": missing
+    }
+
+def build_evidence_request_studio_pack(result: Dict[str, Any]) -> Dict[str, Any]:
+    findings = result.get("findings", [])
+    register = result.get("remediation_register", [])
+
+    register_by_finding = {row.get("finding_id"): row for row in register}
+    request_rows = []
+    closure_rows = []
+    owner_counts: Dict[str, int] = {}
+    priority_counts: Dict[str, int] = {}
+    status_counts: Dict[str, int] = {}
+
+    for finding in findings:
+        request = finding.get("evidence_request", {})
+        fid = finding.get("finding_id")
+        reg = register_by_finding.get(fid, {})
+        owner = reg.get("owner") or request.get("owner") or "Evidence Owner"
+        priority = request.get("priority") or finding.get("severity") or "Medium"
+        status = reg.get("status") or request.get("status") or "Open"
+
+        owner_counts[owner] = owner_counts.get(owner, 0) + 1
+        priority_counts[priority] = priority_counts.get(priority, 0) + 1
+        status_counts[status] = status_counts.get(status, 0) + 1
+
+        artifacts = request.get("preferred_artifacts", [])
+        if isinstance(artifacts, str):
+            artifacts = [artifacts]
+
+        request_message = (
+            f"Please provide evidence for {fid} ({finding.get('title')}). "
+            f"The current gap relates to {finding.get('risk_domain')} and mapped control(s): "
+            f"{', '.join(finding.get('control_atlas_ids', [])) or 'Not mapped'}. "
+            f"Evidence needed: {request.get('evidence_needed', finding.get('evidence_gap'))}. "
+            f"Preferred artifacts: {', '.join(artifacts) if artifacts else 'supporting evidence package'}. "
+            f"Please also provide owner confirmation, evidence date, source system, and reviewer approval where applicable."
+        )
+
+        validation_test = (
+            f"Reviewer should confirm that the evidence directly supports the control claim, ties to the source system, "
+            f"covers the reporting period, and resolves the finding without relying only on verbal confirmation."
+        )
+
+        request_rows.append({
+            "request_id": request.get("request_id"),
+            "finding_id": fid,
+            "priority": priority,
+            "owner": owner,
+            "status": status,
+            "target_date": reg.get("target_date", ""),
+            "risk_domain": finding.get("risk_domain"),
+            "control_atlas_ids": finding.get("control_atlas_ids", []),
+            "evidence_needed": request.get("evidence_needed", finding.get("evidence_gap")),
+            "preferred_artifacts": artifacts,
+            "request_message": request_message,
+            "validation_test": validation_test,
+            "closure_criteria": [
+                "Evidence is attached or clearly referenced.",
+                "Evidence has identifiable source system, owner, and date.",
+                "Evidence resolves the stated gap.",
+                "Reviewer validation notes document why closure is acceptable.",
+                "Residual risk or exception is documented if evidence cannot be produced."
+            ],
+            "management_response": reg.get("management_response", ""),
+            "closure_evidence": reg.get("closure_evidence", ""),
+            "validation_notes": reg.get("validation_notes", "")
+        })
+
+    for row in register:
+        readiness = _closure_readiness_score(row)
+        closure_rows.append({
+            **row,
+            "closure_readiness_score": readiness["score"],
+            "closure_readiness_rating": readiness["rating"],
+            "closure_missing_steps": readiness["missing"],
+            "closure_completed_steps": readiness["completed"]
+        })
+
+    avg_closure_readiness = round(sum(r["closure_readiness_score"] for r in closure_rows) / len(closure_rows)) if closure_rows else 0
+    open_requests = len([r for r in request_rows if r.get("status") != "Closed"])
+    closed_requests = len([r for r in request_rows if r.get("status") == "Closed"])
+
+    return {
+        "product": "Sentinel Evidence Request Studio",
+        "version": "7.0.0",
+        "generated_at": datetime.utcnow().isoformat(),
+        "review_id": result.get("review_id"),
+        "organization": result.get("organization"),
+        "evidence_type": result.get("evidence_type"),
+        "overall_rating": result.get("overall_rating"),
+        "defensibility_score": result.get("evidence_defensibility_score"),
+        "control_atlas_coverage_score": result.get("control_atlas_coverage_score"),
+        "total_requests": len(request_rows),
+        "open_requests": open_requests,
+        "closed_requests": closed_requests,
+        "average_closure_readiness_score": avg_closure_readiness,
+        "owner_distribution": owner_counts,
+        "priority_distribution": priority_counts,
+        "status_distribution": status_counts,
+        "evidence_requests": request_rows,
+        "closure_readiness": closure_rows,
+        "request_governance_note": (
+            "Evidence requests should be tracked with accountable owner, target date, source artifact, management response, "
+            "closure evidence, and reviewer validation notes. Closure should not be based on verbal confirmation alone."
+        ),
+        "request_operating_model": [
+            "Send evidence request to the accountable evidence owner.",
+            "Require source artifact, source system, reporting period, evidence date, and approval where applicable.",
+            "Capture management response in the remediation register.",
+            "Attach or reference closure evidence.",
+            "Document reviewer validation notes before marking closed.",
+            "Re-run Sentinel to confirm score improvement."
+        ]
+    }
+
+def render_evidence_request_pack_html(pack: Dict[str, Any]) -> str:
+    owner_rows = "".join(
+        f"<tr><td>{html.escape(str(k))}</td><td>{v}</td></tr>"
+        for k, v in sorted(pack.get("owner_distribution", {}).items(), key=lambda x: x[1], reverse=True)
+    )
+    priority_rows = "".join(
+        f"<tr><td>{html.escape(str(k))}</td><td>{v}</td></tr>"
+        for k, v in sorted(pack.get("priority_distribution", {}).items(), key=lambda x: x[1], reverse=True)
+    )
+    status_rows = "".join(
+        f"<tr><td>{html.escape(str(k))}</td><td>{v}</td></tr>"
+        for k, v in sorted(pack.get("status_distribution", {}).items(), key=lambda x: x[1], reverse=True)
+    )
+
+    request_blocks = ""
+    for req in pack.get("evidence_requests", []):
+        artifacts = "".join(f"<li>{html.escape(str(a))}</li>" for a in req.get("preferred_artifacts", []))
+        criteria = "".join(f"<li>{html.escape(str(c))}</li>" for c in req.get("closure_criteria", []))
+        controls = ", ".join(req.get("control_atlas_ids", []))
+        request_blocks += f"""
+        <div class='request'>
+          <h3>{html.escape(str(req.get('request_id','')))} · {html.escape(str(req.get('finding_id','')))} · {html.escape(str(req.get('priority','')))}</h3>
+          <p><b>Owner:</b> {html.escape(str(req.get('owner','')))} | <b>Status:</b> {html.escape(str(req.get('status','')))} | <b>Target:</b> {html.escape(str(req.get('target_date','')))}</p>
+          <p><b>Risk domain:</b> {html.escape(str(req.get('risk_domain','')))} | <b>Control Atlas:</b> {html.escape(controls)}</p>
+          <p><b>Evidence Needed:</b> {html.escape(str(req.get('evidence_needed','')))}</p>
+          <p><b>Request Message:</b> {html.escape(str(req.get('request_message','')))}</p>
+          <h4>Preferred Artifacts</h4>
+          <ul>{artifacts}</ul>
+          <h4>Closure Criteria</h4>
+          <ul>{criteria}</ul>
+          <p><b>Validation Test:</b> {html.escape(str(req.get('validation_test','')))}</p>
+        </div>
+        """
+
+    closure_rows = ""
+    for row in pack.get("closure_readiness", []):
+        missing = "; ".join(row.get("closure_missing_steps", []))
+        closure_rows += f"""
+        <tr>
+          <td>{html.escape(str(row.get('finding_id','')))}</td>
+          <td>{html.escape(str(row.get('severity','')))}</td>
+          <td>{html.escape(str(row.get('owner','')))}</td>
+          <td>{html.escape(str(row.get('status','')))}</td>
+          <td>{row.get('closure_readiness_score','')}/100</td>
+          <td>{html.escape(str(row.get('closure_readiness_rating','')))}</td>
+          <td>{html.escape(missing)}</td>
+        </tr>
+        """
+
+    operating_model = "".join(f"<li>{html.escape(x)}</li>" for x in pack.get("request_operating_model", []))
+
+    return f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>Sentinel Evidence Request Studio</title>
+<style>
+body {{ font-family: Arial, sans-serif; background:#f5f7fb; color:#111827; margin:0; padding:32px; }}
+.pack {{ max-width:1280px; margin:auto; background:white; border-radius:22px; padding:38px; box-shadow:0 20px 70px rgba(15,23,42,.13); }}
+.eyebrow {{ color:#1d4ed8; text-transform:uppercase; letter-spacing:.18em; font-size:12px; font-weight:800; }}
+h1 {{ margin:8px 0 8px; font-size:40px; letter-spacing:-.04em; }}
+.sub {{ color:#4b5563; }}
+.cards {{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin:24px 0; }}
+.card {{ background:#f9fafb; border:1px solid #e5e7eb; border-radius:14px; padding:16px; }}
+.card span {{ display:block; color:#6b7280; font-size:12px; text-transform:uppercase; }}
+.card strong {{ display:block; font-size:23px; margin-top:6px; }}
+.summary {{ border-left:5px solid #1d4ed8; background:#eff6ff; padding:16px; border-radius:12px; margin:18px 0; line-height:1.5; }}
+.grid {{ display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin:18px 0; }}
+.panel, .request {{ border:1px solid #e5e7eb; border-radius:16px; padding:18px; margin:16px 0; background:#ffffff; }}
+table {{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px; }}
+th,td {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertical-align:top; }}
+li {{ margin:7px 0; }}
+.footer {{ color:#6b7280; font-size:12px; margin-top:24px; }}
+@media print {{ body {{ background:white; padding:0; }} .pack {{ box-shadow:none; }} }}
+</style>
+</head>
+<body>
+<div class='pack'>
+<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v7.0</div>
+<h1>Evidence Request Studio</h1>
+<p class='sub'>Request-ready evidence pack with owners, priority, preferred artifacts, closure criteria, and validation tests.</p>
+
+<div class='cards'>
+<div class='card'><span>Organization</span><strong>{html.escape(str(pack.get('organization','')))}</strong></div>
+<div class='card'><span>Total Requests</span><strong>{pack.get('total_requests','')}</strong></div>
+<div class='card'><span>Open Requests</span><strong>{pack.get('open_requests','')}</strong></div>
+<div class='card'><span>Closed</span><strong>{pack.get('closed_requests','')}</strong></div>
+<div class='card'><span>Closure Readiness</span><strong>{pack.get('average_closure_readiness_score','')}/100</strong></div>
+</div>
+
+<div class='summary'>{html.escape(pack.get('request_governance_note',''))}</div>
+
+<div class='grid'>
+<div class='panel'><h2>Owners</h2><table><tr><th>Owner</th><th>Requests</th></tr>{owner_rows}</table></div>
+<div class='panel'><h2>Priority</h2><table><tr><th>Priority</th><th>Requests</th></tr>{priority_rows}</table></div>
+<div class='panel'><h2>Status</h2><table><tr><th>Status</th><th>Requests</th></tr>{status_rows}</table></div>
+</div>
+
+<div class='panel'><h2>Operating Model</h2><ol>{operating_model}</ol></div>
+
+<h2>Evidence Requests</h2>
+{request_blocks}
+
+<h2>Closure Readiness Tracker</h2>
+<table><tr><th>Finding</th><th>Severity</th><th>Owner</th><th>Status</th><th>Readiness</th><th>Rating</th><th>Missing Steps</th></tr>{closure_rows}</table>
+
+<div class='footer'>Generated by Sentinel Evidence Defensibility Workbench v7.0. This output supports evidence follow-up, remediation closure, and management response tracking.</div>
+</div>
+</body>
+</html>"""
+
+@app.get("/api/reviews/{review_id}/request-studio")
+def saved_review_request_studio(review_id: str):
+    result = get_review(review_id)
+    return build_evidence_request_studio_pack(result)
+
+@app.get("/api/reviews/{review_id}/request-studio-html", response_class=HTMLResponse)
+def saved_review_request_studio_html(review_id: str):
+    result = get_review(review_id)
+    return render_evidence_request_pack_html(build_evidence_request_studio_pack(result))

@@ -1,0 +1,24 @@
+{
+  "organization": "Sample Tier-1 Bank",
+  "industry": "BFSI / Regulated Banking",
+  "evidence_type": "Evidence Request Studio Defensibility Review",
+  "review_objective": "Generate findings, evidence requests, closure criteria, and validation tests.",
+  "items": [
+    {
+      "title": "Q4 Phishing Metric Evidence",
+      "content": "The ITSC deck reported 150 delivered emails. KnowBe4 source export shows denominator changed to 152. Screenshot-only evidence was retained. No reviewer approval or reconciliation is attached.",
+      "source_system": "KnowBe4 / ITSC Deck",
+      "owner": "IT GRC",
+      "reporting_period": "Q4",
+      "artifact_type": "Metric Evidence"
+    },
+    {
+      "title": "Vendor SOC 2 Evidence",
+      "content": "Vendor provided SOC 2 Type II report. Vendor processes customer data and NPI. Evidence does not include data flow, retention description, bridge letter, subservice organization review, DPA, or CUEC analysis.",
+      "source_system": "Vendor Portal",
+      "owner": "TPRM",
+      "reporting_period": "Annual Review",
+      "artifact_type": "SOC 2 / Vendor Evidence"
+    }
+  ]
+}
