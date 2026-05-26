@@ -1,0 +1,11 @@
+Step,Delivery_Item,Status,Action
+1,Run saved review,Pending,Run + Save Review to Vault
+2,Generate Demo Room,Pending,Open Demo Room tab
+3,Generate Board Pack,Pending,Open Board Pack tab
+4,Generate Evidence Request Studio,Pending,Open Evidence Requests tab
+5,Export HTML report,Pending,Use HTML Report button
+6,Export remediation register,Pending,Use Register CSV button
+7,Assign remediation owners,Pending,Use Command Center
+8,Capture management response,Pending,Use Command Center
+9,Capture closure evidence,Pending,Use Command Center
+10,Prepare client follow-up,Pending,Copy client follow-up note

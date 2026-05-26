@@ -2,7 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Sentinel Evidence Defensibility Workbench",
+  title: "Sentinel v8.1 Evidence Defensibility Workbench",
   description: "Evidence defensibility, control atlas mapping, review vault, remediation register, and portfolio command center by Eye On Bits Pvt Ltd.",
 };
 

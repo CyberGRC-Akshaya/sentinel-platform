@@ -1,0 +1,26 @@
+RUN SENTINEL AFTER LAPTOP RESTART
+
+1. Open Docker Desktop first.
+2. Wait until Docker engine is running.
+3. Open PowerShell.
+
+Commands:
+
+cd $HOME\Desktop\EyeOnBits-Sentinel
+docker compose down --remove-orphans
+docker compose up --build
+
+Open app:
+http://localhost:3000
+
+Check backend:
+http://localhost:8000/api/health
+
+If browser shows old UI:
+Ctrl + Shift + R
+
+If Docker fails:
+wsl --shutdown
+Start-Process "C:\Program Files\Docker\Docker\Docker Desktop.exe"
+docker context use desktop-linux
+docker compose up --build

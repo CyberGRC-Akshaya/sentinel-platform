@@ -277,7 +277,7 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v8-executive-demo-room.html";
+    a.download = "sentinel-v8.1-executive-demo-room.html";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -288,7 +288,7 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v8-executive-demo-room.json";
+    a.download = "sentinel-v8.1-executive-demo-room.json";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -300,7 +300,7 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v8-portfolio-demo-room.html";
+    a.download = "sentinel-v8.1-portfolio-demo-room.html";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -315,6 +315,117 @@ export default function Home() {
     ].join("\n");
     navigator.clipboard.writeText(script);
     alert("Demo talk track copied.");
+  }
+
+
+  function deliveryChecklistRows() {
+    const rows = [
+      ["1", "Run saved review", currentReviewId ? "Ready" : "Pending", "Run + Save Review to Vault"],
+      ["2", "Generate Demo Room", demoPack ? "Ready" : "Pending", "Open Demo Room tab"],
+      ["3", "Generate Board Pack", boardPack ? "Ready" : "Pending", "Open Board Pack tab"],
+      ["4", "Generate Evidence Request Studio", requestPack ? "Ready" : "Pending", "Open Evidence Requests tab"],
+      ["5", "Export HTML report", result ? "Ready" : "Pending", "Use HTML Report button"],
+      ["6", "Export remediation register", registerRows.length ? "Ready" : "Pending", "Use Register CSV button"],
+      ["7", "Assign remediation owners", registerRows.some((r) => r.owner) ? "Ready" : "Pending", "Use Command Center"],
+      ["8", "Capture management response", registerRows.some((r) => r.management_response) ? "Ready" : "Pending", "Use Command Center"],
+      ["9", "Capture closure evidence", registerRows.some((r) => r.closure_evidence) ? "Ready" : "Pending", "Use Command Center"],
+      ["10", "Prepare client follow-up", demoPack ? "Ready" : "Pending", "Copy client follow-up note"]
+    ];
+    return rows;
+  }
+
+  function deliveryReadinessScore() {
+    const rows = deliveryChecklistRows();
+    const ready = rows.filter((r) => r[2] === "Ready").length;
+    return Math.round((ready / rows.length) * 100);
+  }
+
+  function downloadDeliveryChecklistCsv() {
+    const headers = ["Step", "Delivery_Item", "Status", "Action"];
+    downloadCsv("sentinel-v8.1-client-delivery-checklist.csv", headers, deliveryChecklistRows());
+  }
+
+  function clientFollowUpText() {
+    const org = result?.organization || "the evidence review package";
+    const score = result?.evidence_defensibility_score || "TBD";
+    const rating = result?.overall_rating || "TBD";
+    const open = registerRows.filter((r) => r.status !== "Closed").length;
+    return `Subject: Sentinel Evidence Defensibility Review - Follow-up Items
+
+Hi Team,
+
+We completed the Sentinel evidence defensibility review for ${org}.
+
+Summary:
+- Overall rating: ${rating}
+- Evidence defensibility score: ${score}/100
+- Open remediation / evidence follow-up items: ${open}
+- Key focus areas: source lineage, missing control evidence, management response, closure evidence, and reviewer validation.
+
+Recommended next steps:
+1. Review the remediation register and assign owners where missing.
+2. Provide the requested evidence artifacts listed in the Evidence Request Studio.
+3. Add management responses for open items.
+4. Attach closure evidence or document risk acceptance where evidence cannot be produced.
+5. Re-run the review after evidence submission to confirm score improvement.
+
+Regards,
+Eye On Bits Pvt Ltd
+Sentinel Evidence Defensibility Workbench`;
+  }
+
+  function copyClientFollowUp() {
+    navigator.clipboard.writeText(clientFollowUpText());
+    alert("Client follow-up note copied.");
+  }
+
+  function downloadClientFollowUpTxt() {
+    const blob = new Blob([clientFollowUpText()], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v8.1-client-follow-up-note.txt";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadDemoAssetManifest() {
+    const payload = {
+      product: "Sentinel Evidence Defensibility Workbench",
+      version: "8.1",
+      generated_at: new Date().toISOString(),
+      current_review_id: currentReviewId,
+      delivery_readiness_score: deliveryReadinessScore(),
+      exports_to_generate: [
+        "Workspace JSON",
+        "Register CSV",
+        "Control CSV",
+        "Request CSV",
+        "HTML Report",
+        "Board HTML",
+        "Demo HTML",
+        "Delivery Checklist CSV",
+        "Client Follow-up TXT"
+      ],
+      recommended_demo_sequence: [
+        "Open Demo Room",
+        "Explain one-liner and positioning",
+        "Run evidence review",
+        "Open Control Atlas",
+        "Open Evidence Requests",
+        "Open Board Pack",
+        "Show Command Center",
+        "Export delivery artifacts"
+      ],
+      client_follow_up_note: clientFollowUpText()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v8.1-demo-asset-manifest.json";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function loadCase(name: string) {
@@ -604,7 +715,7 @@ export default function Home() {
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v8.0</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v8.1</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
             Professional assurance workbench with review vault, evidence request workflow, closure readiness, control atlas mapping, demo-room storytelling, board-pack generation, remediation register, and executive reporting.
@@ -612,8 +723,8 @@ export default function Home() {
         </div>
         <div className="heroCard">
           <span>Major Upgrade</span>
-          <strong>Executive Demo Room + Final MVP Edition.</strong>
-          <p>Sentinel now converts the working product into a demo-ready buyer narrative, pilot offer, objection handling, and guided sales walkthrough.</p>
+          <strong>Executive Demo Room + Client Delivery Kit.</strong>
+          <p>Sentinel now packages the working product into a buyer-ready demo, delivery checklist, follow-up script, exports, and pilot handoff workflow.</p>
         </div>
       </section>
 
@@ -691,7 +802,7 @@ export default function Home() {
               </div>
 
               <div className="tabBar">
-                {["Demo Room", "Portfolio", "Board Pack", "Evidence Requests", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
+                {["Demo Room", "Delivery Kit", "Portfolio", "Board Pack", "Evidence Requests", "Command Center", "Control Atlas", "Output", "Findings"].map((tab) => (
                   <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
                 ))}
               </div>
@@ -802,6 +913,62 @@ export default function Home() {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+
+
+              {activeTab === "Delivery Kit" && (
+                <div>
+                  <div className="summary">
+                    Client Delivery Kit packages Sentinel outputs into a demo-ready handoff: checklist, export manifest, client follow-up note, and delivery readiness score.
+                  </div>
+
+                  <div className="scoreRow">
+                    <div className="scoreBox"><span>Delivery Readiness</span><strong>{deliveryReadinessScore()}/100</strong></div>
+                    <div className="scoreBox"><span>Register Items</span><strong>{registerRows.length}</strong></div>
+                    <div className="scoreBox"><span>Saved Review</span><strong>{currentReviewId ? "Yes" : "No"}</strong></div>
+                  </div>
+
+                  <div className="actions">
+                    <button onClick={downloadDeliveryChecklistCsv}>Checklist CSV</button>
+                    <button onClick={copyClientFollowUp}>Copy Follow-up</button>
+                    <button onClick={downloadClientFollowUpTxt}>Follow-up TXT</button>
+                    <button onClick={downloadDemoAssetManifest}>Asset Manifest</button>
+                    <button onClick={downloadDemoRoomHtml}>Demo HTML</button>
+                  </div>
+
+                  <div className="nextSteps">
+                    <h3>Client Delivery Checklist</h3>
+                    {deliveryChecklistRows().map((row) => (
+                      <div key={row[0]} className="miniRow">
+                        <span>{row[0]}. {row[1]} — {row[3]}</span>
+                        <strong>{row[2]}</strong>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="miniGrid">
+                    <div>
+                      <h3>Demo Asset Pack</h3>
+                      <div className="miniRow"><span>Demo Room HTML</span><strong>{demoPack ? "Ready" : "Pending"}</strong></div>
+                      <div className="miniRow"><span>Board Pack HTML</span><strong>{boardPack ? "Ready" : "Pending"}</strong></div>
+                      <div className="miniRow"><span>Evidence Request CSV</span><strong>{requestPack ? "Ready" : "Pending"}</strong></div>
+                      <div className="miniRow"><span>Remediation Register</span><strong>{registerRows.length ? "Ready" : "Pending"}</strong></div>
+                    </div>
+                    <div>
+                      <h3>Pilot Handoff</h3>
+                      <div className="miniRow"><span>Review objective</span><strong>{result?.review_objective ? "Captured" : "Pending"}</strong></div>
+                      <div className="miniRow"><span>Evidence package</span><strong>{result?.evidence_type || "Pending"}</strong></div>
+                      <div className="miniRow"><span>Buyer narrative</span><strong>{demoPack ? "Ready" : "Pending"}</strong></div>
+                      <div className="miniRow"><span>Follow-up note</span><strong>Ready</strong></div>
+                    </div>
+                  </div>
+
+                  <div className="mappingBox">
+                    <h4>Client Follow-up Preview</h4>
+                    <p style={{ whiteSpace: "pre-wrap" }}>{clientFollowUpText()}</p>
+                  </div>
                 </div>
               )}
 
