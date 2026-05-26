@@ -104,9 +104,11 @@ export default function Home() {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("Workbench");
   const [saveMessage, setSaveMessage] = useState("");
+  const [portfolio, setPortfolio] = useState<any>(null);
 
   useEffect(() => {
     loadVault();
+    loadPortfolio();
   }, []);
 
   async function loadVault() {
@@ -119,6 +121,61 @@ export default function Home() {
     } catch {
       setReviews([]);
     }
+  }
+
+
+  async function loadPortfolio() {
+    try {
+      const response = await fetch(`${API_BASE}/api/portfolio`);
+      if (response.ok) {
+        const data = await response.json();
+        setPortfolio(data);
+      }
+    } catch {
+      setPortfolio(null);
+    }
+  }
+
+  async function seedDemoReviews() {
+    setSaveMessage("");
+    try {
+      const response = await fetch(`${API_BASE}/api/demo/seed`, { method: "POST" });
+      if (!response.ok) throw new Error("Could not seed demo reviews.");
+      const data = await response.json();
+      setSaveMessage(`Seeded ${data.reviews_created} demo review(s).`);
+      await loadVault();
+      await loadPortfolio();
+      setActiveTab("Portfolio");
+    } catch (err: any) {
+      setError(err.message || "Could not seed demo reviews.");
+    }
+  }
+
+  async function downloadPortfolioReport() {
+    try {
+      const response = await fetch(`${API_BASE}/api/portfolio/report-html`);
+      const reportHtml = await response.text();
+      const blob = new Blob([reportHtml], { type: "text/html" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "sentinel-v4-portfolio-command-center-report.html";
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      setError("Could not generate portfolio report.");
+    }
+  }
+
+  function downloadPortfolioJson() {
+    if (!portfolio) return;
+    const blob = new Blob([JSON.stringify(portfolio, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v4-portfolio-snapshot.json";
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function loadCase(name: string) {
@@ -252,6 +309,7 @@ export default function Home() {
       setActiveTab("Command Center");
       setSaveMessage("Review saved to vault.");
       await loadVault();
+      await loadPortfolio();
     } catch (err: any) {
       setError(err.message || "Something went wrong.");
     }
@@ -282,6 +340,7 @@ export default function Home() {
         setRegisterRows([]);
       }
       await loadVault();
+      await loadPortfolio();
     } catch {
       setError("Could not delete review.");
     }
@@ -419,17 +478,17 @@ export default function Home() {
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v3.0</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v4.0</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
-            Professional assurance workbench with persistent review vault, intake diagnostics, defensibility scoring,
+            Professional assurance workbench with persistent review vault, portfolio analytics, executive dashboard,
             remediation register, and saved report workspace.
           </p>
         </div>
         <div className="heroCard">
           <span>Major Upgrade</span>
-          <strong>Persistent Review Vault + Saved Remediation Register.</strong>
-          <p>Run reviews, save them locally, reopen them after restart, update management responses, and export client-ready registers.</p>
+          <strong>Portfolio Command Center + Persistent Review Vault.</strong>
+          <p>Run reviews, save them locally, track remediation, view portfolio trends, seed demo reviews, and export executive portfolio reports.</p>
         </div>
       </section>
 
@@ -507,7 +566,7 @@ export default function Home() {
               </div>
 
               <div className="tabBar">
-                {["Command Center", "Output", "Scorecards", "Findings"].map((tab) => (
+                {["Portfolio", "Command Center", "Output", "Scorecards", "Findings"].map((tab) => (
                   <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
                 ))}
               </div>
@@ -523,6 +582,78 @@ export default function Home() {
               <div className="actions secondaryActions">
                 <button onClick={copySummary}>Copy Executive Summary</button>
               </div>
+
+
+              {activeTab === "Portfolio" && (
+                <div>
+                  <div className="summary">
+                    Portfolio Command Center summarizes saved evidence reviews, recurring domains, severity mix, and remediation status across the local review vault.
+                  </div>
+
+                  <div className="actions">
+                    <button onClick={loadPortfolio}>Refresh Portfolio</button>
+                    <button onClick={seedDemoReviews}>Seed Demo Reviews</button>
+                    <button onClick={downloadPortfolioJson}>Portfolio JSON</button>
+                    <button onClick={downloadPortfolioReport}>Portfolio HTML Report</button>
+                    <button onClick={loadVault}>Refresh Vault</button>
+                  </div>
+
+                  {!portfolio && <div className="empty">No portfolio snapshot loaded yet. Refresh portfolio or seed demo reviews.</div>}
+
+                  {portfolio && (
+                    <div>
+                      <div className="scoreRow">
+                        <div className="scoreBox"><span>Saved Reviews</span><strong>{portfolio.total_reviews}</strong></div>
+                        <div className="scoreBox"><span>Avg Defensibility</span><strong>{portfolio.average_defensibility_score}/100</strong></div>
+                        <div className="scoreBox"><span>Open Items</span><strong>{portfolio.open_register_items}</strong></div>
+                      </div>
+
+                      <div className="miniGrid">
+                        <div>
+                          <h3>Portfolio Quality</h3>
+                          <div className="miniRow"><span>Average Intake</span><strong>{portfolio.average_intake_score}/100</strong></div>
+                          <div className="miniRow"><span>Average Metadata</span><strong>{portfolio.average_metadata_score}/100</strong></div>
+                          <div className="miniRow"><span>Total Findings</span><strong>{portfolio.total_findings}</strong></div>
+                          <div className="miniRow"><span>High/Critical Findings</span><strong>{portfolio.high_or_critical_findings}</strong></div>
+                        </div>
+                        <div>
+                          <h3>Remediation Portfolio</h3>
+                          <div className="miniRow"><span>Open</span><strong>{portfolio.open_register_items}</strong></div>
+                          <div className="miniRow"><span>In Progress</span><strong>{portfolio.in_progress_register_items}</strong></div>
+                          <div className="miniRow"><span>Closed</span><strong>{portfolio.closed_register_items}</strong></div>
+                        </div>
+                      </div>
+
+                      <div className="miniGrid">
+                        <div>
+                          <h3>Risk Domain Distribution</h3>
+                          {Object.entries(portfolio.risk_domain_distribution || {}).map(([k, v]: any) => (
+                            <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
+                          ))}
+                        </div>
+                        <div>
+                          <h3>Severity Distribution</h3>
+                          {Object.entries(portfolio.severity_distribution || {}).map(([k, v]: any) => (
+                            <div key={k} className="miniRow"><span>{k}</span><strong>{v}</strong></div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="registerPanel">
+                        <h3>Saved Reviews Portfolio</h3>
+                        {(portfolio.reviews || []).map((review: any) => (
+                          <div key={review.id} className="vaultRow">
+                            <strong>{review.evidence_type}</strong>
+                            <span>{review.organization} · {review.overall_rating} · {review.evidence_defensibility_score}/100 · {review.total_findings} findings</span>
+                            <em>{new Date(review.created_at).toLocaleString()}</em>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
 
               {activeTab === "Command Center" && (
                 <div>

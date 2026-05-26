@@ -1,0 +1,16 @@
+{
+  "organization": "Sample Enterprise Portfolio",
+  "industry": "BFSI / Technology / AI Governance",
+  "evidence_type": "Portfolio Demonstration Pack",
+  "review_objective": "Demonstrate portfolio-level evidence defensibility, remediation status, and risk domain roll-up.",
+  "items": [
+    {
+      "title": "Combined Metrics and Vendor Evidence",
+      "content": "Metric denominator changed later. Vendor SOC 2 evidence does not include CUEC analysis, data flow, retention description, or bridge letter. Review approval is not shown.",
+      "source_system": "Combined Evidence Pack",
+      "owner": "IT GRC",
+      "reporting_period": "Portfolio Review",
+      "artifact_type": "Portfolio Evidence"
+    }
+  ]
+}
