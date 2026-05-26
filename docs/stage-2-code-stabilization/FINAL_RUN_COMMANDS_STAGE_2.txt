@@ -1,0 +1,30 @@
+FINAL RUN COMMANDS — STAGE 2
+
+Open PowerShell in:
+
+C:\Users\Akshaya\Desktop\EyeOnBits-Sentinel
+
+Run product:
+
+docker compose down --remove-orphans
+docker compose up --build
+
+Open:
+
+http://localhost:3000
+http://localhost:8000/api/health
+
+Stop product:
+
+Ctrl + C
+docker compose down --remove-orphans
+
+Git branch for Stage 2:
+
+git checkout -b stage-2-code-stabilization
+
+Commit Stage 2 pack:
+
+git add docs scripts cursor-prompts
+git commit -m "Add Stage 2 code stabilization plan and tools"
+git push -u origin stage-2-code-stabilization
