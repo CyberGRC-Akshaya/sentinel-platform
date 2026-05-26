@@ -7,9 +7,9 @@ from datetime import datetime
 import html
 
 app = FastAPI(
-    title="Sentinel Assurance Engine",
-    description="AI-native assurance intelligence engine by Eye On Bits for evidence validation, metric challenge, and examiner-style governance review.",
-    version="1.0.0"
+    title="Sentinel Evidence Defensibility Workbench",
+    description="Professional assurance workbench for evidence defensibility review across IT metrics, vendor risk, privacy, SDLC, IAM, and AI governance.",
+    version="2.0.0"
 )
 
 app.add_middleware(
@@ -23,141 +23,164 @@ app.add_middleware(
 FRAMEWORK_LIBRARY = {
     "Metrics Assurance": [
         {
-            "framework": "FFIEC Management / Audit",
-            "mapping_type": "Examiner expectation",
-            "rationale": "Metric reporting should be traceable to source data, management review, and defensible measurement logic.",
-            "evidence_expected": "Source-of-record extract, calculation logic, denominator/numerator reconciliation, reviewer approval."
+            "framework": "FFIEC-style Management / Audit Expectations",
+            "mapping_type": "Examiner-style assurance relevance",
+            "rationale": "Management reporting and control metrics should be supported by traceable source data, defined calculation logic, reporting-period alignment, and review evidence.",
+            "evidence_expected": "Metric definition, source export, numerator/denominator logic, reconciliation, reviewer approval, and committee/reporting tie-out."
         },
         {
-            "framework": "GLBA 501(b)",
-            "mapping_type": "Program relevance",
-            "rationale": "Information security program oversight depends on reliable risk and control reporting.",
-            "evidence_expected": "Governance reporting package, validated security metrics, review evidence."
+            "framework": "GLBA 501(b) Program Governance Relevance",
+            "mapping_type": "Program oversight relevance",
+            "rationale": "Security program oversight depends on reliable governance reporting and defensible evidence over risk and control performance.",
+            "evidence_expected": "Validated security metrics, governance reporting package, management review evidence, and remediation tracking."
         },
         {
             "framework": "NIST CSF Govern",
             "mapping_type": "Control framework relevance",
-            "rationale": "Governance outcomes require measurement, oversight, and risk-informed decision-making.",
-            "evidence_expected": "Risk reporting, control monitoring, accountable owner review."
-        }
-    ],
-    "Evidence Lineage": [
-        {
-            "framework": "FFIEC Audit",
-            "mapping_type": "Audit evidence principle",
-            "rationale": "Audit and control validation activities require reliable, complete, and traceable evidence.",
-            "evidence_expected": "Evidence source, extraction date, query/filter criteria, reviewer notes, sample basis."
-        },
-        {
-            "framework": "ISO 27001 Monitoring and Measurement",
-            "mapping_type": "Control framework relevance",
-            "rationale": "Monitoring and measurement depend on defined methods, comparable results, and retained evidence.",
-            "evidence_expected": "Monitoring method, evidence retention, review trail."
+            "rationale": "Governance outcomes require risk-informed oversight, measurement, accountability, and evidence-based decision-making.",
+            "evidence_expected": "Risk reporting, accountable owner review, control monitoring evidence, and escalation records."
         }
     ],
     "Third-Party Risk": [
         {
             "framework": "AICPA SOC 2",
-            "mapping_type": "Assurance reliance",
-            "rationale": "SOC 2 reliance requires understanding report scope, exceptions, system boundaries, and complementary user entity controls.",
-            "evidence_expected": "SOC 2 report, CUEC analysis, bridge letter if applicable, control owner mapping."
+            "mapping_type": "Assurance reliance relevance",
+            "rationale": "SOC 2 reliance requires understanding scope, exceptions, subservice organizations, system boundaries, and complementary user entity controls.",
+            "evidence_expected": "SOC 2 report, bridge letter if applicable, CUEC analysis, subservice review, internal owner mapping, and residual risk conclusion."
         },
         {
-            "framework": "FFIEC Outsourcing Technology Services",
-            "mapping_type": "Third-party oversight expectation",
-            "rationale": "Financial institutions should understand and manage outsourced technology service risks.",
-            "evidence_expected": "Vendor due diligence, contract obligations, risk assessment, monitoring evidence."
-        },
-        {
-            "framework": "GLBA Vendor Oversight",
-            "mapping_type": "Safeguards relevance",
-            "rationale": "Service providers handling customer information require appropriate oversight and safeguards.",
-            "evidence_expected": "Data handling commitments, security controls, incident notification terms."
+            "framework": "FFIEC Outsourcing / Third-Party Risk Expectations",
+            "mapping_type": "Third-party oversight relevance",
+            "rationale": "Outsourced technology risk should be evaluated through due diligence, contractual obligations, monitoring, and risk-based oversight.",
+            "evidence_expected": "Due diligence evidence, contract/security addendum, vendor risk assessment, monitoring artifacts, and issue tracking."
         }
     ],
     "Privacy / Data Protection": [
         {
-            "framework": "GLBA",
-            "mapping_type": "Privacy/security relevance",
-            "rationale": "Customer information handling must be supported by appropriate safeguards and oversight.",
-            "evidence_expected": "Data-flow diagram, processing purpose, access boundaries, retention and disposal evidence."
+            "framework": "GLBA Customer Information Safeguards Relevance",
+            "mapping_type": "Data protection relevance",
+            "rationale": "Customer information handling should be supported by safeguards, access boundaries, retention controls, and third-party oversight where applicable.",
+            "evidence_expected": "Data-flow diagram, processing purpose, access list, retention/destruction evidence, vendor transfer evidence, and privacy/security obligations."
         },
         {
-            "framework": "NIST Privacy Framework",
-            "mapping_type": "Privacy control relevance",
-            "rationale": "Privacy risk management requires understanding processing, data actions, and protective controls.",
-            "evidence_expected": "Processing inventory, data minimization rationale, access and retention controls."
-        },
-        {
-            "framework": "ISO 27701",
-            "mapping_type": "Privacy management relevance",
-            "rationale": "Privacy information management requires defined responsibilities and documented processing controls.",
-            "evidence_expected": "Privacy roles, processing record, processor/controller obligations."
+            "framework": "NIST Privacy Framework / ISO 27701 Relevance",
+            "mapping_type": "Privacy governance relevance",
+            "rationale": "Privacy risk management requires understanding data actions, processing responsibilities, minimization, retention, and control accountability.",
+            "evidence_expected": "Processing inventory, privacy impact review, data minimization rationale, retention controls, and processor/controller obligations."
         }
     ],
-    "SDLC / AI Governance": [
+    "SDLC / Change / DevSecOps": [
         {
             "framework": "FFIEC Development, Acquisition, and Maintenance",
-            "mapping_type": "Technology governance expectation",
-            "rationale": "System changes and development activities should be governed, tested, approved, and controlled before production movement.",
-            "evidence_expected": "Change record, test results, approvals, exception/risk acceptance, deployment evidence."
+            "mapping_type": "Technology governance relevance",
+            "rationale": "System changes and development activities should be governed, tested, approved, risk-assessed, and controlled before production movement.",
+            "evidence_expected": "Change record, release approval, security testing results, exception/risk acceptance, deployment record, and rollback evidence."
         },
         {
-            "framework": "NIST SSDF",
+            "framework": "NIST SSDF / Secure SDLC Good Practice",
             "mapping_type": "Secure development relevance",
-            "rationale": "Secure software development requires practices for design, testing, vulnerability handling, and release integrity.",
-            "evidence_expected": "Security testing, code/release review, vulnerability disposition, approval gate evidence."
-        },
+            "rationale": "Secure software development should evidence secure design, testing, vulnerability handling, and release integrity.",
+            "evidence_expected": "SAST/DAST/pentest evidence, vulnerability disposition, code/release review, approval gate evidence, and production readiness confirmation."
+        }
+    ],
+    "AI Governance": [
         {
             "framework": "NIST AI RMF",
-            "mapping_type": "AI governance relevance",
-            "rationale": "AI systems should be governed, mapped, measured, and managed based on risk and impact.",
-            "evidence_expected": "AI inventory, risk classification, data review, monitoring plan, approval record."
+            "mapping_type": "AI risk governance relevance",
+            "rationale": "AI systems should be governed, mapped, measured, and managed based on intended use, risk, impact, and monitoring obligations.",
+            "evidence_expected": "AI inventory, use case owner, risk tier/classification, data review, monitoring plan, approval record, and incident escalation criteria."
         },
         {
             "framework": "ISO/IEC 42001",
             "mapping_type": "AI management system relevance",
-            "rationale": "AI governance should be supported by accountable management system practices and documented controls.",
-            "evidence_expected": "AI use case records, roles, policies/standards, risk treatment and monitoring evidence."
-        }
-    ],
-    "Audit Evidence": [
-        {
-            "framework": "Internal Control Testing Discipline",
-            "mapping_type": "Assurance practice",
-            "rationale": "Positive assurance conclusions must be supported by test procedure, sample basis, and reviewer evidence.",
-            "evidence_expected": "Test steps, population, sample, exception logic, conclusion, reviewer approval."
-        },
-        {
-            "framework": "CRI Profile Governance",
-            "mapping_type": "Cyber risk governance relevance",
-            "rationale": "Cyber risk governance relies on defensible evidence of control operation and review.",
-            "evidence_expected": "Control evidence, owner accountability, review trail, remediation tracking."
+            "rationale": "AI governance should be supported by accountable management system practices, documented responsibilities, risk treatment, and monitoring evidence.",
+            "evidence_expected": "AI management roles, policy/standard evidence, risk treatment records, use case approvals, and monitoring evidence."
         }
     ],
     "Identity & Access": [
         {
-            "framework": "FFIEC Authentication / Access Management Expectations",
-            "mapping_type": "Access governance relevance",
-            "rationale": "Access controls should be risk-based, monitored, reviewed, and supported by appropriate authentication evidence.",
-            "evidence_expected": "Access reviews, MFA/risk-based authentication evidence, privileged access monitoring."
+            "framework": "FFIEC Authentication / Access Governance Expectations",
+            "mapping_type": "Access control relevance",
+            "rationale": "Access and authentication controls should be risk-based, approved, reviewed, monitored, and supported by exception handling evidence.",
+            "evidence_expected": "Access request and approval, authentication control coverage, MFA/risk decision evidence, periodic review, exception register, and revocation evidence."
         },
         {
             "framework": "ISO 27001 Access Control",
             "mapping_type": "Control framework relevance",
-            "rationale": "Identity and access controls require lifecycle governance, authorization, review, and revocation evidence.",
-            "evidence_expected": "Access request, approval, periodic review, joiner/mover/leaver evidence."
+            "rationale": "Identity lifecycle and access controls require authorization, review, revocation, and privileged access governance.",
+            "evidence_expected": "Joiner/mover/leaver records, access certification, privileged access review, and remediation closure evidence."
         }
     ],
-    "General Assurance": [
+    "General Evidence Defensibility": [
         {
-            "framework": "FFIEC / NIST / ISO Governance Good Practice",
-            "mapping_type": "General assurance relevance",
-            "rationale": "Evidence should be complete, accurate, retained, reviewed, and tied to a defined control or risk objective.",
-            "evidence_expected": "Control objective, evidence source, owner, review, retention, and conclusion."
+            "framework": "Audit Evidence Discipline",
+            "mapping_type": "Professional assurance relevance",
+            "rationale": "Evidence should be sufficient, reliable, relevant, retained, reviewed, and clearly tied to the claim being supported.",
+            "evidence_expected": "Evidence objective, source, owner, date, review trail, conclusion, and linkage to control or risk statement."
         }
     ]
 }
+
+DIMENSIONS = [
+    {
+        "key": "source_lineage",
+        "label": "Source Lineage",
+        "weight": 18,
+        "positive": ["source export", "system export", "source-of-record", "source of record", "query", "extract", "timestamp", "system generated"],
+        "negative": ["screenshot-only", "screenshot only", "manual", "email screenshot", "corrected later"]
+    },
+    {
+        "key": "completeness",
+        "label": "Completeness",
+        "weight": 16,
+        "positive": ["population", "complete", "full extract", "all records", "reconciliation", "tie-out"],
+        "negative": ["partial", "sample only", "not included", "missing", "not available", "does not include"]
+    },
+    {
+        "key": "calculation_integrity",
+        "label": "Calculation Integrity",
+        "weight": 16,
+        "positive": ["numerator", "denominator", "formula", "calculation", "logic", "recalculation", "validated"],
+        "negative": ["changed to", "mismatch", "inconsistent", "corrected later", "cumulative", "unclear"]
+    },
+    {
+        "key": "review_approval",
+        "label": "Review & Approval Evidence",
+        "weight": 14,
+        "positive": ["approved", "reviewed", "sign-off", "attested", "owner approval", "committee approved"],
+        "negative": ["no approval", "not approved", "no review", "review not shown", "owner stated"]
+    },
+    {
+        "key": "period_alignment",
+        "label": "Reporting Period Alignment",
+        "weight": 12,
+        "positive": ["q1", "q2", "q3", "q4", "monthly", "quarterly", "annual", "reporting period", "as of"],
+        "negative": ["year-to-date", "ytd", "cumulative", "prior period", "unclear period"]
+    },
+    {
+        "key": "governance_traceability",
+        "label": "Governance Traceability",
+        "weight": 14,
+        "positive": ["policy", "standard", "control", "risk acceptance", "exception", "issue", "ticket", "change record"],
+        "negative": ["no ticket", "no change record", "no exception", "no risk acceptance", "not documented"]
+    },
+    {
+        "key": "data_handling",
+        "label": "Data Handling & Privacy Boundary",
+        "weight": 10,
+        "positive": ["data flow", "retention", "pii", "npi", "customer data", "encryption", "access boundary", "dpa"],
+        "negative": ["no data flow", "retention not", "unknown retention", "no dpa", "not documented"]
+    }
+]
+
+DOMAIN_KEYWORDS = [
+    ("AI Governance", [" ai ", "genai", "model", "prompt", "copilot", "assistant", "machine learning", "inventory", "risk tier"]),
+    ("Identity & Access", ["iam", "access", "authentication", "mfa", "privileged", "password", "user review", "entitlement"]),
+    ("Third-Party Risk", ["vendor", "soc 2", "soc2", "cuec", "subservice", "supplier", "outsourc"]),
+    ("Privacy / Data Protection", ["pii", "npi", "customer data", "data flow", "retention", "privacy", "dpa", "deletion"]),
+    ("SDLC / Change / DevSecOps", ["sdlc", "devops", "release", "change record", "deployment", "security testing", "sast", "dast"]),
+    ("Metrics Assurance", ["metric", "denominator", "numerator", "committee", "dashboard", "scorecard", "rcsa"])
+]
 
 class EvidenceItem(BaseModel):
     title: str
@@ -174,215 +197,255 @@ class AnalyzeRequest(BaseModel):
     review_objective: str
     items: List[EvidenceItem]
 
-def severity_weight(severity: str) -> int:
-    return {"Critical": 30, "High": 18, "Medium": 10, "Low": 5}.get(severity, 5)
+def normalize_text(item: EvidenceItem) -> str:
+    return f" {item.title} {item.content} {item.source_system or ''} {item.owner or ''} {item.reporting_period or ''} ".lower()
 
-def framework_mappings_for(domain: str) -> List[Dict[str, str]]:
-    return FRAMEWORK_LIBRARY.get(domain, FRAMEWORK_LIBRARY["General Assurance"])
+def detect_domain(text: str) -> str:
+    for domain, keywords in DOMAIN_KEYWORDS:
+        if any(keyword in text for keyword in keywords):
+            return domain
+    return "General Evidence Defensibility"
 
-def finding(title, severity, issue, evidence_gap, examiner_question, remediation, affected_item, risk_domain):
-    mappings = framework_mappings_for(risk_domain)
-    return {
-        "title": title,
-        "severity": severity,
-        "risk_domain": risk_domain,
-        "affected_item": affected_item,
-        "issue": issue,
-        "evidence_gap": evidence_gap,
-        "examiner_question": examiner_question,
-        "remediation": remediation,
-        "framework_relevance": [m["framework"] for m in mappings],
-        "framework_mappings": mappings
-    }
+def dimension_score(text: str, dimension: Dict[str, Any]) -> Dict[str, Any]:
+    base = 65
+    positive_hits = [p for p in dimension["positive"] if p in text]
+    negative_hits = [n for n in dimension["negative"] if n in text]
 
-def analyze_item(item: EvidenceItem, evidence_type: str):
-    text = f"{item.title} {item.content} {item.source_system or ''}".lower()
-    findings = []
+    score = base + (len(positive_hits) * 8) - (len(negative_hits) * 12)
+    score = max(0, min(100, score))
 
-    if "denominator" in text and ("mismatch" in text or "different" in text or "changed" in text or "corrected" in text):
-        findings.append(finding(
-            "Metric Denominator Inconsistency",
-            "High",
-            "The metric narrative indicates that the denominator changed or differs across source evidence and reporting output.",
-            "The evidence package does not clearly prove population completeness, denominator approval, or reconciliation to source-of-record.",
-            "How did management validate that the denominator used in the reported metric is complete, accurate, and consistently applied for the reporting period?",
-            "Add source-of-record extract, population logic, reconciliation notes, reviewer approval, and reporting-period tie-out.",
-            item.title,
-            "Metrics Assurance"
-        ))
-
-    if "cumulative" in text and ("quarter" in text or "quarterly" in text):
-        findings.append(finding(
-            "Cumulative vs Periodic Reporting Logic Risk",
-            "High",
-            "The evidence suggests a possible mismatch between cumulative measurement and quarterly reporting interpretation.",
-            "The metric definition does not clearly state whether the value is cumulative, point-in-time, rolling-period, or quarter-specific.",
-            "Is the metric intended to represent quarterly activity or cumulative year-to-date performance, and how is that interpretation controlled?",
-            "Clarify metric definition, align calculation logic to reporting intent, and retain reviewer sign-off for the interpretation.",
-            item.title,
-            "Metrics Assurance"
-        ))
-
-    if "screenshot" in text and ("only" in text or "manual" in text):
-        findings.append(finding(
-            "Weak Evidence Lineage",
-            "Medium",
-            "The evidence appears to rely heavily on screenshots or manual artifacts without system-of-record lineage.",
-            "Screenshots alone may not demonstrate completeness, extraction parameters, source ownership, or calculation integrity.",
-            "What source system produced this evidence, who extracted it, and how was completeness validated?",
-            "Capture system export, timestamp, extractor identity, query/filter criteria, and independent review evidence.",
-            item.title,
-            "Evidence Lineage"
-        ))
-
-    if "vendor" in text and ("soc 2" in text or "soc2" in text) and ("cuec" not in text):
-        findings.append(finding(
-            "Incomplete SOC 2 Reliance Analysis",
-            "Medium",
-            "SOC 2 evidence is referenced but complementary user entity controls are not clearly evaluated.",
-            "The review may not prove whether customer-side responsibilities were identified, assigned, and operating.",
-            "Which complementary user entity controls apply to the organization, and where is operating evidence retained?",
-            "Document CUEC applicability, internal control ownership, evidence location, and residual risk conclusion.",
-            item.title,
-            "Third-Party Risk"
-        ))
-
-    if "pii" in text or "npi" in text or "customer data" in text:
-        if "data flow" not in text and "dpa" not in text and "retention" not in text:
-            findings.append(finding(
-                "Privacy and Data Handling Evidence Gap",
-                "High",
-                "The artifact references sensitive customer or personal data but lacks clear data-flow, retention, or contractual privacy evidence.",
-                "The evidence package does not demonstrate where data moves, who processes it, how long it is retained, or which protections apply.",
-                "Show the data flow, processing purpose, retention period, access boundaries, and contractual safeguards for customer data.",
-                "Add data-flow diagram, processing inventory, privacy/security obligations, retention controls, and vendor contractual evidence where applicable.",
-                item.title,
-                "Privacy / Data Protection"
-            ))
-
-    if "sdlc" in text or "devops" in text or "release" in text:
-        if "security gate" not in text and "approval" not in text and "change record" not in text:
-            findings.append(finding(
-                "SDLC Governance Control Gap",
-                "Medium",
-                "The SDLC/DevOps evidence does not clearly show security gate completion, change approval, or release governance.",
-                "The artifact may prove activity occurred, but not that governance requirements were satisfied before production movement.",
-                "Where is the evidence that security testing, risk acceptance, and change approval occurred before release?",
-                "Map the release to change record, security test results, approval evidence, exception handling, and production deployment record.",
-                item.title,
-                "SDLC / AI Governance"
-            ))
-
-    if "ai" in text and ("approval" not in text or "inventory" not in text or "risk tier" not in text):
-        findings.append(finding(
-            "AI Governance Approval and Inventory Gap",
-            "High",
-            "The evidence references AI usage but does not clearly show inventorying, risk classification, approval, or usage restriction logic.",
-            "Without traceable AI governance evidence, management cannot demonstrate whether the use case is permitted, reviewed, monitored, or escalated.",
-            "Where is the AI use case inventory entry, approval record, classification decision, data handling review, and monitoring plan?",
-            "Capture AI inventory record, risk tier, capability classification, data use review, approval authority, monitoring obligations, and incident escalation triggers.",
-            item.title,
-            "SDLC / AI Governance"
-        ))
-
-    if "no issue" in text or "green" in text or "effective" in text:
-        findings.append(finding(
-            "Unsupported Positive Assurance Statement",
-            "Low",
-            "The artifact includes a positive assurance conclusion but does not provide enough supporting rationale in the provided text.",
-            "A conclusion such as effective, green, or no issue should be traceable to test steps and evidence reviewed.",
-            "What testing was performed to support the positive conclusion, and who reviewed the result?",
-            "Add test procedure, sample basis, evidence references, exception criteria, and reviewer approval.",
-            item.title,
-            "Audit Evidence"
-        ))
-
-    if "iam" in text or "access" in text or "authentication" in text or "mfa" in text:
-        findings.append(finding(
-            "Identity and Access Evidence Review Needed",
-            "Medium",
-            "The artifact references identity, access, authentication, or MFA evidence that should be validated for risk-based coverage and review traceability.",
-            "The provided text does not fully demonstrate access governance, approval, review, or exception handling.",
-            "Where is the evidence of access approval, authentication coverage, periodic review, exception handling, and remediation tracking?",
-            "Add access review evidence, authentication control coverage, exception register, approval trail, and remediation evidence.",
-            item.title,
-            "Identity & Access"
-        ))
-
-    return findings
-
-def build_analysis(payload: AnalyzeRequest):
-    all_findings = []
-    for item in payload.items:
-        all_findings.extend(analyze_item(item, payload.evidence_type))
-
-    if not all_findings:
-        all_findings.append(finding(
-            "No Immediate Critical Issue Detected",
-            "Low",
-            "No rule-based critical issue was detected in the provided text, but the evidence should still be validated for completeness and source lineage.",
-            "The current MVP performs deterministic review. Human review is still required for final assurance.",
-            "Can management demonstrate source lineage, review approval, and completeness of the submitted evidence?",
-            "Retain source extracts, reviewer notes, population basis, and control owner attestation.",
-            "Overall Evidence Package",
-            "General Assurance"
-        ))
-
-    score = max(0, 100 - sum(severity_weight(f["severity"]) for f in all_findings))
-    high_risk_count = len([f for f in all_findings if f["severity"] in ["Critical", "High"]])
-
-    if score >= 85:
+    if score >= 80:
         rating = "Strong"
-    elif score >= 65:
+    elif score >= 60:
         rating = "Moderate"
     elif score >= 40:
         rating = "Weak"
     else:
-        rating = "Critical Attention Required"
-
-    severity_counts = {}
-    risk_domains = {}
-    framework_counts = {}
-
-    for f in all_findings:
-        severity_counts[f["severity"]] = severity_counts.get(f["severity"], 0) + 1
-        risk_domains[f["risk_domain"]] = risk_domains.get(f["risk_domain"], 0) + 1
-        for fw in f["framework_relevance"]:
-            framework_counts[fw] = framework_counts.get(fw, 0) + 1
+        rating = "Deficient"
 
     return {
-        "product": "Sentinel Assurance Engine",
+        "key": dimension["key"],
+        "label": dimension["label"],
+        "weight": dimension["weight"],
+        "score": score,
+        "rating": rating,
+        "positive_indicators": positive_hits,
+        "negative_indicators": negative_hits
+    }
+
+def score_item(item: EvidenceItem) -> Dict[str, Any]:
+    text = normalize_text(item)
+    dimension_results = [dimension_score(text, d) for d in DIMENSIONS]
+    weighted_total = sum((d["score"] * d["weight"]) for d in dimension_results)
+    total_weight = sum(d["weight"] for d in dimension_results)
+    score = round(weighted_total / total_weight)
+
+    if score >= 85:
+        rating = "Strong"
+    elif score >= 70:
+        rating = "Moderate"
+    elif score >= 50:
+        rating = "Weak"
+    else:
+        rating = "Critical Attention Required"
+
+    return {
+        "item_title": item.title,
+        "domain": detect_domain(text),
+        "score": score,
+        "rating": rating,
+        "dimensions": dimension_results
+    }
+
+def severity_from_score(score: int) -> str:
+    if score < 40:
+        return "Critical"
+    if score < 55:
+        return "High"
+    if score < 70:
+        return "Medium"
+    return "Low"
+
+def framework_mappings_for(domain: str) -> List[Dict[str, str]]:
+    return FRAMEWORK_LIBRARY.get(domain, FRAMEWORK_LIBRARY["General Evidence Defensibility"])
+
+def build_finding(item: EvidenceItem, item_score: Dict[str, Any], dimension: Dict[str, Any], idx: int) -> Dict[str, Any]:
+    domain = item_score["domain"]
+    severity = severity_from_score(dimension["score"])
+
+    issue_title = f"{dimension['label']} Defensibility Gap"
+
+    negative = ", ".join(dimension.get("negative_indicators", [])) or "insufficient positive evidence indicators"
+    positive = ", ".join(dimension.get("positive_indicators", [])) or "limited traceable evidence"
+
+    severity_rationale = (
+        f"{dimension['label']} scored {dimension['score']}/100 and is rated {dimension['rating']} "
+        f"based on negative indicators ({negative}) and positive indicators ({positive})."
+    )
+
+    evidence_gap = f"The submitted evidence does not sufficiently demonstrate {dimension['label'].lower()} for the claim being reviewed."
+
+    question = f"What evidence proves {dimension['label'].lower()} for '{item.title}', and who reviewed or approved that evidence?"
+
+    request = {
+        "request_id": f"REQ-{idx:03d}",
+        "evidence_needed": f"Provide evidence supporting {dimension['label'].lower()} for {item.title}.",
+        "preferred_artifacts": [],
+        "owner": item.owner or "Evidence Owner",
+        "priority": severity,
+        "status": "Open"
+    }
+
+    preferred = {
+        "source_lineage": ["source-of-record extract", "query/filter criteria", "timestamped export", "extract owner evidence"],
+        "completeness": ["population report", "reconciliation", "scope definition", "sample basis if sampling was used"],
+        "calculation_integrity": ["metric definition", "formula", "numerator/denominator support", "independent recalculation"],
+        "review_approval": ["review notes", "approval record", "control owner sign-off", "committee approval where applicable"],
+        "period_alignment": ["reporting calendar", "as-of date evidence", "period-specific extract", "committee reporting tie-out"],
+        "governance_traceability": ["ticket/change record", "risk acceptance", "exception approval", "issue/remediation tracker"],
+        "data_handling": ["data-flow diagram", "retention evidence", "access boundary evidence", "contractual/privacy obligation"]
+    }
+
+    request["preferred_artifacts"] = preferred.get(dimension["key"], ["supporting evidence package"])
+
+    return {
+        "finding_id": f"SEN-{idx:03d}",
+        "title": issue_title,
+        "severity": severity,
+        "severity_rationale": severity_rationale,
+        "risk_domain": domain,
+        "affected_item": item.title,
+        "dimension": dimension["label"],
+        "issue": f"{dimension['label']} is not sufficiently evidenced for this review item.",
+        "evidence_gap": evidence_gap,
+        "examiner_question": question,
+        "remediation": f"Provide traceable evidence and management review support for {dimension['label'].lower()}.",
+        "framework_relevance": [m["framework"] for m in framework_mappings_for(domain)],
+        "framework_mappings": framework_mappings_for(domain),
+        "evidence_request": request,
+        "management_response": "",
+        "status": "Open"
+    }
+
+def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
+    item_scores = [score_item(item) for item in payload.items]
+    findings: List[Dict[str, Any]] = []
+    request_counter = 1
+
+    for item, item_score in zip(payload.items, item_scores):
+        weak_dimensions = [
+            d for d in item_score["dimensions"]
+            if d["score"] < 70 or d["negative_indicators"]
+        ]
+
+        weak_dimensions = sorted(weak_dimensions, key=lambda d: d["score"])[:4]
+
+        for dim in weak_dimensions:
+            findings.append(build_finding(item, item_score, dim, request_counter))
+            request_counter += 1
+
+    if not findings:
+        domain = item_scores[0]["domain"] if item_scores else "General Evidence Defensibility"
+        findings.append({
+            "finding_id": "SEN-001",
+            "title": "No Immediate High-Risk Evidence Gap Detected",
+            "severity": "Low",
+            "severity_rationale": "No major rule-based issue was detected. Professional review is still required before relying on the evidence package.",
+            "risk_domain": domain,
+            "affected_item": "Overall Evidence Package",
+            "dimension": "General Review",
+            "issue": "No immediate high-risk issue detected by deterministic review.",
+            "evidence_gap": "Human review should confirm completeness, reliability, and relevance.",
+            "examiner_question": "Can management demonstrate complete source lineage and review approval for this package?",
+            "remediation": "Retain full source evidence, review notes, and approval trail.",
+            "framework_relevance": [m["framework"] for m in framework_mappings_for(domain)],
+            "framework_mappings": framework_mappings_for(domain),
+            "evidence_request": {
+                "request_id": "REQ-001",
+                "evidence_needed": "Retain source evidence, review notes, and approval trail.",
+                "preferred_artifacts": ["source extract", "review notes", "approval record"],
+                "owner": "Evidence Owner",
+                "priority": "Low",
+                "status": "Open"
+            },
+            "management_response": "",
+            "status": "Open"
+        })
+
+    overall_score = round(sum(i["score"] for i in item_scores) / len(item_scores)) if item_scores else 0
+
+    if overall_score >= 85:
+        rating = "Strong"
+    elif overall_score >= 70:
+        rating = "Moderate"
+    elif overall_score >= 50:
+        rating = "Weak"
+    else:
+        rating = "Critical Attention Required"
+
+    severity_distribution: Dict[str, int] = {}
+    domain_counts: Dict[str, int] = {}
+    framework_counts: Dict[str, int] = {}
+
+    for finding in findings:
+        severity_distribution[finding["severity"]] = severity_distribution.get(finding["severity"], 0) + 1
+        domain_counts[finding["risk_domain"]] = domain_counts.get(finding["risk_domain"], 0) + 1
+        for fw in finding["framework_relevance"]:
+            framework_counts[fw] = framework_counts.get(fw, 0) + 1
+
+    evidence_requests = [f["evidence_request"] for f in findings]
+
+    executive_summary = (
+        f"Sentinel reviewed {len(payload.items)} evidence item(s) across {len(set(i['domain'] for i in item_scores))} risk domain(s). "
+        f"The package is rated '{rating}' with an evidence defensibility score of {overall_score}/100. "
+        f"{len(findings)} finding(s) and {len(evidence_requests)} evidence request(s) were generated for management follow-up."
+    )
+
+    return {
+        "product": "Sentinel Evidence Defensibility Workbench",
         "company": "Eye On Bits Pvt Ltd",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "review_timestamp": datetime.utcnow().isoformat(),
         "organization": payload.organization,
         "industry": payload.industry,
         "evidence_type": payload.evidence_type,
         "review_objective": payload.review_objective,
-        "assurance_score": score,
+        "evidence_defensibility_score": overall_score,
         "overall_rating": rating,
-        "high_risk_findings": high_risk_count,
-        "total_findings": len(all_findings),
-        "severity_distribution": severity_counts,
-        "top_risk_domains": sorted([{"domain": k, "count": v} for k, v in risk_domains.items()], key=lambda x: x["count"], reverse=True),
+        "total_findings": len(findings),
+        "high_risk_findings": len([f for f in findings if f["severity"] in ["Critical", "High"]]),
+        "severity_distribution": severity_distribution,
+        "top_risk_domains": sorted([{"domain": k, "count": v} for k, v in domain_counts.items()], key=lambda x: x["count"], reverse=True),
         "framework_coverage": sorted([{"framework": k, "count": v} for k, v in framework_counts.items()], key=lambda x: x["count"], reverse=True),
+        "item_scorecards": item_scores,
+        "findings": findings,
+        "evidence_requests": evidence_requests,
         "recommended_next_steps": [
-            "Validate source-of-record evidence and reporting-period tie-out.",
-            "Document reviewer approval and management rationale for metric interpretation.",
-            "Assign owners and target dates in the exported finding register.",
-            "Use framework mapping rationale to support audit/2LOD response preparation."
+            "Review high and critical findings with accountable evidence owners.",
+            "Use the evidence request list to collect missing source, review, approval, and reconciliation artifacts.",
+            "Update the finding register with owner, target date, management response, and closure evidence.",
+            "Use framework mapping rationale for audit, 2LOD, or committee-ready explanation.",
+            "Re-run Sentinel after remediation evidence is collected."
         ],
-        "executive_summary": f"Sentinel reviewed {len(payload.items)} evidence item(s) and identified {len(all_findings)} examiner-relevant observation(s). The current package is rated '{rating}' with an assurance score of {score}/100.",
-        "findings": all_findings
+        "executive_summary": executive_summary
     }
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "service": "Sentinel Assurance Engine", "version": "1.0.0", "timestamp": datetime.utcnow().isoformat()}
+    return {
+        "status": "ok",
+        "service": "Sentinel Evidence Defensibility Workbench",
+        "version": "2.0.0",
+        "timestamp": datetime.utcnow().isoformat()
+    }
 
 @app.get("/api/framework-library")
 def framework_library():
     return FRAMEWORK_LIBRARY
+
+@app.get("/api/scoring-dimensions")
+def scoring_dimensions():
+    return DIMENSIONS
 
 @app.post("/api/analyze")
 def analyze(payload: AnalyzeRequest):
@@ -391,27 +454,55 @@ def analyze(payload: AnalyzeRequest):
 @app.post("/api/report-html", response_class=HTMLResponse)
 def report_html(payload: AnalyzeRequest):
     result = build_analysis(payload)
+
+    score_rows = ""
+    for item in result["item_scorecards"]:
+        dim_rows = "".join(
+            f"<tr><td>{html.escape(d['label'])}</td><td>{d['score']}/100</td><td>{html.escape(d['rating'])}</td><td>{html.escape(', '.join(d['negative_indicators']) or 'None')}</td></tr>"
+            for d in item["dimensions"]
+        )
+        score_rows += f"""
+        <div class='finding'>
+          <h3>{html.escape(item['item_title'])}</h3>
+          <p><b>Domain:</b> {html.escape(item['domain'])} | <b>Score:</b> {item['score']}/100 | <b>Rating:</b> {html.escape(item['rating'])}</p>
+          <table><tr><th>Dimension</th><th>Score</th><th>Rating</th><th>Negative Indicators</th></tr>{dim_rows}</table>
+        </div>
+        """
+
     finding_blocks = ""
-    for idx, f in enumerate(result["findings"], start=1):
+    for f in result["findings"]:
         mapping_rows = ""
         for m in f.get("framework_mappings", []):
             mapping_rows += f"<tr><td>{html.escape(m['framework'])}</td><td>{html.escape(m['mapping_type'])}</td><td>{html.escape(m['rationale'])}</td><td>{html.escape(m['evidence_expected'])}</td></tr>"
+
+        req = f["evidence_request"]
+        artifacts = ", ".join(req.get("preferred_artifacts", []))
+
         finding_blocks += f"""
         <div class='finding'>
           <div class='finding-head'>
-            <h3>{idx}. {html.escape(f["title"])}</h3>
+            <h3>{html.escape(f["finding_id"])} — {html.escape(f["title"])}</h3>
             <span class='badge {html.escape(f["severity"].lower())}'>{html.escape(f["severity"])}</span>
           </div>
           <p><b>Risk domain:</b> {html.escape(f["risk_domain"])}</p>
           <p><b>Affected item:</b> {html.escape(f["affected_item"])}</p>
+          <p><b>Dimension:</b> {html.escape(f["dimension"])}</p>
           <p><b>Issue:</b> {html.escape(f["issue"])}</p>
+          <p><b>Severity rationale:</b> {html.escape(f["severity_rationale"])}</p>
           <p><b>Evidence gap:</b> {html.escape(f["evidence_gap"])}</p>
           <p><b>Examiner question:</b> {html.escape(f["examiner_question"])}</p>
           <p><b>Remediation:</b> {html.escape(f["remediation"])}</p>
+          <h4>Evidence Request</h4>
+          <p><b>{html.escape(req["request_id"])}:</b> {html.escape(req["evidence_needed"])}</p>
+          <p><b>Preferred artifacts:</b> {html.escape(artifacts)}</p>
           <h4>Framework Mapping Rationale</h4>
           <table><tr><th>Framework</th><th>Mapping Type</th><th>Rationale</th><th>Expected Evidence</th></tr>{mapping_rows}</table>
         </div>
         """
+
+    requests = ""
+    for req in result["evidence_requests"]:
+        requests += f"<tr><td>{html.escape(req['request_id'])}</td><td>{html.escape(req['priority'])}</td><td>{html.escape(req['owner'])}</td><td>{html.escape(req['evidence_needed'])}</td><td>{html.escape(', '.join(req.get('preferred_artifacts', [])))}</td><td>{html.escape(req['status'])}</td></tr>"
 
     domain_rows = "".join([f"<tr><td>{html.escape(x['domain'])}</td><td>{x['count']}</td></tr>" for x in result["top_risk_domains"]])
     framework_rows = "".join([f"<tr><td>{html.escape(x['framework'])}</td><td>{x['count']}</td></tr>" for x in result["framework_coverage"]])
@@ -421,18 +512,18 @@ def report_html(payload: AnalyzeRequest):
 <html>
 <head>
 <meta charset='utf-8' />
-<title>Sentinel Examiner Report</title>
+<title>Sentinel Evidence Defensibility Report</title>
 <style>
 body {{ font-family: Arial, sans-serif; background: #f6f8fb; color: #111827; margin: 0; padding: 32px; }}
-.report {{ max-width: 1180px; margin: auto; background: white; border-radius: 18px; padding: 36px; box-shadow: 0 20px 60px rgba(15,23,42,.12); }}
-.eyebrow {{ color: #2563eb; text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: .18em; }}
-h1 {{ font-size: 40px; margin: 8px 0 4px; }}
+.report {{ max-width: 1220px; margin: auto; background: white; border-radius: 18px; padding: 36px; box-shadow: 0 20px 60px rgba(15,23,42,.12); }}
+.eyebrow {{ color: #1d4ed8; text-transform: uppercase; font-size: 12px; font-weight: 700; letter-spacing: .18em; }}
+h1 {{ font-size: 38px; margin: 8px 0 4px; }}
 .sub {{ color: #4b5563; font-size: 16px; }}
 .cards {{ display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 24px 0; }}
 .card {{ border: 1px solid #e5e7eb; border-radius: 14px; padding: 16px; background: #f9fafb; }}
 .card span {{ display:block; color:#6b7280; font-size:12px; text-transform:uppercase; }}
 .card strong {{ display:block; font-size:22px; margin-top:6px; }}
-.summary {{ border-left: 5px solid #2563eb; background: #eff6ff; padding: 16px; border-radius: 12px; margin: 18px 0; }}
+.summary {{ border-left: 5px solid #1d4ed8; background: #eff6ff; padding: 16px; border-radius: 12px; margin: 18px 0; }}
 .finding {{ border: 1px solid #e5e7eb; border-radius: 14px; padding: 18px; margin: 16px 0; }}
 .finding-head {{ display:flex; justify-content:space-between; align-items:center; gap:12px; }}
 .finding h3 {{ margin:0; }}
@@ -447,24 +538,28 @@ td, th {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertic
 <body>
 <div class='report'>
 <div class='eyebrow'>Eye On Bits Pvt Ltd</div>
-<h1>Sentinel Examiner Report</h1>
-<div class='sub'>AI-native assurance intelligence with framework mapping rationale for evidence, metrics, control, vendor, privacy, SDLC, and AI governance review.</div>
+<h1>Sentinel Evidence Defensibility Report</h1>
+<div class='sub'>Professional assurance workbench output for evidence quality, scoring, findings, evidence requests, and framework mapping rationale.</div>
 <div class='cards'>
 <div class='card'><span>Organization</span><strong>{html.escape(result["organization"])}</strong></div>
 <div class='card'><span>Evidence Type</span><strong>{html.escape(result["evidence_type"])}</strong></div>
-<div class='card'><span>Score</span><strong>{result["assurance_score"]}/100</strong></div>
+<div class='card'><span>Score</span><strong>{result["evidence_defensibility_score"]}/100</strong></div>
 <div class='card'><span>Rating</span><strong>{html.escape(result["overall_rating"])}</strong></div>
 </div>
 <div class='summary'>{html.escape(result["executive_summary"])}</div>
+<h2>Scorecards</h2>
+{score_rows}
+<h2>Evidence Request List</h2>
+<table><tr><th>Request ID</th><th>Priority</th><th>Owner</th><th>Evidence Needed</th><th>Preferred Artifacts</th><th>Status</th></tr>{requests}</table>
 <h2>Top Risk Domains</h2>
 <table><tr><th>Domain</th><th>Finding Count</th></tr>{domain_rows}</table>
 <h2>Framework Coverage</h2>
 <table><tr><th>Framework</th><th>Mapped Findings</th></tr>{framework_rows}</table>
 <h2>Recommended Next Steps</h2>
 <ol>{steps}</ol>
-<h2>Examiner Findings</h2>
+<h2>Findings</h2>
 {finding_blocks}
-<div class='footer'>Generated by Sentinel Assurance Engine v1.0. This output supports assurance review and does not replace qualified professional judgment.</div>
+<div class='footer'>Generated by Sentinel Evidence Defensibility Workbench v2.0. This output supports assurance review and does not replace qualified professional judgment.</div>
 </div>
 </body>
 </html>"""

@@ -1,0 +1,22 @@
+{
+  "organization": "Sample Tier-1 Bank",
+  "industry": "BFSI / Regulated Banking",
+  "evidence_type": "IT Metrics Defensibility Review",
+  "review_objective": "Assess whether IT metrics evidence supports denominator consistency, source lineage, calculation integrity, reporting-period alignment, and management review.",
+  "items": [
+    {
+      "title": "Q4 Phishing Metric Evidence",
+      "content": "The ITSC deck reported 150 delivered emails. KnowBe4 source export shows denominator changed to 152. Screenshot-only evidence was retained. Metric owner stated the number was corrected later. No reviewer approval or reconciliation is attached.",
+      "source_system": "KnowBe4 / ITSC Deck",
+      "owner": "IT GRC",
+      "reporting_period": "Q4"
+    },
+    {
+      "title": "RCSA Control Effectiveness Metric",
+      "content": "The reported value was presented as quarterly, but calculation logic appears cumulative year-to-date. The metric narrative says effective and green but does not show test procedure, sample basis, or reviewer approval.",
+      "source_system": "RCSA Tracker",
+      "owner": "Risk Management",
+      "reporting_period": "Q3"
+    }
+  ]
+}

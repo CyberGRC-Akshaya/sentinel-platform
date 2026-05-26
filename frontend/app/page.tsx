@@ -5,67 +5,67 @@ import { useEffect, useState } from "react";
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 const cases: Record<string, any> = {
-  "IT Metrics Examiner": {
+  "IT Metrics Evidence Package": {
     organization: "Sample Tier-1 Bank",
     industry: "BFSI / Regulated Banking",
-    evidence_type: "IT Metrics Validation",
-    review_objective: "Validate metric evidence for denominator consistency, evidence lineage, and examiner readiness.",
+    evidence_type: "IT Metrics Defensibility Review",
+    review_objective: "Assess whether IT metrics evidence supports denominator consistency, source lineage, calculation integrity, reporting-period alignment, and management review.",
     items: [
       {
         title: "Q4 Phishing Metric Evidence",
-        content: "The ITSC deck reported 150 delivered emails. KnowBe4 source export shows denominator changed to 152. Screenshot-only evidence was retained. Metric owner stated the number was corrected later.",
+        content: "The ITSC deck reported 150 delivered emails. KnowBe4 source export shows denominator changed to 152. Screenshot-only evidence was retained. Metric owner stated the number was corrected later. No reviewer approval or reconciliation is attached.",
         source_system: "KnowBe4 / ITSC Deck",
         owner: "IT GRC",
         reporting_period: "Q4"
       },
       {
         title: "RCSA Control Effectiveness Metric",
-        content: "The reported value was presented as quarterly, but calculation logic appears cumulative year-to-date. The metric narrative says effective and green but does not show test procedure.",
+        content: "The reported value was presented as quarterly, but calculation logic appears cumulative year-to-date. The metric narrative says effective and green but does not show test procedure, sample basis, or reviewer approval.",
         source_system: "RCSA Tracker",
         owner: "Risk Management",
         reporting_period: "Q3"
       }
     ]
   },
-  "Vendor & Privacy Examiner": {
+  "Vendor Privacy Evidence Package": {
     organization: "Sample Financial Institution",
     industry: "BFSI / Vendor Risk",
-    evidence_type: "TPRM and Privacy Evidence Review",
-    review_objective: "Challenge vendor assurance package for SOC 2 reliance, customer data handling, CUECs, retention, and data-flow evidence.",
+    evidence_type: "Vendor and Privacy Evidence Defensibility Review",
+    review_objective: "Assess SOC 2 reliance, CUEC analysis, data-flow evidence, retention, customer information handling, and residual risk support.",
     items: [
       {
-        title: "Vendor SOC 2 Evidence",
-        content: "Vendor provided SOC 2 Type II report. Vendor processes customer data and NPI. Evidence does not include data flow, retention description, or CUEC analysis.",
+        title: "Vendor SOC 2 and Data Handling Evidence",
+        content: "Vendor provided SOC 2 Type II report. Vendor processes customer data and NPI. Evidence does not include data flow, retention description, bridge letter, subservice organization review, DPA, or CUEC analysis.",
         source_system: "Vendor Portal",
         owner: "TPRM",
         reporting_period: "Annual Review"
       }
     ]
   },
-  "SDLC & AI Governance Examiner": {
+  "SDLC AI Release Package": {
     organization: "Sample Enterprise Technology Group",
     industry: "Technology / AI Governance",
-    evidence_type: "SDLC and AI Governance Evidence Review",
-    review_objective: "Validate release governance, AI approval, security gates, and production-readiness evidence.",
+    evidence_type: "SDLC and AI Governance Defensibility Review",
+    review_objective: "Assess release governance, AI approval, security gates, production readiness, monitoring, and incident escalation evidence.",
     items: [
       {
         title: "AI-Enabled Release Evidence",
-        content: "Release notes mention AI assistant functionality and production rollout. Evidence includes release summary but no AI inventory entry, risk tier, approval record, security gate, change record, or monitoring plan.",
+        content: "Release notes mention AI assistant functionality and production rollout. Evidence includes release summary but no AI inventory entry, risk tier, approval record, security gate, change record, risk acceptance, monitoring plan, or incident escalation logic.",
         source_system: "DevOps Release Tracker",
         owner: "Application Owner",
         reporting_period: "Release 2026.05"
       }
     ]
   },
-  "IAM Evidence Examiner": {
+  "IAM Authentication Evidence Package": {
     organization: "Sample Bank IAM Program",
     industry: "BFSI / Identity and Access",
-    evidence_type: "IAM and Authentication Evidence Review",
-    review_objective: "Validate access governance, authentication coverage, approval, review, and exception handling evidence.",
+    evidence_type: "IAM and Authentication Evidence Defensibility Review",
+    review_objective: "Assess access governance, authentication coverage, MFA evidence, approval, periodic review, exception handling, and remediation tracking.",
     items: [
       {
         title: "Customer Access and MFA Evidence",
-        content: "IAM evidence references customer access, authentication, MFA, and access review activity. Evidence does not show full approval trail, risk-based exception handling, or remediation tracking.",
+        content: "IAM evidence references customer access, authentication, MFA, and access review activity. Evidence does not show full approval trail, risk-based exception handling, periodic review results, issue remediation, or closure evidence.",
         source_system: "IAM Review Tracker",
         owner: "IAM Governance",
         reporting_period: "Quarterly Review"
@@ -78,34 +78,30 @@ function defaultIntakePayload() {
   return {
     organization: "Imported Evidence Package",
     industry: "Regulated Enterprise",
-    evidence_type: "Uploaded Evidence Intake Review",
+    evidence_type: "Uploaded Evidence Defensibility Review",
     review_objective: "Challenge uploaded evidence for assurance readiness, evidence lineage, governance defensibility, and examiner-style gaps.",
     items: []
   };
 }
 
 export default function Home() {
-  const [selectedCase, setSelectedCase] = useState("IT Metrics Examiner");
-  const [input, setInput] = useState(JSON.stringify(cases["IT Metrics Examiner"], null, 2));
+  const [selectedCase, setSelectedCase] = useState("IT Metrics Evidence Package");
+  const [input, setInput] = useState(JSON.stringify(cases["IT Metrics Evidence Package"], null, 2));
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
   const [history, setHistory] = useState<any[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem("sentinel-review-history");
+    const saved = localStorage.getItem("sentinel-v2-review-history");
     if (saved) {
-      try {
-        setHistory(JSON.parse(saved));
-      } catch {
-        setHistory([]);
-      }
+      try { setHistory(JSON.parse(saved)); } catch { setHistory([]); }
     }
   }, []);
 
   function saveHistory(entry: any) {
     const next = [entry, ...history].slice(0, 10);
     setHistory(next);
-    localStorage.setItem("sentinel-review-history", JSON.stringify(next));
+    localStorage.setItem("sentinel-v2-review-history", JSON.stringify(next));
   }
 
   function loadCase(name: string) {
@@ -117,22 +113,20 @@ export default function Home() {
 
   function buildTextPayload(fileName: string, text: string) {
     const payload = defaultIntakePayload();
-    payload.items = [
-      {
-        title: fileName,
-        content: text.slice(0, 25000),
-        source_system: "Uploaded File",
-        owner: "Evidence Submitter",
-        reporting_period: "Uploaded Review"
-      }
-    ];
+    payload.items = [{
+      title: fileName,
+      content: text.slice(0, 25000),
+      source_system: "Uploaded File",
+      owner: "Evidence Submitter",
+      reporting_period: "Uploaded Review"
+    }];
     return payload;
   }
 
   function parseCsvToPayload(fileName: string, text: string) {
     const lines = text.split(/\r?\n/).filter(Boolean);
     const payload = defaultIntakePayload();
-    payload.evidence_type = "Uploaded CSV Evidence Intake Review";
+    payload.evidence_type = "Uploaded CSV Evidence Defensibility Review";
 
     if (lines.length === 0) return payload;
 
@@ -142,9 +136,7 @@ export default function Home() {
     payload.items = rows.map((line, index) => {
       const cols = line.split(",").map((c) => c.trim().replace(/^"|"$/g, ""));
       const obj: Record<string, string> = {};
-      headers.forEach((h, i) => {
-        obj[h || `Column_${i + 1}`] = cols[i] || "";
-      });
+      headers.forEach((h, i) => { obj[h || `Column_${i + 1}`] = cols[i] || ""; });
 
       return {
         title: obj.title || obj.Title || obj.name || obj.Name || `CSV Evidence Row ${index + 1}`,
@@ -168,7 +160,6 @@ export default function Home() {
     try {
       if (file.name.toLowerCase().endsWith(".json")) {
         const parsed = JSON.parse(text);
-
         if (parsed.organization && parsed.items) {
           setInput(JSON.stringify(parsed, null, 2));
         } else if (Array.isArray(parsed)) {
@@ -189,7 +180,6 @@ export default function Home() {
       } else {
         setInput(JSON.stringify(buildTextPayload(file.name, text), null, 2));
       }
-
       setSelectedCase("Uploaded Evidence");
       setResult(null);
     } catch (err: any) {
@@ -215,7 +205,7 @@ export default function Home() {
         organization: data.organization,
         evidence_type: data.evidence_type,
         rating: data.overall_rating,
-        score: data.assurance_score,
+        score: data.evidence_defensibility_score,
         findings: data.total_findings
       });
     } catch (err: any) {
@@ -234,7 +224,7 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-examiner-report.json";
+    a.download = "sentinel-v2-evidence-report.json";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -243,27 +233,17 @@ export default function Home() {
     if (!result) return;
 
     const headers = [
-      "Finding_ID",
-      "Severity",
-      "Risk_Domain",
-      "Affected_Item",
-      "Issue",
-      "Evidence_Gap",
-      "Examiner_Question",
-      "Remediation",
-      "Framework_Relevance",
-      "Framework_Rationale",
-      "Expected_Evidence",
-      "Owner",
-      "Target_Date",
-      "Status",
-      "Management_Response"
+      "Finding_ID","Severity","Severity_Rationale","Risk_Domain","Dimension","Affected_Item","Issue","Evidence_Gap",
+      "Examiner_Question","Remediation","Framework_Relevance","Framework_Rationale","Expected_Evidence",
+      "Evidence_Request_ID","Evidence_Needed","Preferred_Artifacts","Owner","Target_Date","Status","Management_Response"
     ];
 
-    const rows = result.findings.map((finding: any, index: number) => [
-      `SEN-${String(index + 1).padStart(3, "0")}`,
+    const rows = result.findings.map((finding: any) => [
+      finding.finding_id,
       finding.severity,
+      finding.severity_rationale,
       finding.risk_domain,
+      finding.dimension,
       finding.affected_item,
       finding.issue,
       finding.evidence_gap,
@@ -272,7 +252,10 @@ export default function Home() {
       (finding.framework_relevance || []).join("; "),
       (finding.framework_mappings || []).map((m: any) => `${m.framework}: ${m.rationale}`).join(" | "),
       (finding.framework_mappings || []).map((m: any) => `${m.framework}: ${m.evidence_expected}`).join(" | "),
-      "",
+      finding.evidence_request?.request_id || "",
+      finding.evidence_request?.evidence_needed || "",
+      (finding.evidence_request?.preferred_artifacts || []).join("; "),
+      finding.evidence_request?.owner || "",
       "",
       "Open",
       ""
@@ -283,7 +266,30 @@ export default function Home() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-finding-register.csv";
+    a.download = "sentinel-v2-finding-register.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadEvidenceRequestCsv() {
+    if (!result) return;
+
+    const headers = ["Request_ID","Priority","Owner","Evidence_Needed","Preferred_Artifacts","Status"];
+    const rows = result.evidence_requests.map((req: any) => [
+      req.request_id,
+      req.priority,
+      req.owner,
+      req.evidence_needed,
+      (req.preferred_artifacts || []).join("; "),
+      req.status
+    ]);
+
+    const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v2-evidence-request-list.csv";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -301,7 +307,7 @@ export default function Home() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "sentinel-examiner-report.html";
+      a.download = "sentinel-v2-evidence-defensibility-report.html";
       a.click();
       URL.revokeObjectURL(url);
     } catch (err: any) {
@@ -317,49 +323,52 @@ export default function Home() {
 
   function clearHistory() {
     setHistory([]);
-    localStorage.removeItem("sentinel-review-history");
+    localStorage.removeItem("sentinel-v2-review-history");
   }
 
   return (
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd</p>
-          <h1>Sentinel Assurance Platform</h1>
-          <p className="subtitle">AI-native examiner intelligence with evidence intake, framework mapping rationale, finding register export, and local review history.</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v2.0</p>
+          <h1>Evidence Defensibility Workbench</h1>
+          <p className="subtitle">
+            Professional assurance workbench for challenging evidence quality, source lineage, calculation integrity,
+            governance traceability, data handling, review approval, and framework relevance.
+          </p>
         </div>
         <div className="heroCard">
-          <span>Sentinel v1.0</span>
-          <strong>Consulting-Ready Assurance Console</strong>
-          <p>Upload JSON, CSV, or text evidence packages and convert them into examiner-ready review input.</p>
+          <span>Positioning</span>
+          <strong>Not a GRC repository. A defensibility challenge layer.</strong>
+          <p>Built for IT GRC, audit readiness, TPRM, privacy, SDLC, IAM, and AI governance evidence reviews.</p>
         </div>
       </section>
 
       <section className="caseLibrary">
         <div>
           <h2>Evidence Intake</h2>
-          <p>Upload JSON, CSV, or text evidence. Sentinel converts it into a structured review package.</p>
+          <p>Upload JSON, CSV, TXT, or MD evidence. Sentinel converts it into a structured review package.</p>
         </div>
         <div className="uploadBox">
           <input type="file" accept=".json,.csv,.txt,.md" onChange={handleFileUpload} />
-          <span>Supported: JSON packages, CSV rows, TXT/MD evidence notes</span>
+          <span>Use this for client-like evidence packages, sample files, or demo artifacts.</span>
         </div>
       </section>
 
       <section className="caseLibrary">
         <div>
-          <h2>Sample Case Library</h2>
-          <p>Load realistic regulated-industry evidence packages and run examiner review.</p>
+          <h2>Professional Sample Packages</h2>
+          <p>Each package demonstrates a real assurance review pattern.</p>
         </div>
         <div className="caseGrid">
           {Object.keys(cases).map((name) => (
             <button key={name} className={selectedCase === name ? "caseCard active" : "caseCard"} onClick={() => loadCase(name)}>
               <strong>{name}</strong>
               <span>
-                {name === "IT Metrics Examiner" && "Denominator, evidence lineage, and reporting validation."}
-                {name === "Vendor & Privacy Examiner" && "SOC 2 reliance, CUEC, NPI/PII, data-flow, and retention challenge."}
-                {name === "SDLC & AI Governance Examiner" && "Release governance, AI approval, security gates, and production-readiness challenge."}
-                {name === "IAM Evidence Examiner" && "Access governance, authentication, MFA, exception, and review evidence challenge."}
+                {name === "IT Metrics Evidence Package" && "Metric denominator, lineage, review, and reporting-period challenge."}
+                {name === "Vendor Privacy Evidence Package" && "SOC 2 reliance, CUEC, customer data, retention, and data-flow challenge."}
+                {name === "SDLC AI Release Package" && "Release governance, AI approval, security gate, monitoring, and change evidence challenge."}
+                {name === "IAM Authentication Evidence Package" && "Access governance, MFA, exception, review, and remediation evidence challenge."}
               </span>
             </button>
           ))}
@@ -368,10 +377,10 @@ export default function Home() {
 
       <section className="grid">
         <div className="panel">
-          <h2>Evidence Input</h2>
-          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will challenge evidence quality, metric logic, and governance defensibility.</p>
+          <h2>Review Input</h2>
+          <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will produce a defensibility scorecard, findings, and evidence requests.</p>
           <textarea value={input} onChange={(e) => setInput(e.target.value)} />
-          <button className="primaryBtn" onClick={analyze}>Run Examiner Review</button>
+          <button className="primaryBtn" onClick={analyze}>Run Evidence Defensibility Review</button>
           {error && <div className="error">{error}</div>}
 
           {history.length > 0 && (
@@ -383,7 +392,7 @@ export default function Home() {
               {history.map((h, idx) => (
                 <div key={idx} className="historyRow">
                   <strong>{h.evidence_type}</strong>
-                  <span>{h.rating} Ã‚Â· {h.score}/100 Ã‚Â· {h.findings} findings</span>
+                  <span>{h.rating} · {h.score}/100 · {h.findings} findings</span>
                   <em>{new Date(h.timestamp).toLocaleString()}</em>
                 </div>
               ))}
@@ -392,25 +401,25 @@ export default function Home() {
         </div>
 
         <div className="panel">
-          <h2>Examiner Output</h2>
-          <p className="muted">Executive-ready findings, evidence gaps, challenge questions, remediation guidance, and framework mapping rationale.</p>
+          <h2>Defensibility Output</h2>
+          <p className="muted">Scorecards, findings, evidence requests, severity rationale, and framework mapping rationale.</p>
 
-          {!result && <div className="empty">Run the examiner review to generate assurance score, severity distribution, framework coverage, and exportable report.</div>}
+          {!result && <div className="empty">Run a review to generate professional evidence defensibility output.</div>}
 
           {result && (
             <div>
               <div className="scoreRow">
-                <div className="scoreBox"><span>Assurance Score</span><strong>{result.assurance_score}/100</strong></div>
+                <div className="scoreBox"><span>Defensibility Score</span><strong>{result.evidence_defensibility_score}/100</strong></div>
                 <div className="scoreBox"><span>Rating</span><strong>{result.overall_rating}</strong></div>
-                <div className="scoreBox"><span>Findings</span><strong>{result.total_findings}</strong></div>
+                <div className="scoreBox"><span>Evidence Requests</span><strong>{result.evidence_requests.length}</strong></div>
               </div>
 
               <div className="actions">
-                <button onClick={downloadJson}>Download JSON</button>
+                <button onClick={downloadJson}>JSON</button>
                 <button onClick={downloadFindingRegisterCsv}>Finding Register</button>
+                <button onClick={downloadEvidenceRequestCsv}>Evidence Requests</button>
                 <button onClick={downloadHtmlReport}>HTML Report</button>
                 <button onClick={copySummary}>Copy Summary</button>
-                <button onClick={() => window.print()}>Print</button>
               </div>
 
               <div className="summary">{result.executive_summary}</div>
@@ -431,27 +440,48 @@ export default function Home() {
               </div>
 
               <div className="nextSteps">
-                <h3>Framework Coverage</h3>
-                {(result.framework_coverage || []).map((x: any) => (
-                  <div key={x.framework} className="miniRow"><span>{x.framework}</span><strong>{x.count}</strong></div>
+                <h3>Item Scorecards</h3>
+                {(result.item_scorecards || []).map((item: any) => (
+                  <div key={item.item_title} className="scorecardItem">
+                    <div className="scorecardTop">
+                      <strong>{item.item_title}</strong>
+                      <span>{item.score}/100 · {item.rating}</span>
+                    </div>
+                    <p>{item.domain}</p>
+                    {(item.dimensions || []).map((d: any) => (
+                      <div key={d.key} className="dimensionRow">
+                        <span>{d.label}</span>
+                        <strong>{d.score}/100</strong>
+                        <em>{d.rating}</em>
+                      </div>
+                    ))}
+                  </div>
                 ))}
               </div>
 
               <div className="nextSteps">
-                <h3>Recommended Next Steps</h3>
-                <ol>{(result.recommended_next_steps || []).map((step: string) => <li key={step}>{step}</li>)}</ol>
+                <h3>Evidence Request List</h3>
+                {(result.evidence_requests || []).map((req: any) => (
+                  <div key={req.request_id} className="requestRow">
+                    <strong>{req.request_id} · {req.priority}</strong>
+                    <span>{req.evidence_needed}</span>
+                    <em>Preferred: {(req.preferred_artifacts || []).join(", ")}</em>
+                  </div>
+                ))}
               </div>
 
               <div className="findings">
-                {result.findings.map((finding: any, index: number) => (
-                  <div key={index} className="finding">
+                {result.findings.map((finding: any) => (
+                  <div key={finding.finding_id} className="finding">
                     <div className="findingTop">
-                      <h3>{finding.title}</h3>
+                      <h3>{finding.finding_id} — {finding.title}</h3>
                       <span className={"badge " + finding.severity.toLowerCase()}>{finding.severity}</span>
                     </div>
                     <p><b>Risk domain:</b> {finding.risk_domain}</p>
+                    <p><b>Dimension:</b> {finding.dimension}</p>
                     <p><b>Affected item:</b> {finding.affected_item}</p>
                     <p><b>Issue:</b> {finding.issue}</p>
+                    <p><b>Severity rationale:</b> {finding.severity_rationale}</p>
                     <p><b>Evidence gap:</b> {finding.evidence_gap}</p>
                     <p><b>Examiner question:</b> {finding.examiner_question}</p>
                     <p><b>Remediation:</b> {finding.remediation}</p>
@@ -469,6 +499,11 @@ export default function Home() {
                     </div>
                   </div>
                 ))}
+              </div>
+
+              <div className="nextSteps">
+                <h3>Recommended Next Steps</h3>
+                <ol>{(result.recommended_next_steps || []).map((step: string) => <li key={step}>{step}</li>)}</ol>
               </div>
             </div>
           )}
