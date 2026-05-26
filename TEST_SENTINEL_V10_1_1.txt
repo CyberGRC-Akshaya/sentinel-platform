@@ -1,0 +1,36 @@
+TEST SENTINEL v10.1.1 HOTFIX
+
+Commands:
+
+cd $HOME\Desktop\EyeOnBits-Sentinel
+docker compose down --remove-orphans
+docker compose up --build
+
+Open:
+http://localhost:3000
+http://localhost:8000/api/health
+
+Expected backend:
+"version": "10.1.1"
+
+Browser:
+Ctrl + Shift + R
+
+Smoke test:
+1. Final Room loads
+2. Launch Room loads
+3. Run + Save Review to Vault
+4. Demo Room opens
+5. Delivery Kit opens
+6. Portfolio opens
+7. Board Pack opens
+8. Evidence Requests opens
+9. Command Center opens
+10. Control Atlas opens
+
+Commit:
+git add .
+git commit -m "Hotfix Sentinel v10.1.1 frontend build"
+git push
+git tag -a v10.1.1-build-hotfix -m "Sentinel v10.1.1 - Frontend build hotfix"
+git push origin v10.1.1-build-hotfix

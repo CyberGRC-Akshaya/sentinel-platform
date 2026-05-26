@@ -1,0 +1,29 @@
+SENTINEL v10.1 BUGFIX SUMMARY
+
+Fixed:
+1. Launch Room frontend/backend mismatch:
+   - frontend expected launchReadiness.final
+   - backend returned launchReadiness.freeze
+   - backend now returns both final and freeze
+   - frontend has fallback
+
+2. Score card layout issue:
+   - scoreRow was accidentally changed to 11 columns
+   - restored to 3 columns
+
+3. Tab layout:
+   - tabBar supports 11 tabs on large screen
+   - responsive fallback added
+
+4. Added clean endpoint:
+   - /api/product/final-scope
+
+5. Future version wording cleaned:
+   - removed confusing direct v10 future gate
+
+Next:
+- Run tests
+- capture screenshots
+- polish README
+- record demo
+- GitHub presentation

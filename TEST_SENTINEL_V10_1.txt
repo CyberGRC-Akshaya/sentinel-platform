@@ -1,0 +1,29 @@
+TEST SENTINEL v10.1
+
+Commands:
+
+cd $HOME\Desktop\EyeOnBits-Sentinel
+docker compose down --remove-orphans
+docker compose up --build
+
+Open:
+http://localhost:3000
+http://localhost:8000/api/health
+
+Expected backend:
+"version": "10.1.0"
+
+Browser hard refresh:
+Ctrl + Shift + R
+
+Smoke test:
+1. Final Room loads
+2. Launch Room loads without crash
+3. Launch score cards show properly
+4. Run + Save Review to Vault
+5. Open all tabs
+6. Export Final HTML
+7. Export Launch HTML
+8. Export Vault Backup
+9. Export Register CSV
+10. Export Request CSV

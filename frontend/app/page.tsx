@@ -449,7 +449,7 @@ Sentinel Evidence Defensibility Workbench`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v10-final-launch-report.html";
+    a.download = "sentinel-v10.1.1-final-launch-report.html";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -461,23 +461,23 @@ Sentinel Evidence Defensibility Workbench`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v10-review-vault-backup.json";
+    a.download = "sentinel-v10.1.1-review-vault-backup.json";
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  function downloadMvpFinalJson() {
+  function downloadFinalScopeJson() {
     if (!launchReadiness) return;
     const blob = new Blob([JSON.stringify(launchReadiness.final, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v10-final-scope.json";
+    a.download = "sentinel-v10.1.1-final-scope.json";
     a.click();
     URL.revokeObjectURL(url);
   }
 
-  function copyMvpPositioning() {
+  function copyLaunchPositioning() {
     if (!launchReadiness) return;
     const final = launchReadiness.final;
     const text = `${final.product_name}
@@ -513,7 +513,7 @@ ${final.pilot_offer.buyer}`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v10-final-launch-edition.html";
+    a.download = "sentinel-v10.1.1-final-launch-edition.html";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -524,7 +524,7 @@ ${final.pilot_offer.buyer}`;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "sentinel-v10-final-release-manifest.json";
+    a.download = "sentinel-v10.1.1-final-release-manifest.json";
     a.click();
     URL.revokeObjectURL(url);
   }
@@ -834,7 +834,7 @@ ${finalRelease.commercial_offer.outcome}`;
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v10.0</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v10.1.1.1</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
             Professional assurance workbench with review vault, evidence request workflow, closure readiness, control atlas mapping, demo-room storytelling, board-pack generation, remediation register, and executive reporting.
@@ -1012,13 +1012,15 @@ ${finalRelease.commercial_offer.outcome}`;
                     <button onClick={loadLaunchReadiness}>Refresh Launch</button>
                     <button onClick={downloadLaunchReadinessHtml}>Launch HTML</button>
                     <button onClick={downloadVaultBackupJson}>Vault Backup</button>
-                    <button onClick={downloadMvpFinalJson}>Final JSON</button>
-                    <button onClick={copyMvpPositioning}>Copy Positioning</button>
+                    <button onClick={downloadFinalScopeJson}>Final JSON</button>
+                    <button onClick={copyLaunchPositioning}>Copy Positioning</button>
                   </div>
 
                   {!launchReadiness && <div className="empty">Launch readiness not loaded yet.</div>}
 
-                  {launchReadiness && (
+                  {launchReadiness && (() => {
+                    const launchScope = launchReadiness.final || launchReadiness.freeze;
+                    return (
                     <div>
                       <div className="scoreRow">
                         <div className="scoreBox"><span>Launch Readiness</span><strong>{launchReadiness.launch_readiness_score}/100</strong></div>
@@ -1026,8 +1028,8 @@ ${finalRelease.commercial_offer.outcome}`;
                         <div className="scoreBox"><span>Saved Reviews</span><strong>{launchReadiness.portfolio_snapshot?.total_reviews || 0}</strong></div>
                       </div>
 
-                      <div className="summary"><b>Positioning:</b> {launchReadiness.final.positioning}</div>
-                      <div className="summary"><b>One-liner:</b> {launchReadiness.final.one_liner}</div>
+                      <div className="summary"><b>Positioning:</b> {launchScope.positioning}</div>
+                      <div className="summary"><b>One-liner:</b> {launchScope.one_liner}</div>
 
                       <div className="miniGrid">
                         <div>
@@ -1041,8 +1043,8 @@ ${finalRelease.commercial_offer.outcome}`;
                         </div>
                         <div>
                           <h3>Pilot Offer</h3>
-                          <div className="miniRow"><span>Name</span><strong>{launchReadiness.final.pilot_offer.name}</strong></div>
-                          <div className="miniRow"><span>Duration</span><strong>{launchReadiness.final.pilot_offer.duration}</strong></div>
+                          <div className="miniRow"><span>Name</span><strong>{launchScope.pilot_offer.name}</strong></div>
+                          <div className="miniRow"><span>Duration</span><strong>{launchScope.pilot_offer.duration}</strong></div>
                           <div className="miniRow"><span>Status</span><strong>Ready</strong></div>
                         </div>
                       </div>
@@ -1050,17 +1052,17 @@ ${finalRelease.commercial_offer.outcome}`;
                       <div className="miniGrid">
                         <div>
                           <h3>Final Edition In Scope</h3>
-                          <ol>{(launchReadiness.final.final_in_scope || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
+                          <ol>{(launchScope.final_in_scope || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
                         </div>
                         <div>
                           <h3>Explicitly Out of Scope</h3>
-                          <ol>{(launchReadiness.final.explicitly_out_of_scope_for_final || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
+                          <ol>{(launchScope.explicitly_out_of_scope_for_final || []).map((x: string) => <li key={x}>{x}</li>)}</ol>
                         </div>
                       </div>
 
                       <div className="nextSteps">
                         <h3>Future Versions — Only If Justified</h3>
-                        {(launchReadiness.final.next_versions_only_if_justified || []).map((x: any) => (
+                        {(launchScope.next_versions_only_if_justified || []).map((x: any) => (
                           <div key={x.version} className="miniRow">
                             <span>{x.version}</span>
                             <strong>{x.gate}</strong>
@@ -1068,7 +1070,8 @@ ${finalRelease.commercial_offer.outcome}`;
                         ))}
                       </div>
                     </div>
-                  )}
+                    );
+                  })()}
                 </div>
               )}
 

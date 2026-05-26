@@ -1,0 +1,26 @@
+SENTINEL v10.1.1 BUILD HOTFIX
+
+This hotfix repairs the frontend build error:
+
+Error:
+Unexpected token `main`. Expected JSX identifier.
+
+Root cause:
+An automated JSX wrapper patch accidentally inserted the Launch Room IIFE closing syntax into the Final Room block. This made page.tsx invalid before the main return block could compile.
+
+Fix:
+1. Final Room now uses normal JSX conditional rendering:
+   {finalRelease && (...)}
+
+2. Launch Room keeps the IIFE fallback wrapper correctly:
+   {launchReadiness && (() => { ... return (...); })()}
+
+Validation completed before packaging:
+- backend Python syntax compiled successfully
+- frontend page.tsx parsed with TypeScript TSX parser with zero parse diagnostics
+
+Next:
+- apply this hotfix
+- rebuild Docker
+- hard refresh browser
+- commit and tag
