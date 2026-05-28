@@ -18,7 +18,7 @@ try {
 
 Write-Host "`nFrontend status:"
 try {
-    $response = Invoke-WebRequest -Uri "http://localhost:3000" -TimeoutSec 5
+    $response = Invoke-WebRequest -Uri "http://localhost:3000" -UseBasicParsing -TimeoutSec 5
     Write-Host "Frontend HTTP status: $($response.StatusCode)" -ForegroundColor Green
 } catch {
     Write-Host "Frontend check failed." -ForegroundColor Red
