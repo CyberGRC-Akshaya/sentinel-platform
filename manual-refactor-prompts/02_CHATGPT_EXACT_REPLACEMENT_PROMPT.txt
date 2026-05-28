@@ -1,0 +1,21 @@
+We are in Stage 2 — Code Stabilization.
+
+Please provide an exact replacement block for the code below.
+
+Rules:
+- preserve behavior
+- no new features
+- no redesign
+- no broad rewrite
+- keep imports valid
+- keep TypeScript/Python syntax valid
+- tell me the exact file and line/section where to paste
+
+File:
+[PASTE FILE PATH]
+
+Current code:
+[PASTE CODE]
+
+Required change:
+[DESCRIBE CHANGE]

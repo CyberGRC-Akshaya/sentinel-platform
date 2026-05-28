@@ -1,0 +1,21 @@
+We are in Stage 2 — Code Stabilization for Sentinel Evidence Defensibility Workbench.
+
+Rules:
+- no new features
+- preserve existing behavior
+- no redesign
+- no new tabs
+- no API behavior changes unless absolutely necessary
+- make the smallest safe change
+- provide exact replacement code only
+- explain exactly where to paste it
+- mention test command
+
+File:
+[PASTE FILE PATH]
+
+Current code section:
+[PASTE CODE SECTION]
+
+Task:
+Review this section for stabilization risk and suggest the smallest safe cleanup.

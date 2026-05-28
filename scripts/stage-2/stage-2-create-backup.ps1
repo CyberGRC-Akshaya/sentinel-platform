@@ -16,14 +16,6 @@ New-Item -ItemType Directory -Path $backupRoot -Force | Out-Null
 Write-Host "Creating backup:" -ForegroundColor Cyan
 Write-Host $backupFile
 
-$exclude = @(
-    "node_modules",
-    ".next",
-    "__pycache__",
-    ".venv",
-    "venv"
-)
-
 $temp = Join-Path $env:TEMP "sentinel-backup-$timestamp"
 if (Test-Path $temp) { Remove-Item $temp -Recurse -Force }
 New-Item -ItemType Directory -Path $temp | Out-Null

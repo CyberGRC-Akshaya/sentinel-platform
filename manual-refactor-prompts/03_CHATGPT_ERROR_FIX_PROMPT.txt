@@ -1,0 +1,22 @@
+We are in Stage 2 — Code Stabilization.
+
+The app failed after a small change.
+
+Do not add features.
+
+Help me fix only this error.
+
+Error:
+[PASTE ERROR]
+
+File involved:
+[PASTE FILE PATH]
+
+Recent code change:
+[PASTE CODE OR DESCRIBE CHANGE]
+
+Need:
+- root cause
+- exact fix
+- exact replacement code if needed
+- test command

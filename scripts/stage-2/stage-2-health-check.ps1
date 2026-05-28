@@ -3,7 +3,7 @@ $ErrorActionPreference = "Continue"
 
 Write-Host "=== Sentinel Stage 2 Health Check ===" -ForegroundColor Cyan
 
-Write-Host "`nDocker compose status:"
+Write-Host "`nDocker containers:"
 docker compose ps
 
 Write-Host "`nBackend health:"
@@ -16,10 +16,10 @@ try {
     Write-Host $_
 }
 
-Write-Host "`nFrontend check:"
+Write-Host "`nFrontend status:"
 try {
     $response = Invoke-WebRequest -Uri "http://localhost:3000" -TimeoutSec 5
-    Write-Host "Frontend status code: $($response.StatusCode)" -ForegroundColor Green
+    Write-Host "Frontend HTTP status: $($response.StatusCode)" -ForegroundColor Green
 } catch {
     Write-Host "Frontend check failed." -ForegroundColor Red
     Write-Host $_
