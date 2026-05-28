@@ -734,27 +734,37 @@ ${finalRelease.commercial_offer.outcome}`;
     return `"${text.replace(/"/g, '""')}"`;
   }
 
+  function downloadBlob(fileName: string, content: BlobPart, mimeType: string) {
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+
+    try {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  function downloadJson(fileName: string, payload: any) {
+    downloadBlob(fileName, JSON.stringify(payload, null, 2), "application/json");
+  }
+
+  function downloadText(fileName: string, content: string, mimeType: string) {
+    downloadBlob(fileName, content, mimeType);
+  }
+
   function downloadCsv(fileName: string, headers: string[], rows: any[][]) {
     const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadBlob(fileName, csv, "text/csv;charset=utf-8");
   }
 
   function downloadWorkspaceJson() {
     if (!result) return;
     const payload = { ...result, remediation_register: registerRows };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sentinel-v5-control-atlas-workspace.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadJson("sentinel-v5-control-atlas-workspace.json", payload);
   }
 
   function downloadRegisterCsv() {
@@ -777,13 +787,7 @@ ${finalRelease.commercial_offer.outcome}`;
 
   function downloadPortfolioJson() {
     if (!portfolio) return;
-    const blob = new Blob([JSON.stringify(portfolio, null, 2)], { type: "application/json" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sentinel-v5-portfolio-snapshot.json";
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadJson("sentinel-v5-portfolio-snapshot.json", portfolio);
   }
 
   async function downloadHtmlReport() {
@@ -792,27 +796,14 @@ ${finalRelease.commercial_offer.outcome}`;
     const options = currentReviewId ? undefined : { method: "POST", headers: {"Content-Type": "application/json"}, body: input };
     const response = await fetch(endpoint, options as any);
     const reportHtml = await response.text();
-    const blob = new Blob([reportHtml], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sentinel-v5-control-atlas-report.html";
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadText("sentinel-v5-control-atlas-report.html", reportHtml, "text/html");
   }
 
   async function downloadPortfolioReport() {
     const response = await fetch(`${API_BASE}/api/portfolio/report-html`);
     const reportHtml = await response.text();
-    const blob = new Blob([reportHtml], { type: "text/html" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sentinel-v5-portfolio-control-atlas-report.html";
-    a.click();
-    URL.revokeObjectURL(url);
+    downloadText("sentinel-v5-portfolio-control-atlas-report.html", reportHtml, "text/html");
   }
-
   async function copySummary() {
     if (!result) return;
     await navigator.clipboard.writeText(result.executive_summary);
