@@ -1,0 +1,273 @@
+﻿SENTINEL STAGE 2 CODE INVENTORY REPORT
+Generated: 05/28/2026 06:01:35
+Project: C:\Users\Akshaya\Desktop\EyeOnBits-Sentinel
+Branch: stage-2-code-stabilization
+
+GIT STATUS
+----------
+?? docs/stage-2-code-stabilization/STAGE_2_CODE_INVENTORY_HOTFIX_NOTE.md
+?? docs/stage-2-code-stabilization/STAGE_2_CODE_INVENTORY_INSTRUCTIONS.md
+?? docs/stage-2-code-stabilization/STAGE_2_CODE_INVENTORY_REPORT.txt
+?? scripts/stage-2/stage-2-code-inventory.ps1
+
+KEY FILE LINE COUNTS
+--------------------
+frontend\app\page.tsx : 1400 lines
+frontend\app\globals.css : 664 lines
+frontend\app\layout.tsx : 17 lines
+backend\app\main.py : 1943 lines
+docker-compose.yml : 17 lines
+
+FRONTEND INVENTORY - page.tsx
+-----------------------------
+useState count: 16
+useEffect count: 2
+async function count: 24
+function count: 55
+fetch call count: 22
+activeTab references: 18
+download references: 73
+
+FRONTEND TAB REFERENCES
+-----------------------
+Line 103: const [activeTab, setActiveTab] = useState("Workbench");
+Line 145: setActiveTab("Portfolio");
+Line 556: setActiveTab("Workbench");
+Line 646: setActiveTab("Workbench");
+Line 665: setActiveTab("Command Center");
+Line 688: setActiveTab("Command Center");
+Line 925: <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
+Line 944: {activeTab === "Final Room" && (
+Line 1005: {activeTab === "Launch Room" && (
+Line 1079: {activeTab === "Demo Room" && (
+Line 1177: {activeTab === "Delivery Kit" && (
+Line 1232: {activeTab === "Portfolio" && (
+Line 1270: {activeTab === "Board Pack" && (
+Line 1354: {activeTab === "Evidence Requests" && (
+Line 1440: {activeTab === "Command Center" && (
+Line 1489: {activeTab === "Control Atlas" && (
+Line 1514: {activeTab === "Output" && (
+Line 1534: {activeTab === "Findings" && (
+
+FRONTEND API CALLS
+------------------
+Line 120: const response = await fetch(`${API_BASE}/api/reviews`);
+Line 129: const response = await fetch(`${API_BASE}/api/portfolio`);
+Line 139: const response = await fetch(`${API_BASE}/api/demo/seed`, { method: "POST" });
+Line 154: const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/board-pack`);
+Line 166: const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/board-pack-html`);
+Line 189: const response = await fetch(`${API_BASE}/api/portfolio/board-pack-html`);
+Line 203: const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/request-studio`);
+Line 215: const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/request-studio-html`);
+Line 266: const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/demo-room`);
+Line 278: const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/demo-room-html`);
+Line 301: const response = await fetch(`${API_BASE}/api/portfolio/demo-room-html`);
+Line 438: const response = await fetch(`${API_BASE}/api/launch/readiness`);
+Line 446: const response = await fetch(`${API_BASE}/api/launch/readiness-html`);
+Line 458: const response = await fetch(`${API_BASE}/api/vault/export`);
+Line 502: const response = await fetch(`${API_BASE}/api/product/final-release`);
+Line 510: const response = await fetch(`${API_BASE}/api/product/final-release-html`);
+Line 659: const response = await fetch(`${API_BASE}/api/reviews/analyze-save`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) });
+Line 682: const response = await fetch(`${API_BASE}/api/reviews/${reviewId}`);
+Line 700: await fetch(`${API_BASE}/api/reviews/${reviewId}`, { method: "DELETE" });
+Line 718: const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/register`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ rows: registerRows }) });
+Line 793: const response = await fetch(endpoint, options as any);
+Line 805: const response = await fetch(`${API_BASE}/api/portfolio/report-html`);
+
+FRONTEND DOWNLOAD FUNCTIONS
+---------------------------
+Line 161: async function downloadBoardPackHtml() {
+Line 172: a.download = "sentinel-v6-board-pack.html";
+Line 177: function downloadBoardPackJson() {
+Line 183: a.download = "sentinel-v6-board-pack.json";
+Line 188: async function downloadPortfolioBoardPack() {
+Line 195: a.download = "sentinel-v6-portfolio-board-pack.html";
+Line 210: async function downloadRequestPackHtml() {
+Line 221: a.download = "sentinel-v7-evidence-request-studio.html";
+Line 226: function downloadRequestPackJson() {
+Line 232: a.download = "sentinel-v7-evidence-request-studio.json";
+Line 237: function downloadEvidenceRequestCsv() {
+Line 254: downloadCsv("sentinel-v7-evidence-request-list.csv", headers, rows);
+Line 273: async function downloadDemoRoomHtml() {
+Line 284: a.download = "sentinel-v10-executive-demo-room.html";
+Line 289: function downloadDemoRoomJson() {
+Line 295: a.download = "sentinel-v10-executive-demo-room.json";
+Line 300: async function downloadPortfolioDemoRoom() {
+Line 307: a.download = "sentinel-v10-portfolio-demo-room.html";
+Line 347: function downloadDeliveryChecklistCsv() {
+Line 349: downloadCsv("sentinel-v10-client-delivery-checklist.csv", headers, deliveryChecklistRows());
+Line 386: function downloadClientFollowUpTxt() {
+Line 391: a.download = "sentinel-v10-client-follow-up-note.txt";
+Line 396: function downloadDemoAssetManifest() {
+Line 430: a.download = "sentinel-v10-demo-asset-manifest.json";
+Line 445: async function downloadLaunchReadinessHtml() {
+Line 452: a.download = "sentinel-v10.1.1-final-launch-report.html";
+Line 457: async function downloadVaultBackupJson() {
+Line 464: a.download = "sentinel-v10.1.1-review-vault-backup.json";
+Line 469: function downloadFinalScopeJson() {
+Line 475: a.download = "sentinel-v10.1.1-final-scope.json";
+Line 509: async function downloadFinalReleaseHtml() {
+Line 516: a.download = "sentinel-v10.1.1-final-launch-edition.html";
+Line 521: function downloadFinalReleaseJson() {
+Line 527: a.download = "sentinel-v10.1.1-final-release-manifest.json";
+Line 737: function downloadCsv(fileName: string, headers: string[], rows: any[][]) {
+Line 743: a.download = fileName;
+Line 748: function downloadWorkspaceJson() {
+Line 755: a.download = "sentinel-v5-control-atlas-workspace.json";
+Line 760: function downloadRegisterCsv() {
+Line 763: downloadCsv("sentinel-v5-control-atlas-register.csv", headers, rows);
+Line 766: function downloadControlAtlasCsv() {
+Line 775: downloadCsv("sentinel-v5-control-atlas-mapping.csv", headers, rows);
+Line 778: function downloadPortfolioJson() {
+Line 784: a.download = "sentinel-v5-portfolio-snapshot.json";
+Line 789: async function downloadHtmlReport() {
+Line 799: a.download = "sentinel-v5-control-atlas-report.html";
+Line 804: async function downloadPortfolioReport() {
+Line 811: a.download = "sentinel-v5-portfolio-control-atlas-report.html";
+Line 931: <button onClick={downloadWorkspaceJson}>Workspace JSON</button>
+Line 932: <button onClick={downloadRegisterCsv}>Register CSV</button>
+Line 933: <button onClick={downloadControlAtlasCsv}>Control CSV</button>
+Line 934: <button onClick={downloadHtmlReport}>HTML Report</button>
+Line 952: <button onClick={downloadFinalReleaseHtml}>Final HTML</button>
+Line 953: <button onClick={downloadFinalReleaseJson}>Final JSON</button>
+Line 955: <button onClick={downloadVaultBackupJson}>Vault Backup</button>
+Line 1013: <button onClick={downloadLaunchReadinessHtml}>Launch HTML</button>
+Line 1014: <button onClick={downloadVaultBackupJson}>Vault Backup</button>
+Line 1015: <button onClick={downloadFinalScopeJson}>Final JSON</button>
+Line 1087: <button onClick={downloadDemoRoomJson}>Demo JSON</button>
+Line 1088: <button onClick={downloadDemoRoomHtml}>Demo HTML</button>
+Line 1089: <button onClick={downloadPortfolioDemoRoom}>Portfolio Demo</button>
+Line 1190: <button onClick={downloadDeliveryChecklistCsv}>Checklist CSV</button>
+Line 1192: <button onClick={downloadClientFollowUpTxt}>Follow-up TXT</button>
+Line 1193: <button onClick={downloadDemoAssetManifest}>Asset Manifest</button>
+Line 1194: <button onClick={downloadDemoRoomHtml}>Demo HTML</button>
+Line 1238: <button onClick={downloadPortfolioJson}>Portfolio JSON</button>
+Line 1239: <button onClick={downloadPortfolioReport}>Portfolio HTML</button>
+Line 1278: <button onClick={downloadBoardPackJson}>Board JSON</button>
+Line 1279: <button onClick={downloadBoardPackHtml}>Board HTML</button>
+Line 1280: <button onClick={downloadPortfolioBoardPack}>Portfolio Board</button>
+Line 1362: <button onClick={downloadRequestPackJson}>Request JSON</button>
+Line 1363: <button onClick={downloadRequestPackHtml}>Request HTML</button>
+Line 1364: <button onClick={downloadEvidenceRequestCsv}>Request CSV</button>
+
+BACKEND INVENTORY - main.py
+---------------------------
+app route count: 32
+def count: 56
+async def count: 0
+HTMLResponse references: 11
+sqlite references: 5
+json references: 23
+
+BACKEND ROUTES
+--------------
+Line 317: @app.on_event("startup")
+Line 666: @app.get("/api/health")
+Line 670: @app.get("/api/control-atlas")
+Line 674: @app.get("/api/framework-library")
+Line 678: @app.get("/api/scoring-dimensions")
+Line 682: @app.get("/api/intake-requirements")
+Line 686: @app.post("/api/analyze")
+Line 690: @app.post("/api/reviews/analyze-save")
+Line 694: @app.get("/api/reviews")
+Line 705: @app.get("/api/reviews/{review_id}")
+Line 716: @app.put("/api/reviews/{review_id}/register")
+Line 730: @app.delete("/api/reviews/{review_id}")
+Line 799: @app.get("/api/portfolio")
+Line 810: @app.post("/api/demo/seed")
+Line 907: @app.post("/api/report-html", response_class=HTMLResponse)
+Line 913: @app.get("/api/reviews/{review_id}/report-html", response_class=HTMLResponse)
+Line 917: @app.get("/api/portfolio/report-html", response_class=HTMLResponse)
+Line 1201: @app.get("/api/reviews/{review_id}/board-pack")
+Line 1206: @app.get("/api/reviews/{review_id}/board-pack-html", response_class=HTMLResponse)
+Line 1211: @app.get("/api/portfolio/board-pack-html", response_class=HTMLResponse)
+Line 1517: @app.get("/api/reviews/{review_id}/request-studio")
+Line 1522: @app.get("/api/reviews/{review_id}/request-studio-html", response_class=HTMLResponse)
+Line 1809: @app.get("/api/reviews/{review_id}/demo-room")
+Line 1814: @app.get("/api/reviews/{review_id}/demo-room-html", response_class=HTMLResponse)
+Line 1819: @app.get("/api/portfolio/demo-room-html", response_class=HTMLResponse)
+Line 1896: @app.get("/api/product/freeze")
+Line 1900: @app.get("/api/product/final-scope")
+Line 1904: @app.get("/api/vault/export")
+Line 1938: @app.get("/api/launch/readiness")
+Line 1971: @app.get("/api/launch/readiness-html", response_class=HTMLResponse)
+Line 2083: @app.get("/api/product/final-release")
+Line 2087: @app.get("/api/product/final-release-html", response_class=HTMLResponse)
+
+BACKEND FUNCTION DEFINITIONS
+----------------------------
+Line 289: def db():
+Line 294: def ensure_db():
+Line 318: def startup():
+Line 321: def normalize_text(item: EvidenceItem) -> str:
+Line 324: def detect_domain(text: str) -> str:
+Line 330: def infer_artifact_profile(item: EvidenceItem, domain: str) -> Dict[str, Any]:
+Line 363: def intake_gap_analysis(item: EvidenceItem, domain: str) -> Dict[str, Any]:
+Line 376: def dimension_score(text: str, dimension: Dict[str, Any]) -> Dict[str, Any]:
+Line 383: def map_control_atlas(domain: str, text: str) -> Dict[str, Any]:
+Line 413: def score_item(item: EvidenceItem) -> Dict[str, Any]:
+Line 432: def severity_from_score(score: int) -> str:
+Line 441: def framework_mappings_for(domain: str) -> List[Dict[str, str]]:
+Line 444: def build_finding(item: EvidenceItem, item_score: Dict[str, Any], dimension: Dict[str, Any], idx: int) -> Dict[str, Any]:
+Line 479: def build_register(result: Dict[str, Any]) -> List[Dict[str, Any]]:
+Line 502: def build_analysis(payload: AnalyzeRequest) -> Dict[str, Any]:
+Line 641: def save_review(payload: AnalyzeRequest, result: Dict[str, Any]) -> Dict[str, Any]:
+Line 667: def health():
+Line 671: def control_atlas():
+Line 675: def framework_library():
+Line 679: def scoring_dimensions():
+Line 683: def intake_requirements():
+Line 687: def analyze(payload: AnalyzeRequest):
+Line 691: def analyze_and_save(payload: AnalyzeRequest):
+Line 695: def list_reviews():
+Line 706: def get_review(review_id: str):
+Line 717: def replace_register(review_id: str, update: RegisterUpdate):
+Line 731: def delete_review(review_id: str):
+Line 740: def _portfolio_snapshot_from_reviews(rows: List[sqlite3.Row]) -> Dict[str, Any]:
+Line 800: def portfolio_dashboard():
+Line 811: def seed_demo_reviews():
+Line 841: def render_html_report(result: Dict[str, Any]) -> str:
+Line 908: def report_html(payload: AnalyzeRequest):
+Line 914: def saved_report_html(review_id: str):
+Line 918: def portfolio_report_html():
+Line 942: def build_board_pack_from_result(result: Dict[str, Any]) -> Dict[str, Any]:
+Line 1078: def render_board_pack_html(pack: Dict[str, Any]) -> str:
+Line 1202: def saved_review_board_pack(review_id: str):
+Line 1207: def saved_review_board_pack_html(review_id: str):
+Line 1212: def portfolio_board_pack_html():
+Line 1260: def _closure_readiness_score(row: Dict[str, Any]) -> Dict[str, Any]:
+Line 1293: def build_evidence_request_studio_pack(result: Dict[str, Any]) -> Dict[str, Any]:
+Line 1406: def render_evidence_request_pack_html(pack: Dict[str, Any]) -> str:
+Line 1518: def saved_review_request_studio(review_id: str):
+Line 1523: def saved_review_request_studio_html(review_id: str):
+Line 1528: def build_demo_room_pack(result: Dict[str, Any]) -> Dict[str, Any]:
+Line 1704: def render_demo_room_html(pack: Dict[str, Any]) -> str:
+Line 1810: def saved_review_demo_room(review_id: str):
+Line 1815: def saved_review_demo_room_html(review_id: str):
+Line 1820: def portfolio_demo_room_html():
+Line 1897: def product_freeze():
+Line 1901: def product_final_scope():
+Line 1905: def export_vault():
+Line 1939: def launch_readiness():
+Line 1972: def launch_readiness_html():
+Line 2084: def final_release_manifest():
+Line 2088: def final_release_manifest_html():
+
+CSS INVENTORY - globals.css
+---------------------------
+class selector rough count: 134
+media query count: 6
+important count: 3
+
+DOCKER COMPOSE CONFIG CHECK
+---------------------------
+Docker Compose config: OK
+
+RECOMMENDED FIRST STABILIZATION TARGETS
+---------------------------------------
+1. Do not change Docker yet.
+2. Do not redesign UI.
+3. First inspect frontend/app/page.tsx section boundaries.
+4. First low-risk frontend extraction should be helper functions/static constants, not JSX-heavy tabs.
+5. First low-risk backend extraction should be pure scoring/helper functions, not routes.
+6. Commit only after app still builds and health check passes.
