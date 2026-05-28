@@ -1,0 +1,101 @@
+      await loadVault();
+      await loadPortfolio();
+    } else setSaveMessage("Register save failed.");
+  }
+
+  function updateRegisterRow(index: number, field: keyof RegisterRow, value: string) {
+    const next = [...registerRows];
+    next[index] = { ...next[index], [field]: value };
+    setRegisterRows(next);
+  }
+
+  function csvEscape(value: any) {
+    const text = String(value ?? "");
+    return `"${text.replace(/"/g, '""')}"`;
+  }
+
+  function downloadCsv(fileName: string, headers: string[], rows: any[][]) {
+    const csv = [headers, ...rows].map((row) => row.map(csvEscape).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadWorkspaceJson() {
+    if (!result) return;
+    const payload = { ...result, remediation_register: registerRows };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v5-control-atlas-workspace.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadRegisterCsv() {
+    const headers = ["Finding_ID","Severity","Risk_Domain","Control_Atlas_IDs","Affected_Item","Issue","Remediation","Evidence_Needed","Preferred_Artifacts","Owner","Target_Date","Status","Management_Response","Closure_Evidence","Validation_Notes"];
+    const rows = registerRows.map((row) => [row.finding_id,row.severity,row.risk_domain,row.control_atlas_ids || "",row.affected_item,row.issue,row.remediation,row.evidence_needed,row.preferred_artifacts,row.owner,row.target_date,row.status,row.management_response,row.closure_evidence,row.validation_notes]);
+    downloadCsv("sentinel-v5-control-atlas-register.csv", headers, rows);
+  }
+
+  function downloadControlAtlasCsv() {
+    if (!result) return;
+    const headers = ["Item","Domain","Control_ID","Control_Theme","Coverage","Rating","Missing_Evidence","Challenge_Questions"];
+    const rows: any[][] = [];
+    result.item_scorecards.forEach((item: any) => {
+      (item.control_atlas_mapping?.mapped_controls || []).forEach((control: any) => {
+        rows.push([item.item_title, item.domain, control.control_id, control.control_theme, control.control_coverage_score, control.control_rating, (control.missing_evidence || []).join("; "), (control.challenge_questions || []).join("; ")]);
+      });
+    });
+    downloadCsv("sentinel-v5-control-atlas-mapping.csv", headers, rows);
+  }
+
+  function downloadPortfolioJson() {
+    if (!portfolio) return;
+    const blob = new Blob([JSON.stringify(portfolio, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v5-portfolio-snapshot.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function downloadHtmlReport() {
+    if (!result) return;
+    const endpoint = currentReviewId ? `${API_BASE}/api/reviews/${currentReviewId}/report-html` : `${API_BASE}/api/report-html`;
+    const options = currentReviewId ? undefined : { method: "POST", headers: {"Content-Type": "application/json"}, body: input };
+    const response = await fetch(endpoint, options as any);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v5-control-atlas-report.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function downloadPortfolioReport() {
+    const response = await fetch(`${API_BASE}/api/portfolio/report-html`);
+    const reportHtml = await response.text();
+    const blob = new Blob([reportHtml], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "sentinel-v5-portfolio-control-atlas-report.html";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  async function copySummary() {
+    if (!result) return;
+    await navigator.clipboard.writeText(result.executive_summary);
+    alert("Executive summary copied.");
+  }
+
