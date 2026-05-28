@@ -10,6 +10,7 @@ import html
 import json
 import sqlite3
 import uuid
+from app.db.sqlite import db, ensure_db
 
 from app.services.scoring import (
     CONTROL_ATLAS,
@@ -28,9 +29,6 @@ from app.services.scoring import (
     severity_from_score,
     framework_mappings_for,
 )
-
-DB_PATH = Path("data/sentinel.db")
-DB_PATH.parent.mkdir(parents=True, exist_ok=True)
 
 app = FastAPI(
     title="Sentinel Evidence Defensibility Workbench",
@@ -55,34 +53,6 @@ class AnalyzeRequest(BaseModel):
 
 class RegisterUpdate(BaseModel):
     rows: List[Dict[str, Any]]
-
-def db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
-
-def ensure_db():
-    with db() as conn:
-        conn.execute("""
-            CREATE TABLE IF NOT EXISTS reviews (
-                id TEXT PRIMARY KEY,
-                created_at TEXT NOT NULL,
-                updated_at TEXT NOT NULL,
-                organization TEXT,
-                industry TEXT,
-                evidence_type TEXT,
-                review_objective TEXT,
-                overall_rating TEXT,
-                evidence_defensibility_score INTEGER,
-                intake_coverage_score INTEGER,
-                metadata_completeness_score INTEGER,
-                total_findings INTEGER,
-                payload_json TEXT NOT NULL,
-                result_json TEXT NOT NULL,
-                register_json TEXT NOT NULL
-            )
-        """)
-        conn.commit()
 
 @app.on_event("startup")
 def startup():
@@ -1766,4 +1736,5 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 </div>
 </body>
 </html>"""
+
 
