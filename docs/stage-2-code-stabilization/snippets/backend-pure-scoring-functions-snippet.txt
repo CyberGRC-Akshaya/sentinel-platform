@@ -1,0 +1,125 @@
+    return f" {item.title} {item.content} {item.source_system or ''} {item.owner or ''} {item.reporting_period or ''} {item.artifact_type or ''} {item.control_reference or ''} ".lower()
+
+def detect_domain(text: str) -> str:
+    for domain, keywords in DOMAIN_KEYWORDS:
+        if any(keyword in text for keyword in keywords):
+            return domain
+    return "General Evidence Defensibility"
+
+def infer_artifact_profile(item: EvidenceItem, domain: str) -> Dict[str, Any]:
+    text = normalize_text(item)
+    artifact_type = item.artifact_type or "Unspecified Evidence Artifact"
+    if "screenshot" in text:
+        artifact_type = "Screenshot / Visual Evidence"
+    elif "soc 2" in text or "soc2" in text:
+        artifact_type = "SOC 2 / Vendor Assurance"
+    elif "metric" in text or "denominator" in text:
+        artifact_type = "Metric Evidence"
+    elif "change record" in text or "release" in text:
+        artifact_type = "Change / Release Evidence"
+    elif "access" in text or "mfa" in text:
+        artifact_type = "IAM / Access Evidence"
+    elif "ai " in text or "risk tier" in text:
+        artifact_type = "AI Governance Evidence"
+
+    profile = {
+        "title": item.title, "domain": domain, "artifact_type": artifact_type,
+        "has_owner": bool(item.owner), "has_source_system": bool(item.source_system),
+        "has_reporting_period": bool(item.reporting_period), "has_control_reference": bool(item.control_reference),
+        "has_evidence_date": bool(item.evidence_date), "text_length": len(item.content or ""),
+        "metadata_completeness_score": 0, "missing_metadata": []
+    }
+    checks = [("has_owner", "owner"), ("has_source_system", "source_system"), ("has_reporting_period", "reporting_period"), ("has_control_reference", "control_reference"), ("has_evidence_date", "evidence_date")]
+    present = 0
+    for key, label in checks:
+        if profile[key]:
+            present += 1
+        else:
+            profile["missing_metadata"].append(label)
+    profile["metadata_completeness_score"] = round((present / len(checks)) * 100)
+    return profile
+
+def intake_gap_analysis(item: EvidenceItem, domain: str) -> Dict[str, Any]:
+    text = normalize_text(item)
+    requirements = INTAKE_REQUIREMENTS.get(domain, INTAKE_REQUIREMENTS["General Evidence Defensibility"])
+    present, missing = [], []
+    for requirement in requirements:
+        if requirement.lower() in text:
+            present.append(requirement)
+        else:
+            missing.append(requirement)
+    coverage = round((len(present) / len(requirements)) * 100) if requirements else 0
+    rating = "Strong Intake" if coverage >= 80 else "Partial Intake" if coverage >= 55 else "Weak Intake"
+    return {"title": item.title, "domain": domain, "required_evidence_elements": requirements, "present_elements": present, "missing_elements": missing, "intake_coverage_score": coverage, "intake_rating": rating}
+
+def dimension_score(text: str, dimension: Dict[str, Any]) -> Dict[str, Any]:
+    positive_hits = [p for p in dimension["positive"] if p in text]
+    negative_hits = [n for n in dimension["negative"] if n in text]
+    score = max(0, min(100, 65 + (len(positive_hits) * 8) - (len(negative_hits) * 12)))
+    rating = "Strong" if score >= 80 else "Moderate" if score >= 60 else "Weak" if score >= 40 else "Deficient"
+    return {"key": dimension["key"], "label": dimension["label"], "weight": dimension["weight"], "score": score, "rating": rating, "positive_indicators": positive_hits, "negative_indicators": negative_hits}
+
+def map_control_atlas(domain: str, text: str) -> Dict[str, Any]:
+    controls = CONTROL_ATLAS.get(domain, CONTROL_ATLAS["General Evidence Defensibility"])
+    mapped_controls = []
+    all_expected = []
+    all_questions = []
+
+    for control in controls:
+        expected = control.get("expected_evidence", [])
+        present = [e for e in expected if e.lower() in text]
+        missing = [e for e in expected if e.lower() not in text]
+        coverage = round((len(present) / len(expected)) * 100) if expected else 0
+        mapped_controls.append({
+            **control,
+            "present_evidence": present,
+            "missing_evidence": missing,
+            "control_coverage_score": coverage,
+            "control_rating": "Strong" if coverage >= 80 else "Partial" if coverage >= 50 else "Weak"
+        })
+        all_expected.extend(missing)
+        all_questions.extend(control.get("challenge_questions", []))
+
+    avg_coverage = round(sum(c["control_coverage_score"] for c in mapped_controls) / len(mapped_controls)) if mapped_controls else 0
+    return {
+        "domain": domain,
+        "control_coverage_score": avg_coverage,
+        "mapped_controls": mapped_controls,
+        "missing_evidence_summary": sorted(list(set(all_expected))),
+        "challenge_question_bank": sorted(list(set(all_questions)))
+    }
+
+def score_item(item: EvidenceItem) -> Dict[str, Any]:
+    text = normalize_text(item)
+    domain = detect_domain(text)
+    dimensions = [dimension_score(text, d) for d in DIMENSIONS]
+    weighted_total = sum(d["score"] * d["weight"] for d in dimensions)
+    total_weight = sum(d["weight"] for d in dimensions)
+    score = round(weighted_total / total_weight)
+    rating = "Strong" if score >= 85 else "Moderate" if score >= 70 else "Weak" if score >= 50 else "Critical Attention Required"
+    return {
+        "item_title": item.title,
+        "domain": domain,
+        "score": score,
+        "rating": rating,
+        "dimensions": dimensions,
+        "intake_gap_analysis": intake_gap_analysis(item, domain),
+        "artifact_profile": infer_artifact_profile(item, domain),
+        "control_atlas_mapping": map_control_atlas(domain, text)
+    }
+
+def severity_from_score(score: int) -> str:
+    if score < 40:
+        return "Critical"
+    if score < 55:
+        return "High"
+    if score < 70:
+        return "Medium"
+    return "Low"
+
+def framework_mappings_for(domain: str) -> List[Dict[str, str]]:
+    return FRAMEWORK_LIBRARY.get(domain, FRAMEWORK_LIBRARY["General Evidence Defensibility"])
+
+def build_finding(item: EvidenceItem, item_score: Dict[str, Any], dimension: Dict[str, Any], idx: int) -> Dict[str, Any]:
+    domain = item_score["domain"]
+    severity = severity_from_score(dimension["score"])
