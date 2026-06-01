@@ -1,0 +1,90 @@
+﻿SENTINEL STAGE 4 AI INVENTORY REPORT
+Generated: 06/01/2026 08:48:27
+Branch: stage-4-real-ai-integration
+
+GIT STATUS
+----------
+?? docs/stage-4-ai-integration/STAGE_4_AI_INVENTORY_REPORT.txt
+
+KEY FILE LINE COUNTS
+--------------------
+backend/app/main.py lines: 1580
+backend/app/services/scoring.py lines: 355
+backend/app/db/sqlite.py lines: 30
+frontend/app/page.tsx lines: 1388
+backend/requirements.txt lines: 3
+
+AI-RELATED EXISTING REFERENCES
+------------------------------
+main.py OpenAI references: 9
+page.tsx OpenAI references: 3
+requirements OpenAI references: 0
+docker-compose env references: 1
+
+BACKEND ROUTE REFERENCES
+------------------------
+Line 57: @app.on_event("startup")
+Line 283: @app.get("/api/health")
+Line 287: @app.get("/api/control-atlas")
+Line 291: @app.get("/api/framework-library")
+Line 295: @app.get("/api/scoring-dimensions")
+Line 299: @app.get("/api/intake-requirements")
+Line 303: @app.post("/api/analyze")
+Line 307: @app.post("/api/reviews/analyze-save")
+Line 311: @app.get("/api/reviews")
+Line 322: @app.get("/api/reviews/{review_id}")
+Line 333: @app.put("/api/reviews/{review_id}/register")
+Line 347: @app.delete("/api/reviews/{review_id}")
+Line 416: @app.get("/api/portfolio")
+Line 427: @app.post("/api/demo/seed")
+Line 524: @app.post("/api/report-html", response_class=HTMLResponse)
+Line 530: @app.get("/api/reviews/{review_id}/report-html", response_class=HTMLResponse)
+Line 534: @app.get("/api/portfolio/report-html", response_class=HTMLResponse)
+Line 818: @app.get("/api/reviews/{review_id}/board-pack")
+Line 823: @app.get("/api/reviews/{review_id}/board-pack-html", response_class=HTMLResponse)
+Line 828: @app.get("/api/portfolio/board-pack-html", response_class=HTMLResponse)
+Line 1134: @app.get("/api/reviews/{review_id}/request-studio")
+Line 1139: @app.get("/api/reviews/{review_id}/request-studio-html", response_class=HTMLResponse)
+Line 1426: @app.get("/api/reviews/{review_id}/demo-room")
+Line 1431: @app.get("/api/reviews/{review_id}/demo-room-html", response_class=HTMLResponse)
+Line 1436: @app.get("/api/portfolio/demo-room-html", response_class=HTMLResponse)
+Line 1513: @app.get("/api/product/freeze")
+Line 1517: @app.get("/api/product/final-scope")
+Line 1521: @app.get("/api/vault/export")
+Line 1555: @app.get("/api/launch/readiness")
+Line 1588: @app.get("/api/launch/readiness-html", response_class=HTMLResponse)
+Line 1700: @app.get("/api/product/final-release")
+Line 1704: @app.get("/api/product/final-release-html", response_class=HTMLResponse)
+
+FRONTEND FETCH CALLS
+--------------------
+Line 120: const response = await fetch(`${API_BASE}/api/reviews`);
+Line 129: const response = await fetch(`${API_BASE}/api/portfolio`);
+Line 139: const response = await fetch(`${API_BASE}/api/demo/seed`, { method: "POST" });
+Line 154: const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/board-pack`);
+Line 166: const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/board-pack-html`);
+Line 189: const response = await fetch(`${API_BASE}/api/portfolio/board-pack-html`);
+Line 203: const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/request-studio`);
+Line 215: const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/request-studio-html`);
+Line 266: const response = await fetch(`${API_BASE}/api/reviews/${reviewId}/demo-room`);
+Line 278: const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/demo-room-html`);
+Line 301: const response = await fetch(`${API_BASE}/api/portfolio/demo-room-html`);
+Line 438: const response = await fetch(`${API_BASE}/api/launch/readiness`);
+Line 446: const response = await fetch(`${API_BASE}/api/launch/readiness-html`);
+Line 458: const response = await fetch(`${API_BASE}/api/vault/export`);
+Line 502: const response = await fetch(`${API_BASE}/api/product/final-release`);
+Line 510: const response = await fetch(`${API_BASE}/api/product/final-release-html`);
+Line 659: const response = await fetch(`${API_BASE}/api/reviews/analyze-save`, { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(payload) });
+Line 682: const response = await fetch(`${API_BASE}/api/reviews/${reviewId}`);
+Line 700: await fetch(`${API_BASE}/api/reviews/${reviewId}`, { method: "DELETE" });
+Line 718: const response = await fetch(`${API_BASE}/api/reviews/${currentReviewId}/register`, { method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ rows: registerRows }) });
+Line 797: const response = await fetch(endpoint, options as any);
+Line 803: const response = await fetch(`${API_BASE}/api/portfolio/report-html`);
+
+RECOMMENDED STAGE 4 FIRST CODE CHANGE
+-------------------------------------
+1. Add AI configuration template first.
+2. Add backend/app/services/ai_review.py second.
+3. Add backend route only after service exists.
+4. Do not touch frontend until backend AI endpoint is stable.
+5. AI must be optional and fallback-safe.

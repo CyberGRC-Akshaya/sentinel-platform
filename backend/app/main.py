@@ -1,4 +1,4 @@
-
+﻿
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -12,6 +12,7 @@ import sqlite3
 import uuid
 from app.db.sqlite import DB_PATH, db, ensure_db
 
+from app.services.ai_review import AIReviewRequest, generate_ai_assist
 from app.services.scoring import (
     CONTROL_ATLAS,
     FRAMEWORK_LIBRARY,
@@ -304,6 +305,10 @@ def intake_requirements():
 def analyze(payload: AnalyzeRequest):
     return build_analysis(payload)
 
+
+@app.post("/api/ai/assist-review")
+def ai_assist_review(request: AIReviewRequest):
+    return generate_ai_assist(request)
 @app.post("/api/reviews/analyze-save")
 def analyze_and_save(payload: AnalyzeRequest):
     return save_review(payload, build_analysis(payload))
@@ -475,7 +480,7 @@ def render_html_report(result: Dict[str, Any]) -> str:
     for f in result["findings"]:
         finding_blocks += f"""
         <div class='finding'>
-          <h3>{html.escape(f['finding_id'])} — {html.escape(f['title'])}</h3>
+          <h3>{html.escape(f['finding_id'])} â€” {html.escape(f['title'])}</h3>
           <p><b>Severity:</b> {html.escape(f['severity'])} | <b>Risk domain:</b> {html.escape(f['risk_domain'])} | <b>Control Atlas:</b> {html.escape(', '.join(f.get('control_atlas_ids', [])))}</p>
           <p><b>Issue:</b> {html.escape(f['issue'])}</p>
           <p><b>Evidence gap:</b> {html.escape(f['evidence_gap'])}</p>
@@ -504,7 +509,7 @@ th,td {{ border-bottom:1px solid #e5e7eb; padding:10px; text-align:left; vertica
 </head>
 <body>
 <div class='report'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.1.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd Â· Sentinel v10.1.1</div>
 <h1>Evidence Defensibility and Control Atlas Report</h1>
 <div class='cards'>
 <div class='card'><span>Organization</span><strong>{html.escape(result['organization'])}</strong></div>
@@ -717,7 +722,7 @@ def render_board_pack_html(pack: Dict[str, Any]) -> str:
         actions = "".join(f"<li>{html.escape(a)}</li>" for a in phase.get("actions", []))
         plan_blocks += f"""
         <div class='phase'>
-          <h3>{html.escape(phase.get('phase',''))} — {html.escape(phase.get('focus',''))}</h3>
+          <h3>{html.escape(phase.get('phase',''))} â€” {html.escape(phase.get('focus',''))}</h3>
           <ul>{actions}</ul>
         </div>
         """
@@ -726,7 +731,7 @@ def render_board_pack_html(pack: Dict[str, Any]) -> str:
     for finding in pack.get("high_priority_findings", []):
         finding_blocks += f"""
         <div class='finding'>
-          <h3>{html.escape(str(finding.get('finding_id','')))} — {html.escape(str(finding.get('severity','')))}</h3>
+          <h3>{html.escape(str(finding.get('finding_id','')))} â€” {html.escape(str(finding.get('severity','')))}</h3>
           <p><b>Risk Domain:</b> {html.escape(str(finding.get('risk_domain','')))}</p>
           <p><b>Control Atlas:</b> {html.escape(', '.join(finding.get('control_atlas_ids', [])))}</p>
           <p><b>Issue:</b> {html.escape(str(finding.get('issue','')))}</p>
@@ -776,7 +781,7 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.1.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd Â· Sentinel v10.1.1</div>
 <h1>Board Pack Studio</h1>
 <p class='sub'>Board-ready evidence defensibility narrative, risk themes, missing evidence, challenge questions, and 30-day action plan.</p>
 
@@ -857,7 +862,7 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.1.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd Â· Sentinel v10.1.1</div>
 <h1>Portfolio Board Pack</h1>
 <div class='cards'>
 <div class='card'><span>Total Reviews</span><strong>{snapshot.get('total_reviews')}</strong></div>
@@ -1041,7 +1046,7 @@ def render_evidence_request_pack_html(pack: Dict[str, Any]) -> str:
         controls = ", ".join(req.get("control_atlas_ids", []))
         request_blocks += f"""
         <div class='request'>
-          <h3>{html.escape(str(req.get('request_id','')))} · {html.escape(str(req.get('finding_id','')))} · {html.escape(str(req.get('priority','')))}</h3>
+          <h3>{html.escape(str(req.get('request_id','')))} Â· {html.escape(str(req.get('finding_id','')))} Â· {html.escape(str(req.get('priority','')))}</h3>
           <p><b>Owner:</b> {html.escape(str(req.get('owner','')))} | <b>Status:</b> {html.escape(str(req.get('status','')))} | <b>Target:</b> {html.escape(str(req.get('target_date','')))}</p>
           <p><b>Risk domain:</b> {html.escape(str(req.get('risk_domain','')))} | <b>Control Atlas:</b> {html.escape(controls)}</p>
           <p><b>Evidence Needed:</b> {html.escape(str(req.get('evidence_needed','')))}</p>
@@ -1098,7 +1103,7 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.1.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd Â· Sentinel v10.1.1</div>
 <h1>Evidence Request Studio</h1>
 <p class='sub'>Request-ready evidence pack with owners, priority, preferred artifacts, closure criteria, and validation tests.</p>
 
@@ -1294,7 +1299,7 @@ def build_demo_room_pack(result: Dict[str, Any]) -> Dict[str, Any]:
         "demo_status": demo_status,
         "one_liner": one_liner,
         "positioning": "Not a GRC repository. A defensibility challenge layer for evidence, controls, and closure readiness.",
-        "core_workflow": "Evidence → Defensibility Review → Control Atlas → Evidence Request → Management Response → Closure Readiness → Board Pack → Portfolio Oversight",
+        "core_workflow": "Evidence â†’ Defensibility Review â†’ Control Atlas â†’ Evidence Request â†’ Management Response â†’ Closure Readiness â†’ Board Pack â†’ Portfolio Oversight",
         "buyer_value_matrix": buyer_value_matrix,
         "demo_flow": demo_flow,
         "objection_handling": objection_handling,
@@ -1349,7 +1354,7 @@ def render_demo_room_html(pack: Dict[str, Any]) -> str:
     scope = "".join(f"<li>{html.escape(x)}</li>" for x in pilot.get("scope", []))
     next_build = "".join(f"<li>{html.escape(x)}</li>" for x in pack.get("next_build_recommendation", []))
     board_questions = "".join(f"<li>{html.escape(x)}</li>" for x in pack.get("board_pack_snapshot", {}).get("board_questions", []))
-    missing = "".join(f"<li>{html.escape(x.get('artifact',''))} — {x.get('count')}</li>" for x in pack.get("board_pack_snapshot", {}).get("top_missing_evidence", []))
+    missing = "".join(f"<li>{html.escape(x.get('artifact',''))} â€” {x.get('count')}</li>" for x in pack.get("board_pack_snapshot", {}).get("top_missing_evidence", []))
 
     return f"""<!DOCTYPE html>
 <html>
@@ -1378,7 +1383,7 @@ li {{ margin:7px 0; }}
 </head>
 <body>
 <div class='pack'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.1.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd Â· Sentinel v10.1.1</div>
 <h1>Executive Demo Room</h1>
 <p class='sub'>Final Final Edition demo script, buyer narrative, pilot offer, objection handling, and build boundary.</p>
 
@@ -1453,7 +1458,7 @@ h1{{font-size:40px;margin:8px 0}}.summary{{border-left:5px solid #1d4ed8;backgro
 .grid{{display:grid;grid-template-columns:1fr 1fr;gap:18px}}.panel{{border:1px solid #e5e7eb;border-radius:16px;padding:18px}}
 table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}td,th{{border-bottom:1px solid #e5e7eb;padding:10px;text-align:left}}
 </style></head>
-<body><div class='pack'><div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.1.1</div><h1>Portfolio Demo Room</h1><div class='summary'>{html.escape(narrative)}</div>
+<body><div class='pack'><div class='eyebrow'>Eye On Bits Pvt Ltd Â· Sentinel v10.1.1</div><h1>Portfolio Demo Room</h1><div class='summary'>{html.escape(narrative)}</div>
 <div class='grid'><div class='panel'><h2>Risk Domains</h2><table><tr><th>Domain</th><th>Count</th></tr>{domain_rows}</table></div><div class='panel'><h2>Control Concentration</h2><table><tr><th>Control</th><th>Count</th></tr>{control_rows}</table></div></div>
 </div></body></html>"""
 
@@ -1626,7 +1631,7 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 </head>
 <body>
 <div class='report'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.1.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd Â· Sentinel v10.1.1</div>
 <h1>Final Launch Edition Report</h1>
 <p class='sub'>{html.escape(freeze['positioning'])}</p>
 <div class='cards'>
@@ -1726,15 +1731,16 @@ table{{width:100%;border-collapse:collapse;margin-top:10px;font-size:13px}}th,td
 </head>
 <body>
 <div class='report'>
-<div class='eyebrow'>Eye On Bits Pvt Ltd · Sentinel v10.1.1</div>
+<div class='eyebrow'>Eye On Bits Pvt Ltd Â· Sentinel v10.1.1</div>
 <h1>Final Launch Edition</h1>
 <div class='summary'><b>Positioning:</b> {html.escape(FINAL_RELEASE_MANIFEST['positioning'])}</div>
 <div class='summary'><b>One-liner:</b> {html.escape(FINAL_RELEASE_MANIFEST['one_liner'])}</div>
-<div class='grid'><div class='panel'><h2>Capability Stack</h2><ul>{cap_rows}</ul></div><div class='panel'><h2>Commercial Offer</h2><p><b>{html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['name'])}</b> · {html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['duration'])}</p><p>{html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['outcome'])}</p><ul>{deliv_rows}</ul></div></div>
+<div class='grid'><div class='panel'><h2>Capability Stack</h2><ul>{cap_rows}</ul></div><div class='panel'><h2>Commercial Offer</h2><p><b>{html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['name'])}</b> Â· {html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['duration'])}</p><p>{html.escape(FINAL_RELEASE_MANIFEST['commercial_offer']['outcome'])}</p><ul>{deliv_rows}</ul></div></div>
 <div class='panel'><h2>Important Boundary</h2><p>{html.escape(FINAL_RELEASE_MANIFEST['important_boundary'])}</p></div>
 <h2>Next Stage Gates</h2><table><tr><th>Stage</th><th>Condition</th></tr>{gates}</table>
 </div>
 </body>
 </html>"""
+
 
 
