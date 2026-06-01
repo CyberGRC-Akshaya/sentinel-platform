@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 
@@ -107,6 +107,9 @@ export default function Home() {
   const [demoPack, setDemoPack] = useState<any>(null);
   const [launchReadiness, setLaunchReadiness] = useState<any>(null);
   const [finalRelease, setFinalRelease] = useState<any>(null);
+  const [aiAssist, setAiAssist] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
 
   useEffect(() => {
     loadVault();
@@ -135,6 +138,8 @@ export default function Home() {
 
   async function seedDemoReviews() {
     setSaveMessage("");
+    setAiAssist(null);
+    setAiError("");
     try {
       const response = await fetch(`${API_BASE}/api/demo/seed`, { method: "POST" });
       if (!response.ok) throw new Error("Could not seed demo reviews.");
@@ -488,7 +493,7 @@ One-liner:
 ${final.one_liner}
 
 Pilot Offer:
-${final.pilot_offer.name} — ${final.pilot_offer.duration}
+${final.pilot_offer.name} â€” ${final.pilot_offer.duration}
 
 Buyer:
 ${final.pilot_offer.buyer}`;
@@ -539,7 +544,7 @@ One-liner:
 ${finalRelease.one_liner}
 
 Commercial Offer:
-${finalRelease.commercial_offer.name} — ${finalRelease.commercial_offer.duration}
+${finalRelease.commercial_offer.name} â€” ${finalRelease.commercial_offer.duration}
 
 Outcome:
 ${finalRelease.commercial_offer.outcome}`;
@@ -678,6 +683,8 @@ ${finalRelease.commercial_offer.outcome}`;
 
   async function loadSavedReview(reviewId: string) {
     setError("");
+    setAiAssist(null);
+    setAiError("");
     try {
       const response = await fetch(`${API_BASE}/api/reviews/${reviewId}`);
       if (!response.ok) throw new Error("Review not found.");
@@ -804,6 +811,63 @@ ${finalRelease.commercial_offer.outcome}`;
     const reportHtml = await response.text();
     downloadText("sentinel-v5-portfolio-control-atlas-report.html", reportHtml, "text/html");
   }
+  async function runAiAssist() {
+    if (!result) {
+      setSaveMessage("Run or load a saved review before using AI Assist.");
+      return;
+    }
+
+    setAiLoading(true);
+    setAiError("");
+    setAiAssist(null);
+
+    let parsedInput: any = {};
+    try {
+      parsedInput = JSON.parse(input);
+    } catch {
+      parsedInput = {};
+    }
+
+    try {
+      const response = await fetch(`${API_BASE}/api/ai/assist-review`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+          review_id: currentReviewId || "",
+          mode: "executive_summary",
+          organization: result.organization || parsedInput.organization || "",
+          industry: result.industry || parsedInput.industry || "",
+          review_objective: result.review_objective || parsedInput.review_objective || "",
+          result: { ...result, remediation_register: registerRows },
+          findings: result.findings || registerRows || []
+        })
+      });
+
+      if (!response.ok) throw new Error("AI Assist endpoint returned error: " + response.status);
+
+      const data = await response.json();
+      setAiAssist(data);
+      setSaveMessage(data.status === "fallback" ? "AI Assist fallback generated safely." : "AI Assist draft generated.");
+    } catch (err: any) {
+      setAiError(err.message || "AI Assist failed safely.");
+    } finally {
+      setAiLoading(false);
+    }
+  }
+
+  function aiAssistDisplayText() {
+    if (!aiAssist) return "";
+    if (aiAssist.output?.text) return aiAssist.output.text;
+
+    const parts: string[] = [];
+    if (aiAssist.output?.executive_summary) parts.push(aiAssist.output.executive_summary);
+    if (Array.isArray(aiAssist.output?.suggested_next_steps)) {
+      parts.push("Suggested Next Steps:\n" + aiAssist.output.suggested_next_steps.map((x: string, index: number) => `${index + 1}. ${x}`).join("\n"));
+    }
+    if (aiAssist.output?.human_review_note) parts.push("Human Review Note:\n" + aiAssist.output.human_review_note);
+
+    return parts.join("\n\n") || "AI Assist returned no displayable text.";
+  }
   async function copySummary() {
     if (!result) return;
     await navigator.clipboard.writeText(result.executive_summary);
@@ -825,7 +889,7 @@ ${finalRelease.commercial_offer.outcome}`;
     <main className="page">
       <section className="hero">
         <div>
-          <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v10.1.1.1</p>
+          <p className="eyebrow">Eye On Bits Pvt Ltd Â· Sentinel v10.1.1.1</p>
           <h1>Evidence Defensibility Workbench</h1>
           <p className="subtitle">
             Professional assurance workbench with review vault, evidence request workflow, closure readiness, control atlas mapping, demo-room storytelling, board-pack generation, remediation register, and executive reporting.
@@ -886,7 +950,7 @@ ${finalRelease.commercial_offer.outcome}`;
             {reviews.map((review) => (
               <div key={review.id} className="vaultRow">
                 <strong>{review.evidence_type}</strong>
-                <span>{review.organization} · {review.overall_rating} · {review.evidence_defensibility_score}/100 · {review.total_findings} findings</span>
+                <span>{review.organization} Â· {review.overall_rating} Â· {review.evidence_defensibility_score}/100 Â· {review.total_findings} findings</span>
                 <em>{new Date(review.created_at).toLocaleString()}</em>
                 <div className="vaultActions">
                   <button onClick={() => loadSavedReview(review.id)}>Load</button>
@@ -927,7 +991,28 @@ ${finalRelease.commercial_offer.outcome}`;
 
               <div className="actions secondaryActions">
                 <button onClick={copySummary}>Copy Executive Summary</button>
+                <button onClick={runAiAssist} disabled={aiLoading}>{aiLoading ? "AI Assist Running..." : "AI Assist Review"}</button>
               </div>
+
+              {aiError && <div className="error">{aiError}</div>}
+
+              {aiAssist && (
+                <div className="aiAssistPanel">
+                  <div className="scorecardTop">
+                    <strong>AI-Assisted Review Draft</strong>
+                    <span>{aiAssist.status} Â· {aiAssist.model}</span>
+                  </div>
+                  <p className="muted">
+                    Drafting support only. Sentinel scores remain deterministic and human review is required before audit, management, or client use.
+                  </p>
+                  <pre className="aiAssistText">{aiAssistDisplayText()}</pre>
+                  <div className="miniGrid">
+                    <div className="miniRow"><span>AI Status</span><strong>{aiAssist.status}</strong></div>
+                    <div className="miniRow"><span>Human Review</span><strong>Required</strong></div>
+                    <div className="miniRow"><span>Mode</span><strong>{aiAssist.mode}</strong></div>
+                  </div>
+                </div>
+              )}
 
 
 
@@ -1052,7 +1137,7 @@ ${finalRelease.commercial_offer.outcome}`;
                       </div>
 
                       <div className="nextSteps">
-                        <h3>Future Versions — Only If Justified</h3>
+                        <h3>Future Versions â€” Only If Justified</h3>
                         {(launchScope.next_versions_only_if_justified || []).map((x: any) => (
                           <div key={x.version} className="miniRow">
                             <span>{x.version}</span>
@@ -1189,7 +1274,7 @@ ${finalRelease.commercial_offer.outcome}`;
                     <h3>Client Delivery Checklist</h3>
                     {deliveryChecklistRows().map((row) => (
                       <div key={row[0]} className="miniRow">
-                        <span>{row[0]}. {row[1]} — {row[3]}</span>
+                        <span>{row[0]}. {row[1]} â€” {row[3]}</span>
                         <strong>{row[2]}</strong>
                       </div>
                     ))}
@@ -1314,7 +1399,7 @@ ${finalRelease.commercial_offer.outcome}`;
                         <h3>30-Day Action Plan</h3>
                         {(boardPack.thirty_day_action_plan || []).map((phase: any) => (
                           <div key={phase.phase} className="mappingBox">
-                            <h4>{phase.phase} · {phase.focus}</h4>
+                            <h4>{phase.phase} Â· {phase.focus}</h4>
                             <ol>{(phase.actions || []).map((a: string) => <li key={a}>{a}</li>)}</ol>
                           </div>
                         ))}
@@ -1325,7 +1410,7 @@ ${finalRelease.commercial_offer.outcome}`;
                         {(boardPack.high_priority_findings || []).map((finding: any) => (
                           <div key={finding.finding_id} className="finding">
                             <div className="findingTop">
-                              <h3>{finding.finding_id} · {finding.severity}</h3>
+                              <h3>{finding.finding_id} Â· {finding.severity}</h3>
                               <span className={"badge " + String(finding.severity || "").toLowerCase()}>{finding.risk_domain}</span>
                             </div>
                             <p><b>Control Atlas:</b> {(finding.control_atlas_ids || []).join(", ")}</p>
@@ -1393,10 +1478,10 @@ ${finalRelease.commercial_offer.outcome}`;
                         {(requestPack.evidence_requests || []).map((req: any) => (
                           <div key={req.request_id} className="finding">
                             <div className="findingTop">
-                              <h3>{req.request_id} · {req.finding_id}</h3>
+                              <h3>{req.request_id} Â· {req.finding_id}</h3>
                               <span className={"badge " + String(req.priority || "").toLowerCase()}>{req.priority}</span>
                             </div>
-                            <p><b>Owner:</b> {req.owner} · <b>Status:</b> {req.status} · <b>Target:</b> {req.target_date || "Not set"}</p>
+                            <p><b>Owner:</b> {req.owner} Â· <b>Status:</b> {req.status} Â· <b>Target:</b> {req.target_date || "Not set"}</p>
                             <p><b>Risk Domain:</b> {req.risk_domain}</p>
                             <p><b>Control Atlas:</b> {(req.control_atlas_ids || []).join(", ")}</p>
                             <p><b>Evidence Needed:</b> {req.evidence_needed}</p>
@@ -1415,8 +1500,8 @@ ${finalRelease.commercial_offer.outcome}`;
                         {(requestPack.closure_readiness || []).map((row: any) => (
                           <div key={row.finding_id} className="scorecardItem">
                             <div className="scorecardTop">
-                              <strong>{row.finding_id} · {row.severity}</strong>
-                              <span>{row.closure_readiness_score}/100 · {row.closure_readiness_rating}</span>
+                              <strong>{row.finding_id} Â· {row.severity}</strong>
+                              <span>{row.closure_readiness_score}/100 Â· {row.closure_readiness_rating}</span>
                             </div>
                             <p><b>Missing steps:</b> {(row.closure_missing_steps || []).join(", ") || "None"}</p>
                           </div>
@@ -1454,7 +1539,7 @@ ${finalRelease.commercial_offer.outcome}`;
                     {registerRows.map((row, index) => (
                       <div key={row.finding_id} className="registerCard">
                         <div className="registerHeader">
-                          <strong>{row.finding_id} · {row.severity} · {row.risk_domain}</strong>
+                          <strong>{row.finding_id} Â· {row.severity} Â· {row.risk_domain}</strong>
                           <span>Control Atlas: {row.control_atlas_ids || "Not mapped"}</span>
                         </div>
                         <p><b>Issue:</b> {row.issue}</p>
@@ -1486,12 +1571,12 @@ ${finalRelease.commercial_offer.outcome}`;
                         <strong>{item.item_title}</strong>
                         <span>{item.control_atlas_mapping?.control_coverage_score}/100</span>
                       </div>
-                      <p>{item.domain} · {item.artifact_profile?.artifact_type}</p>
+                      <p>{item.domain} Â· {item.artifact_profile?.artifact_type}</p>
                       {(item.control_atlas_mapping?.mapped_controls || []).map((control: any) => (
                         <div key={control.control_id} className="mappingBox">
-                          <h4>{control.control_id} · {control.control_theme}</h4>
+                          <h4>{control.control_id} Â· {control.control_theme}</h4>
                           <p><b>Objective:</b> {control.control_objective}</p>
-                          <p><b>Coverage:</b> {control.control_coverage_score}/100 · {control.control_rating}</p>
+                          <p><b>Coverage:</b> {control.control_coverage_score}/100 Â· {control.control_rating}</p>
                           <p><b>Missing evidence:</b> {(control.missing_evidence || []).join(", ") || "None"}</p>
                           <p><b>Challenge questions:</b></p>
                           <ol>{(control.challenge_questions || []).map((q: string) => <li key={q}>{q}</li>)}</ol>
@@ -1527,7 +1612,7 @@ ${finalRelease.commercial_offer.outcome}`;
                   {result.findings.map((finding: any) => (
                     <div key={finding.finding_id} className="finding">
                       <div className="findingTop">
-                        <h3>{finding.finding_id} — {finding.title}</h3>
+                        <h3>{finding.finding_id} â€” {finding.title}</h3>
                         <span className={"badge " + finding.severity.toLowerCase()}>{finding.severity}</span>
                       </div>
                       <p><b>Risk domain:</b> {finding.risk_domain}</p>
@@ -1550,3 +1635,4 @@ ${finalRelease.commercial_offer.outcome}`;
     </main>
   );
 }
+
