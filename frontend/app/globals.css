@@ -1231,3 +1231,176 @@ input[type="file"] {
     min-height: 420px;
   }
 }
+/* =========================================================
+   Sentinel Stage 3 Premium UI Polish Overlay — Pass 3
+   Scope: screenshot-ready finishing touches.
+   ========================================================= */
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.55) rgba(2, 6, 23, 0.5);
+}
+
+*::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+*::-webkit-scrollbar-track {
+  background: rgba(2, 6, 23, 0.5);
+  border-radius: 999px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.72), rgba(71, 85, 105, 0.72));
+  border-radius: 999px;
+  border: 2px solid rgba(2, 6, 23, 0.7);
+}
+
+.panel,
+.caseLibrary,
+.heroCard {
+  position: relative;
+}
+
+.panel::before,
+.caseLibrary::before,
+.heroCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), transparent 34%, rgba(139, 92, 246, 0.08));
+  opacity: 0.72;
+}
+
+.panel > *,
+.caseLibrary > *,
+.heroCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.panel h2,
+.caseLibrary h2 {
+  font-size: clamp(1.35rem, 1.4vw, 1.75rem);
+  margin-bottom: 8px;
+}
+
+.historyHead,
+.scorecardTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.historyHead h3,
+.scorecardTop h3 {
+  margin: 0;
+}
+
+.scorecardTop {
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.scorecardItem {
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.scorecardItem:hover,
+.mappingBox:hover,
+.nextSteps:hover {
+  border-color: rgba(56, 189, 248, 0.24);
+}
+
+.summary {
+  border-color: rgba(125, 211, 252, 0.18);
+}
+
+.actions:not(.secondaryActions) {
+  row-gap: 12px;
+}
+
+.actions button {
+  white-space: nowrap;
+}
+
+.panel > .actions:first-of-type {
+  padding-top: 4px;
+}
+
+.secondaryActions {
+  margin-top: 10px;
+  margin-bottom: 20px;
+}
+
+.secondaryActions + .summary,
+.actions + .summary {
+  margin-top: 18px;
+}
+
+.miniRow {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.miniRow strong {
+  color: #f8fafc;
+  text-align: right;
+}
+
+.vaultRow {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.78), rgba(2, 6, 23, 0.52));
+}
+
+.vaultRow strong,
+.vaultRow b {
+  color: #f8fafc;
+}
+
+.empty {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.74), rgba(2, 6, 23, 0.46));
+}
+
+.caseCard {
+  min-height: 92px;
+}
+
+.caseCard.active {
+  background:
+    linear-gradient(135deg, rgba(14, 165, 233, 0.24), rgba(124, 58, 237, 0.18));
+}
+
+.scoreBox {
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.84), rgba(2, 6, 23, 0.62));
+}
+
+.scoreBox strong {
+  text-shadow: 0 12px 32px rgba(56, 189, 248, 0.12);
+}
+
+button:disabled,
+button[disabled] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (min-width: 1200px) {
+  .grid {
+    align-items: start;
+  }
+
+  .panel {
+    min-height: 520px;
+  }
+}
