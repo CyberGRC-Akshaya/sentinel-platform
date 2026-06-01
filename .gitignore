@@ -19,3 +19,6 @@ backend/app/*.stage2-*-backup-*
 
 # Local Stage 2 backup files
 backend/app/*.stage2-*-backup-*
+
+# Local Stage 4 backup files
+backend/app/*.stage4-*-backup-*
