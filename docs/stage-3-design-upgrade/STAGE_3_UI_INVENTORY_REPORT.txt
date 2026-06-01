@@ -1,0 +1,119 @@
+﻿SENTINEL STAGE 3 UI INVENTORY REPORT
+Generated: 06/01/2026 08:18:46
+Branch: stage-2-code-stabilization
+
+FILE SIZE
+---------
+page.tsx lines: 1388
+globals.css lines: 664
+
+CSS COUNTS
+----------
+class selector count: 134
+media query count: 6
+important count: 3
+gradient references: 15
+box-shadow references: 6
+border-radius references: 14
+
+POSSIBLE CORE CSS SECTIONS
+--------------------------
+Pattern body count: 0
+Pattern .page count: 0
+Pattern .hero count: 0
+Pattern .card count: 0
+Pattern .panel count: 0
+Pattern .tabs count: 0
+Pattern .button count: 0
+Pattern .btn count: 0
+Pattern .grid count: 0
+Pattern .output count: 0
+Pattern .finding count: 0
+Pattern .severity count: 0
+Pattern .table count: 0
+Pattern .final count: 0
+Pattern .launch count: 0
+Pattern .demo count: 0
+
+PAGE CLASSNAME REFERENCES
+-------------------------
+Line 825: <main className="page">
+Line 826: <section className="hero">
+Line 828: <p className="eyebrow">Eye On Bits Pvt Ltd · Sentinel v10.1.1.1</p>
+Line 830: <p className="subtitle">
+Line 834: <div className="heroCard">
+Line 841: <section className="caseLibrary">
+Line 846: <div className="uploadBox">
+Line 852: <section className="caseLibrary">
+Line 857: <div className="caseGrid">
+Line 859: <button key={name} className={selectedCase === name ? "caseCard active" : "caseCard"} onClick={() => loadCase(name)}>
+Line 871: <section className="grid">
+Line 872: <div className="panel">
+Line 874: <p className="muted">Paste, load, or upload evidence package JSON. Sentinel will save the review into the local vault.</p>
+Line 876: <button className="primaryBtn" onClick={analyzeAndSave}>Run + Save Review to Vault</button>
+Line 877: {error && <div className="error">{error}</div>}
+Line 878: {saveMessage && <div className="summary">{saveMessage}</div>}
+Line 880: <div className="historyBox">
+Line 881: <div className="historyHead">
+Line 885: {reviews.length === 0 && <p className="muted">No saved reviews yet.</p>}
+Line 887: <div key={review.id} className="vaultRow">
+Line 891: <div className="vaultActions">
+Line 900: <div className="panel">
+Line 902: <p className="muted">Control Atlas mappings, scorecards, evidence requests, and persistent remediation register.</p>
+Line 904: {!result && <div className="empty">Run a review, load one from the Review Vault, or seed demo reviews from Portfolio.</div>}
+Line 908: <div className="scoreRow">
+Line 909: <div className="scoreBox"><span>Defensibility</span><strong>{result.evidence_defensibility_score}/100</strong></div>
+Line 910: <div className="scoreBox"><span>Control Atlas</span><strong>{result.control_atlas_coverage_score}/100</strong></div>
+Line 911: <div className="scoreBox"><span>Metadata</span><strong>{result.metadata_completeness_score}/100</strong></div>
+Line 914: <div className="tabBar">
+Line 916: <button key={tab} className={activeTab === tab ? "tab activeTab" : "tab"} onClick={() => setActiveTab(tab)}>{tab}</button>
+Line 920: <div className="actions">
+Line 928: <div className="actions secondaryActions">
+Line 937: <div className="summary">
+Line 941: <div className="actions">
+Line 949: {!finalRelease && <div className="empty">Final release manifest not loaded yet.</div>}
+Line 953: <div className="scoreRow">
+Line 954: <div className="scoreBox"><span>Edition</span><strong>{finalRelease.edition}</strong></div>
+Line 955: <div className="scoreBox"><span>Status</span><strong>{finalRelease.release_status}</strong></div>
+Line 956: <div className="scoreBox"><span>Version</span><strong>{finalRelease.version}</strong></div>
+Line 959: <div className="summary"><b>Positioning:</b> {finalRelease.positioning}</div>
+Line 960: <div className="summary"><b>One-liner:</b> {finalRelease.one_liner}</div>
+Line 962: <div className="miniGrid">
+Line 969: <div className="miniRow"><span>Name</span><strong>{finalRelease.commercial_offer.name}</strong></div>
+Line 970: <div className="miniRow"><span>Duration</span><strong>{finalRelease.commercial_offer.duration}</strong></div>
+Line 976: <div className="nextSteps">
+Line 979: <div key={x.stage} className="miniRow">
+Line 986: <div className="mappingBox">
+Line 998: <div className="summary">
+Line 1002: <div className="actions">
+Line 1010: {!launchReadiness && <div className="empty">Launch readiness not loaded yet.</div>}
+Line 1016: <div className="scoreRow">
+Line 1017: <div className="scoreBox"><span>Launch Readiness</span><strong>{launchReadiness.launch_readiness_score}/100</strong></div>
+Line 1018: <div className="scoreBox"><span>Status</span><strong>{launchReadiness.status}</strong></div>
+Line 1019: <div className="scoreBox"><span>Saved Reviews</span><strong>{launchReadiness.portfolio_snapshot?.total_reviews || 0}</strong></div>
+Line 1022: <div className="summary"><b>Positioning:</b> {launchScope.positioning}</div>
+Line 1023: <div className="summary"><b>One-liner:</b> {launchScope.one_liner}</div>
+Line 1025: <div className="miniGrid">
+Line 1029: <div key={item.item} className="miniRow">
+Line 1037: <div className="miniRow"><span>Name</span><strong>{launchScope.pilot_offer.name}</strong></div>
+Line 1038: <div className="miniRow"><span>Duration</span><strong>{launchScope.pilot_offer.duration}</strong></div>
+Line 1039: <div className="miniRow"><span>Status</span><strong>Ready</strong></div>
+Line 1043: <div className="miniGrid">
+Line 1054: <div className="nextSteps">
+Line 1057: <div key={x.version} className="miniRow">
+Line 1072: <div className="summary">
+Line 1076: <div className="actions">
+Line 1084: {!demoPack && <div className="empty">Run or load a saved review first to generate the Executive Demo Room.</div>}
+Line 1088: <div className="scoreRow">
+Line 1089: <div className="scoreBox"><span>Demo Readiness</span><strong>{demoPack.demo_readiness_score}/100</strong></div>
+Line 1090: <div className="scoreBox"><span>Status</span><strong>{demoPack.demo_status}</strong></div>
+Line 1091: <div className="scoreBox"><span>Version</span><strong>{demoPack.version}</strong></div>
+Line 1094: <div className="summary"><b>One-liner:</b> {demoPack.one_liner}</div>
+Line 1095: <div className="summary"><b>Positioning:</b> {demoPack.positioning}</div>
+Line 1096: <div className="summary"><b>Workflow:</b> {demoPack.core_workflow}</div>
+Line 1098: <div className="nextSteps">
+Line 1101: <div key={row.buyer} className="mappingBox">
+Line 1110: <div className="nextSteps">
+Line 1113: <div key={step.step} className="scorecardItem">
+Line 1114: <div className="scorecardTop">
+Line 1124: <div className="miniGrid">
