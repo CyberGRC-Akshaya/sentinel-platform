@@ -13,3 +13,9 @@ backend/data/*.db
 backend/data/*.sqlite
 backend/data/*.sqlite3
 backend/data-backup/
+
+# Local Stage 2 backup files
+backend/app/*.stage2-*-backup-*
+
+# Local Stage 2 backup files
+backend/app/*.stage2-*-backup-*
