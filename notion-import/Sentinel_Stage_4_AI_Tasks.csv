@@ -1,0 +1,9 @@
+Task,Stage,Priority,Status,Notes
+Run AI inventory,Stage 4 — Real AI Integration,High,Not Started,Inspect existing files before AI code
+Add AI environment template,Stage 4 — Real AI Integration,High,Not Started,No secrets committed
+Add backend AI service,Stage 4 — Real AI Integration,High,Not Started,Fallback-safe AI helper
+Add backend AI route,Stage 4 — Real AI Integration,High,Not Started,Only after service works
+Test AI disabled mode,Stage 4 — Real AI Integration,High,Not Started,Must not break app
+Test AI enabled without key,Stage 4 — Real AI Integration,High,Not Started,Graceful configuration message
+Add frontend AI Assist button,Stage 4 — Real AI Integration,Medium,Not Started,Only after backend route stable
+Add prompt logging plan,Stage 4 — Real AI Integration,Medium,Not Started,Governance traceability
