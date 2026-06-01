@@ -1,0 +1,9 @@
+Task,Stage,Priority,Status,Notes
+Run UI inventory,Stage 3 — Design Upgrade,High,Not Started,Inspect CSS/page structure before changes
+Polish page shell/background,Stage 3 — Design Upgrade,High,Not Started,Dark premium baseline
+Polish cards/panels,Stage 3 — Design Upgrade,High,Not Started,Consistent padding/border/shadow
+Polish buttons/actions,Stage 3 — Design Upgrade,Medium,Not Started,Primary and secondary action hierarchy
+Polish tabs/navigation,Stage 3 — Design Upgrade,Medium,Not Started,Make active tab obvious
+Polish output/finding cards,Stage 3 — Design Upgrade,High,Not Started,More executive readable
+Run Stage 3 smoke test,Stage 3 — Design Upgrade,High,Not Started,No regression
+Capture screenshots,Stage 3 — Design Upgrade,Medium,Not Started,For Stage 8 packaging
