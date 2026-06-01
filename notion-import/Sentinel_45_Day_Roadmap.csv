@@ -1,0 +1,11 @@
+Stage,Days,Objective,Status,Exit Gate
+Stage 1 — Product Freeze,Maintain,Notion + GitHub product freeze,Done/maintain,"Roadmap, PRD, backlog, decision log exist"
+Stage 2 — Code Stabilization,1-7,Stabilize codebase,In Progress,"Docker, health, frontend, review save, exports work"
+Stage 3 — Design Upgrade,8-13,Premium UI polish,Not Started,All tabs load with improved visual hierarchy
+Stage 4 — Real AI Integration,14-20,Optional OpenAI-assisted review,Not Started,Works with and without API key
+Stage 5 — Database Upgrade,21-25,PostgreSQL readiness,Not Started,DB abstraction and migration path ready
+Stage 6 — Automation Layer,26-30,n8n/GWorkspace workflow,Not Started,Evidence request workflow blueprint/prototype
+Stage 7 — PMO and Operating System,31-33,Notion/GitHub operating cadence,Not Started,PMO databases and cadence active
+Stage 8 — Demo and Sales Packaging,34-39,Client-facing demo assets,Not Started,"README, one-pager, script, pilot offer ready"
+Stage 9 — Deployment,40-42,Hosted demo readiness,Not Started,Deployment runbook and boundary ready
+Stage 10 — Commercialization,43-45,Commercial kit,Not Started,"Outreach, proposal, tracker ready"

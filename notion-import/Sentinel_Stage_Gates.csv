@@ -1,0 +1,13 @@
+Gate,Stage,Required Result,Status
+G2-01,Stage 2,Docker build works,Pending
+G2-02,Stage 2,Backend health works,Pending
+G2-03,Stage 2,Frontend loads,Pending
+G2-04,Stage 2,Run + Save Review works,Pending
+G2-05,Stage 2,Exports work,Pending
+G3-01,Stage 3,UI polish committed,Pending
+G4-01,Stage 4,AI optional fallback works,Pending
+G5-01,Stage 5,Postgres path documented,Pending
+G6-01,Stage 6,n8n workflow blueprint ready,Pending
+G8-01,Stage 8,Demo/sales assets ready,Pending
+G9-01,Stage 9,Deployment runbook ready,Pending
+G10-01,Stage 10,Commercial kit ready,Pending
