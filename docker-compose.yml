@@ -1,5 +1,6 @@
-services:
+﻿services:
   backend:
+    env_file:       - .env.local
     build: ./backend
     container_name: sentinel-backend
     ports:
